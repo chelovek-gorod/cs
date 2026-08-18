@@ -25,6 +25,8 @@ export default class Settings extends Container {
         // this.popup.setBackgroundImage(texture)
         // this.popup.setBackgroundTile(texture)
 
+        this.isActive = false
+
         // Заголовок
         this.title = new Text({
             text: TEXT_POPUP_TITLE[POPUP_TYPE.SETTINGS][this.currentLanguage],
@@ -112,6 +114,10 @@ export default class Settings extends Container {
         this.addChild(this.closeBtn)
     }
 
+    setActive(isActive) {
+        this.isActive = isActive
+    }
+
     findSoundMusic(isMusic) {
         const isOn = isMusic ? musicGetState() : soundGetState()
         if (!isOn) return 0
@@ -122,6 +128,8 @@ export default class Settings extends Container {
     }
 
     changeMusic() {
+        if(!this.isActive) return
+
         const volume = musicGetVolume()
         let iconIndex = 0
         if (volume > 0.7) {
@@ -142,6 +150,8 @@ export default class Settings extends Container {
     }
 
     changeSound() {
+        if(!this.isActive) return
+
         const volume = soundGetVolume()
         let iconIndex = 0
         if (volume > 0.7) {
@@ -162,11 +172,15 @@ export default class Settings extends Container {
     }
 
     prevLang() {
+        if(!this.isActive) return
+
         this.langIndex = (this.langIndex - 1 + this.langCodes.length) % this.langCodes.length
         this.updateLanguage(this.langCodes[this.langIndex])
     }
 
     nextLang() {
+        if(!this.isActive) return
+        
         this.langIndex = (this.langIndex + 1) % this.langCodes.length
         this.updateLanguage(this.langCodes[this.langIndex])
     }

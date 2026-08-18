@@ -11,6 +11,7 @@ import Tower from "./Tower";
 import { getRoundWaves } from "./waves"; 
 
 let WAVES
+const ENEMY_SPAWN_INTERVAL_MS = 600   // интервал между появлением отдельных врагов в линии
 
 const SIZE = 800
 const MAX_SCALE = 1.3
@@ -46,6 +47,9 @@ export default class GameContainer extends Container {
         this.enemiesWaveLineIndex = 0
         this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
         this.allWavesSpawned = false
+        this.isLineSpawning = false
+        this.enemySpawnQueue = []
+        this.enemySpawnTimer = 0
         this.addChild(this.enemies)
         
         this.addChild(this.arrows)
@@ -219,59 +223,93 @@ export default class GameContainer extends Container {
         this.enemies.addChild( new Enemy(rx, ry, enemy) )
     }
 
-    spawnWaveLine() {
-        const enemies = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].enemies
-
-        for (const enemy in enemies) {
-            let count = enemies[enemy]
-            while (count--) this.spawnEnemy(enemy)
-        }
-    }
-
     nextWaveLine() {
         // Переход к следующей волне после зачистки текущей
         this.enemiesWaveLineIndex = 0
         this.enemiesWaveIndex++
-    
+
         if (this.enemiesWaveIndex === WAVES.length) {
             this.allWavesSpawned = true
             return
         }
-    
+
         this.updateRoundText()
         // Устанавливаем таймер первой линии новой волны
         this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][0].timeout
         this.isWaveSpawnedCompletely = false
+        this.isLineSpawning = false
+        this.enemySpawnQueue = []
+    }
+
+    startLineSpawning() {
+        const lineData = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex]
+        const enemies = lineData.enemies
+
+        // Заполняем очередь врагов
+        this.enemySpawnQueue = []
+        for (const type in enemies) {
+            let count = enemies[type]
+            while (count-- > 0) this.enemySpawnQueue.push(type)
+        }
+
+        // Сразу спавним первого врага, чтобы не было пустой паузы
+        if (this.enemySpawnQueue.length > 0) {
+            const type = this.enemySpawnQueue.shift()
+            this.spawnEnemy(type)
+            this.enemySpawnTimer = ENEMY_SPAWN_INTERVAL_MS
+        }
+
+        this.isLineSpawning = true
+    }
+
+    onLineSpawned() {
+        // Переходим к следующей линии
+        this.enemiesWaveLineIndex++
+
+        if (this.enemiesWaveLineIndex < WAVES[this.enemiesWaveIndex].length) {
+            // Запускаем таймер следующей линии
+            this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
+        } else {
+            // Это была последняя линия волны — ждём её полной зачистки
+            this.isWaveSpawnedCompletely = true
+        }
     }
 
     handleSpawning(deltaMs) {
-        if (this.isWaveSpawnedCompletely) {
-            // Все линии заспавнены, ждём полной зачистки волны
-            if (this.enemies.children.length === 0) {
-                this.isWaveSpawnedCompletely = false
-                this.nextWaveLine() // переход к следующей волне или завершение раунда
+        // 1. Идёт поштучный спавн текущей линии
+        if (this.isLineSpawning) {
+            if (this.enemySpawnQueue.length > 0) {
+                this.enemySpawnTimer -= deltaMs
+                if (this.enemySpawnTimer <= 0) {
+                    this.enemySpawnTimer = ENEMY_SPAWN_INTERVAL_MS
+                    const type = this.enemySpawnQueue.shift()
+                    this.spawnEnemy(type)
+                }
+            } else {
+                // Все враги линии появились — линия полностью заспавнена
+                this.isLineSpawning = false
+                this.onLineSpawned()
             }
             return
         }
-    
+
+        // 2. Все линии волны заспавнены, ждём зачистки волны
+        if (this.isWaveSpawnedCompletely) {
+            if (this.enemies.children.length === 0) {
+                this.isWaveSpawnedCompletely = false
+                this.nextWaveLine()
+            }
+            return
+        }
+
+        // 3. Таймер до следующей линии ещё идёт
         if (this.enemiesSpawnTimeout > 0) {
             this.enemiesSpawnTimeout -= deltaMs
             return
         }
-    
-        // Таймер истёк — спавним текущую линию
-        this.spawnWaveLine()
-    
-        // Переходим к следующей линии в пределах волны
-        this.enemiesWaveLineIndex++
-    
-        if (this.enemiesWaveLineIndex < WAVES[this.enemiesWaveIndex].length) {
-            // Планируем таймер следующей линии
-            this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
-        } else {
-            // Это была последняя линия волны, теперь ждём зачистки всех врагов
-            this.isWaveSpawnedCompletely = true
-        }
+
+        // 4. Таймер истёк — начинаем спавн текущей линии
+        this.startLineSpawning()
     }
 
     handleRoundEnd(deltaMs) {

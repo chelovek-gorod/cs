@@ -28,10 +28,10 @@ const POPUP_STATE = {
   CLOSE_DOWN: 'CLOSE_DOWN'
 }
 
-// ─── Дефолтный фон (константы, капс) ───
-const DEFAULT_BG_COLORS = [0x2d1b3d, 0x1a1a2e, 0x16213e]   // градиент по умолчанию
-const DEFAULT_BG_IMAGE = null                               // если задать текстуру – будет использована картинка
-const DEFAULT_BG_TILE = null                                // если задать текстуру – будет использован тайл
+// ─── Дефолтный фон ───
+const DEFAULT_BG_COLORS = [0x2d1b3d, 0x1a1a2e, 0x16213e]   
+const DEFAULT_BG_IMAGE = null                               
+const DEFAULT_BG_TILE = null                                
 
 // ─── Класс Popup (оболочка) ───
 export default class Popup extends Container {
@@ -47,15 +47,37 @@ export default class Popup extends Container {
         this.scaleAcceleration = 1.1
         this.onCloseCallback = null
 
+        // Оверлей (задний план затемнения)
         this.overlay = new Overlay()
         this.addChild(this.overlay)
 
+        // Главный контейнер для анимаций и ресайза
         this.box = new Container()
         this.box.scale.set(0)
         this.addChild(this.box)
 
+        const HALF_SIZE = BG_SIDE_SIZE * 0.5
+
+        // 1. Создаем графику маски внутри box
+        this.bgMask = new Graphics()
+        this.bgMask.roundRect(-HALF_SIZE, -HALF_SIZE, BG_SIDE_SIZE, BG_SIDE_SIZE, BG_BORDER_RADIUS)
+        this.bgMask.fill(0xffffff)
+        this.box.addChild(this.bgMask)
+
+        // 2. Создаем изолированный контейнер для всего, что должно маскироваться (сосед маски)
+        this.boxMasked = new Container()
+        this.boxMasked.mask = this.bgMask // Маскируем этот контейнер
+        this.box.addChild(this.boxMasked)
+
+        // 3. Контент кладем внутрь маскированного контейнера
         this.content = new Container()
-        this.box.addChild(this.content)
+        this.boxMasked.addChild(this.content)
+
+        // 4. Обводку кладем в главный box поверх маскированного контейнера (её маска не режет)
+        this.border = new Graphics()
+        this.border.roundRect(-HALF_SIZE, -HALF_SIZE, BG_SIDE_SIZE, BG_SIDE_SIZE, BG_BORDER_RADIUS)
+        this.border.stroke({ width: BG_BORDER_WIDTH, color: BG_BORDER_COLOR })
+        this.box.addChild(this.border)
 
         this.bg = null
         if (DEFAULT_BG_IMAGE) this.setBackgroundImage(DEFAULT_BG_IMAGE)
@@ -75,6 +97,8 @@ export default class Popup extends Container {
         const fullScale = (this.scaleMax - this.scaleNormal) * 2 + this.scaleNormal
         this.scaleSpeedMax = (fullScale * 2) / SCALE_TIME
         this.scaleAcceleration = (fullScale * 2) / (SCALE_TIME * SCALE_TIME)
+        
+        // Меняем масштаб только у ОДНОГО главного контейнера box
         if (this.visible) this.box.scale.set(this.scaleNormal)
     }
 
@@ -100,7 +124,7 @@ export default class Popup extends Container {
     }
 
     clear() {
-        // Уничтожаем все дочерние элементы в content
+        // Уничтожаем дочерние элементы в content
         while (this.content.children.length) {
             const child = this.content.children[0]
             this.content.removeChild(child)
@@ -117,19 +141,21 @@ export default class Popup extends Container {
         this.removeBackground()
         const bg = new BackgroundGradient(colors)
         bg.anchor.set(0.5)
-        this.box.addChildAt(bg, 0)
+        // Добавляем строго на индекс 0 внутрь МАСКИРОВАННОГО контейнера
+        this.boxMasked.addChildAt(bg, 0)
         this.bg = bg
-        bg.screenResize({ width: BG_SIDE_SIZE, height: BG_SIDE_SIZE, isLandscape: true }) // 780
+        bg.screenResize({ width: BG_SIDE_SIZE, height: BG_SIDE_SIZE, isLandscape: true })
     }
     
     setBackgroundImage(texture) {
         this.removeBackground()
         const bg = new Sprite(texture)
         bg.anchor.set(0.5)
-        const scale = Math.min(BG_SIDE_SIZE / texture.width, BG_SIDE_SIZE / texture.height) // 780
+        const scale = Math.min(BG_SIDE_SIZE / texture.width, BG_SIDE_SIZE / texture.height)
         bg.scale.set(scale)
         bg.position.set(0, 0)
-        this.box.addChildAt(bg, 0)
+        // Добавляем строго на индекс 0 внутрь МАСКИРОВАННОГО контейнера
+        this.boxMasked.addChildAt(bg, 0)
         this.bg = bg
     }
     
@@ -137,14 +163,15 @@ export default class Popup extends Container {
         this.removeBackground()
         const bg = new BackgroundTiling(texture)
         bg.anchor.set(0.5)
-        this.box.addChildAt(bg, 0)
+        // Добавляем строго на индекс 0 внутрь МАСКИРОВАННОГО контейнера
+        this.boxMasked.addChildAt(bg, 0)
         this.bg = bg
-        bg.screenResize({ width: BG_SIDE_SIZE, height: BG_SIDE_SIZE, isLandscape: true }) // 780
+        bg.screenResize({ width: BG_SIDE_SIZE, height: BG_SIDE_SIZE, isLandscape: true })
     }
 
     removeBackground() {
         if (this.bg) {
-            this.box.removeChild(this.bg)
+            this.boxMasked.removeChild(this.bg)
             kill(this.bg)
             this.bg = null
         }
@@ -169,6 +196,7 @@ export default class Popup extends Container {
             if (this.box.scale.x === this.scaleNormal) {
                 tickerRemove(this)
                 this.state = POPUP_STATE.ACTIVE
+                this.content?.children[0]?.setActive(true)
             }
         }
 
@@ -183,6 +211,14 @@ export default class Popup extends Container {
 
     kill() {
         EventHub.off(events.screenResize, this.screenResize, this)
+
+        // Чистим ссылки масок перед удалением контейнеров
+        if (this.boxMasked) {
+            this.boxMasked.mask = null
+        }
+
+        this.bgMask = null
+        this.border = null
 
         if (this.overlay) {
             this.removeChild(this.overlay)

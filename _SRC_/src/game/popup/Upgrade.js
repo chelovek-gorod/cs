@@ -31,7 +31,7 @@ export default class Upgrade extends Container {
         this.title.position.set(0, -260)
         this.addChild(this.title)
 
-        this.isActive = true
+        this.isActive = false
         this.buttons = []
         const xPositions = [-240, 0, 240]
         for (let i = 0; i < 3; i++) {
@@ -73,6 +73,10 @@ export default class Upgrade extends Container {
         return btn
     }
 
+    setActive(isActive) {
+        this.isActive = isActive
+    }
+
     setUpgrades() {
         const selected = []
         const available = [...UPGRADE_NAMES]
@@ -91,7 +95,7 @@ export default class Upgrade extends Container {
             switch (type) {
                 case UPGRADE_TYPE.TOWER_HP: desc = '+10 HP'; break
                 case UPGRADE_TYPE.ARROWS: desc = '+1 Arrow'; break
-                case UPGRADE_TYPE.ARROW_POWER: desc = 'Power +2'; break
+                case UPGRADE_TYPE.ARROW_POWER: desc = 'Power +1'; break
                 case UPGRADE_TYPE.ARROW_FLY_SPEED: desc = 'Arrow Speed +10%'; break
                 case UPGRADE_TYPE.ARROW_SHUT_SPEED: desc = 'Shut Speed +10%'; break
                 case UPGRADE_TYPE.ARROW_RELOAD_SPEED: desc = 'Reload Speed +10%'; break

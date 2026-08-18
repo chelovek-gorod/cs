@@ -100,7 +100,6 @@ const UNIT_DATA = {
 // --- ТАЙМИНГИ ---
 const FIRST_LINE_TIMEOUT_MS = 2400       // задержка перед первой линией каждой волны
 const BASE_LINE_TIMEOUT_MS = 1800        // минимальная задержка между линиями
-const LINE_TIMEOUT_PER_ENEMY_MS = 180    // добавка к задержке за каждого врага
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -415,11 +414,8 @@ export function getRoundWaves(round) {
         const waveLines = []
         for (let l = 0; l < wave.lines.length; l++) {
             const line = wave.lines[l]
-            const totalEnemies = Object.values(line.enemies).reduce((s, c) => s + c, 0)
 
-            const timeout = l === 0
-                ? FIRST_LINE_TIMEOUT_MS
-                : Math.max(BASE_LINE_TIMEOUT_MS, LINE_TIMEOUT_PER_ENEMY_MS * totalEnemies)
+            const timeout = l === 0 ? FIRST_LINE_TIMEOUT_MS : BASE_LINE_TIMEOUT_MS
 
             // Фильтруем типы с нулевым количеством
             const enemies = {}

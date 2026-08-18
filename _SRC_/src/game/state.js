@@ -11,10 +11,10 @@ export let gold = 0
 export let round = 1
 export let towerHP = 100
 export let arrows = 10
-export let arrowPower = 12
+export let arrowPower = 10
 export let arrowShutTimeout = 360
 export let arrowReloadTimeout = 1800
-export let arrowSpeedRate = 0.03 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
+export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 export let catapultsCount = 0
 export let catapultPower = 24
 export let catapultDamageRadius = 64
@@ -27,11 +27,11 @@ export let wizardShutTimeout = 360
 export function addGold(value) { gold += value }
 export function addRound() { round++ }
 export function addTowerHP() { towerHP += 10 }
-export function addArrow() { arrows++ }
-export function addArrowPower() { arrowPower += Math.floor(arrowPower * 0.1) }
-export function addArrowShutTimeout() { arrowShutTimeout = Math.ceil(arrowShutTimeout * 0.85) }
-export function addArrowReloadTimeout() { arrowReloadTimeout = Math.ceil(arrowReloadTimeout * 0.8) }
-export function addArrowSpeedRate() { arrowSpeedRate += 0.005 }
+export function addArrow() { arrows += 1 }
+export function addArrowPower() { arrowPower += 1 }
+export function addArrowShutTimeout() { arrowShutTimeout = Math.ceil(arrowShutTimeout * 0.9) }
+export function addArrowReloadTimeout() { arrowReloadTimeout = Math.ceil(arrowReloadTimeout * 0.9) }
+export function addArrowSpeedRate() { arrowSpeedRate = arrowSpeedRate * 1.1 }
 export function addCatapult() { catapultsCount++ }
 export function addCatapultPower() { catapultPower += Math.floor(catapultPower * 0.1) }
 export function addCatapultDamageRadius() { catapultDamageRadius += 4 }

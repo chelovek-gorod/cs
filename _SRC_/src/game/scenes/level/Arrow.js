@@ -10,9 +10,9 @@ const POOL = []
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
 export const MIN_SCALE_Y = 0.7
-const MAX_SCALE_Y = 1.6
+const MAX_SCALE_Y = 1.3
 // по X сжимаем для ощущения полета по пораболе
-export const MIN_SCALE_X = MIN_SCALE_Y * 0.7
+export const MIN_SCALE_X = MIN_SCALE_Y * 0.5
 const MAX_SCALE_X = MAX_SCALE_Y
 
 class PrototypeArrow extends Sprite {
