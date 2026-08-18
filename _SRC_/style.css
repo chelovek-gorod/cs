@@ -1,0 +1,91 @@
+:root {
+    --sat: env(safe-area-inset-top, 0px);      /* 0px -> fallback */
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    
+    --dvw: 100dvw;
+    --dvh: 100dvh;
+}
+
+/* Предотвращение bounce-эффекта в iOS */
+html {
+    overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100dvh;
+    background-color: #000000;
+    color: #fff000;
+    font-family: 'MontserratAlternates';
+
+    /* Все свойства против выделения */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none; /* Добавил и для body */
+}
+
+/* Fallback */
+@supports not (height: 100dvh) {
+    body {
+        height: 100vh;
+    }
+    
+    :root {
+        --dvw: 100vw;
+        --dvh: 100vh;
+    }
+}
+
+canvas {
+    display: block;
+    position: fixed;
+    top: var(--sat);
+    left: var(--sal);
+    right: var(--sar);
+    bottom: var(--sab);
+    width: calc(var(--dvw) - var(--sal) - var(--sar));
+    height: calc(var(--dvh) - var(--sat) - var(--sab));
+
+    outline: none;
+    /* Свойства против выделения (наследуются от body) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    -webkit-user-drag: none;
+}
+
+canvas:focus, canvas:active {
+    outline: none;
+
+    /* Уже есть в вашем коде, но продублируем для надежности */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    
+    /* Новые свойства для предотвращения контекстного меню */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+}

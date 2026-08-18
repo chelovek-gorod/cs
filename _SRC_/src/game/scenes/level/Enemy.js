@@ -1,0 +1,174 @@
+import { Container, Sprite } from "pixi.js";
+import { tickerAdd, tickerRemove } from "../../../app/application";
+import { images } from "../../../app/assets";
+import { setDamage } from "../../../app/events";
+import { createEnum, getDistance, moveSprite, turnSpriteToTarget } from "../../../utils/functions";
+import FlyText from "../../effects/FlyText";
+
+
+const POOL = []
+
+export const TYPES = createEnum(['NORMAL', 'FAST', 'BOMB', 'TANK', 'BOSS'])
+
+const ALPHA_STEP = 0.001
+
+const ENEMY = {
+    [TYPES.NORMAL] : {
+        hp: 50,
+        speed: 0.03,
+        damage: 3,
+        scale: 1, // 64x64px + collider 0.75%
+        towerOffset: 72 + 28,
+        collider: 28,
+        headSqCollider: 10 * 10,
+        tint: 0x0000ff
+    },
+    [TYPES.FAST] : {
+        hp: 25,
+        speed: 0.05,
+        damage: 2,
+        scale: 0.8, // 50x50px + collider 0.75%
+        towerOffset: 72 + 23,
+        collider: 23,
+        headSqCollider: 8 * 8,
+        tint: 0x00ffff
+    },
+    [TYPES.TANK] : {
+        hp: 150,
+        speed: 0.02,
+        damage: 5,
+        scale: 2, // 128x128px + collider 0.75%
+        towerOffset: 72 + 56,
+        collider: 56,
+        headSqCollider: 20 * 20,
+        tint: 0xffff00
+    },
+    [TYPES.BOMB] : {
+        hp: 40,
+        speed: 0.04,
+        damage: 10,
+        scale: 1.2, // 96x96px + collider 0.75%
+        towerOffset: 72 + 34,
+        collider: 34,
+        headSqCollider: 12 * 12,
+        tint: 0xff0000
+    },
+    [TYPES.BOSS] : {
+        hp: 500,
+        speed: 0.015,
+        damage: 10,
+        scale: 3, // 128x128px + collider 0.75%
+        towerOffset: 72 + 84,
+        collider: 84,
+        headSqCollider: 30 * 30,
+        tint: 0xff00ff
+    },
+}
+
+class PrototypeEnemy extends Container {
+    constructor(x, y, type) {
+        super()
+
+        this.image = new Sprite(images.enemy)
+        this.image.anchor.set(0.5)
+        this.addChild(this.image)
+
+        this.hpBar = new Container()
+        this.addChild(this.hpBar)
+        this.hpBg = new Sprite(images.hp_bar_bg)
+        this.hpBg.position.set(-28, -64 * ENEMY[type].scale)
+        this.hpBar.addChild(this.hpBg)
+        this.hpLine = new Sprite(images.hp_bar_line)
+        this.hpLine.position.set(-25, -64 * ENEMY[type].scale + 2)
+        this.hpBar.addChild(this.hpLine)
+
+        this.reset(x, y, type)
+    }
+  
+    reset(x, y, type) {
+        this.type = type
+        this.position.set(x, y)
+        this.alpha = 0
+
+        this.isOnMove = true
+        this.maxHp = ENEMY[type].hp
+        this.hp = this.maxHp
+        this.speed = ENEMY[type].speed
+        this.damage = ENEMY[type].damage
+        this.image.tint = ENEMY[type].tint
+        this.image.scale.set( ENEMY[type].scale )
+        this.collider = ENEMY[type].collider
+        this.headSqCollider = ENEMY[type].headSqCollider
+        this.towerOffset = ENEMY[type].towerOffset
+
+        this.hpLine.tint = 0x00ff00
+        this.hpLine.scale.x = 1
+
+        this.attackTimeout = 1000
+
+        const rotation = Math.atan2(0-y, 0-x)
+        this.image.rotation = rotation
+        this.directionSin = Math.sin(rotation)
+        this.directionCos = Math.cos(rotation)
+
+        tickerAdd(this)
+    }
+
+    setDamage(power) {
+        this.hp = Math.max(0, this.hp - power)
+
+        this.hpLine.scale.x = this.hp / this.maxHp
+        if (this.hpLine.scale.x > 0.4) this.hpLine.tint = 0x00ff00
+        else if (this.hpLine.scale.x > 0.25) this.hpLine.tint = 0xffff00
+        else if (this.hpLine.scale.x > 0.12) this.hpLine.tint = 0xff7700
+        else this.hpLine.tint = 0xff0000
+
+        if (this.hp === 0) this.die()
+    }
+
+    die() {
+        tickerRemove(this)
+        this.parent.removeChild(this)
+        POOL.push(this)
+    }
+
+    tick(deltaMs) {
+        if (this.alpha < 1) this.alpha += ALPHA_STEP * deltaMs
+
+        if (this.isOnMove) {
+            const pathSize = this.speed * deltaMs
+            this.x += this.directionCos * pathSize
+            this.y += this.directionSin * pathSize
+
+            this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
+            if (!this.isOnMove) {
+                setDamage(this.damage)
+                if (this.type === TYPES.BOMB) this.die()
+            }
+        } else {
+            this.attackTimeout -= deltaMs
+            if (this.attackTimeout <= 0) {
+                this.attackTimeout += 1000
+                setDamage(this.damage)
+            }
+        }
+    }
+
+    kill() {
+        tickerRemove(this)
+        POOL.length = 0
+    }
+}
+
+// Экспортируем прокси, который перехватывает вызов 'new'
+export const Enemy = new Proxy(PrototypeEnemy, {
+    construct(target, args) {
+        if (POOL.length > 0) {
+            const reused = POOL.pop()
+            reused.reset(...args)
+            return reused
+        }
+
+        return new target(...args)
+    }
+})
