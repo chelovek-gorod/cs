@@ -4,6 +4,7 @@ import { images } from "../../../app/assets";
 import { setDamage } from "../../../app/events";
 import { createEnum, getDistance, moveSprite, turnSpriteToTarget } from "../../../utils/functions";
 import FlyText from "../../effects/FlyText";
+import { wizardPower } from "../../state";
 
 
 const POOL = []
@@ -97,6 +98,7 @@ class PrototypeEnemy extends Container {
         this.damage = ENEMY[type].damage
         this.image.tint = ENEMY[type].tint
         this.image.scale.set( ENEMY[type].scale )
+        this.lightningCount = 0
         this.collider = ENEMY[type].collider
         this.headSqCollider = ENEMY[type].headSqCollider
         this.towerOffset = ENEMY[type].towerOffset
@@ -114,7 +116,15 @@ class PrototypeEnemy extends Container {
         tickerAdd(this)
     }
 
+    onLightning() {
+        this.setDamage(wizardPower)
+        this.image.tint = 0x000000
+        this.lightningCount = 6
+    }
+
     setDamage(power) {
+        if (this.hp === 0) return
+
         this.hp = Math.max(0, this.hp - power)
 
         this.hpLine.scale.x = this.hp / this.maxHp
@@ -123,7 +133,7 @@ class PrototypeEnemy extends Container {
         else if (this.hpLine.scale.x > 0.12) this.hpLine.tint = 0xff7700
         else this.hpLine.tint = 0xff0000
 
-        if (this.hp === 0) this.die()
+        if (this.hp === 0) requestAnimationFrame( this.die.bind(this) )
     }
 
     die() {
@@ -134,6 +144,13 @@ class PrototypeEnemy extends Container {
 
     tick(deltaMs) {
         if (this.alpha < 1) this.alpha += ALPHA_STEP * deltaMs
+
+        if (this.lightningCount > 0) {
+            this.lightningCount--
+            if (this.lightningCount % 2 === 0) this.image.tint = ENEMY[this.type].tint
+            else this.image.tint = 0x000000
+            return
+        }
 
         if (this.isOnMove) {
             const pathSize = this.speed * deltaMs

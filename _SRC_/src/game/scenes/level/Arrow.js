@@ -1,6 +1,6 @@
 import { Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { images } from "../../../app/assets";
+import { atlases, images } from "../../../app/assets";
 import { arrowOnTarget } from "../../../app/events";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { arrowSpeedRate } from "../../state";
@@ -9,15 +9,17 @@ const POOL = []
 
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
-export const MIN_SCALE_Y = 0.7
-const MAX_SCALE_Y = 1.3
+export const MIN_SCALE_Y = 0.5
+const MAX_SCALE_Y = 0.8
 // по X сжимаем для ощущения полета по пораболе
 export const MIN_SCALE_X = MIN_SCALE_Y * 0.5
 const MAX_SCALE_X = MAX_SCALE_Y
 
+const START_OFFSET = 20
+
 class PrototypeArrow extends Sprite {
     constructor(x, y) {
-        super(images.arrow)
+        super(images.archer_arrow)
         this.anchor.set(1, 0.5)
         this.reset(x, y)
 
@@ -32,9 +34,11 @@ class PrototypeArrow extends Sprite {
         this.path = 0
         this.distance = Math.hypot(x, y)
         this.speed = Math.sqrt(this.distance) * arrowSpeedRate
-        this.damage = 25
 
         turnSpriteToTarget(this, {x, y}, 360)
+        this.position.x += Math.cos(this.rotation) * START_OFFSET
+        this.position.y += Math.sin(this.rotation) * START_OFFSET
+
         tickerAdd(this)
     }
 

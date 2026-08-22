@@ -15,14 +15,14 @@ export let arrowPower = 10
 export let arrowShutTimeout = 360
 export let arrowReloadTimeout = 1800
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export let catapultsCount = 0
-export let catapultPower = 24
+export let catapultsCount = 1
+export let catapultPower = 36
 export let catapultDamageRadius = 64
-export let catapultShutTimeout = 600
-export let wizardsCount = 0
-export let wizardPower = 24
+export let catapultShutTimeout = 3200
+export let wizardsCount = 1
+export let wizardPower = 18
 export let wizardTargetsCount = 1
-export let wizardShutTimeout = 360
+export let wizardShutTimeout = 1800
 
 export function addGold(value) { gold += value }
 export function addRound() { round++ }

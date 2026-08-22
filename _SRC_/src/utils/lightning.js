@@ -13,6 +13,14 @@ const colors = [
 ]
 let colorIndex = Math.floor(Math.random() * colors.length)
 
+const lineWidth = 2
+
+function getDistance(sprite, target) {
+    let dx = target.x - sprite.x
+    let dy = target.y - sprite.y
+    return (dx * dx + dy * dy) ** 0.5
+}
+
 export function drawLightning(object, target, graphics) {
     const lineColor = colors[colorIndex]
     colorIndex++
@@ -23,14 +31,14 @@ export function drawLightning(object, target, graphics) {
     const stepsCount = Math.ceil(distance / stepsSize)
     const offsetRate = Math.ceil(stepsSize * 0.75)
   
-    let xx = object.position.x
-    let yy = object.position.y
+    let xx = object.x
+    let yy = object.y
     let path = [{x: xx, y: yy}]
     for (let i = stepsCount; i > 1; i--) {
-        let pathLength = Math.sqrt((xx - target.position.x) ** 2 + (yy - target.position.y) ** 2)
+        let pathLength = Math.sqrt((xx - target.x) ** 2 + (yy - target.y) ** 2)
         let offset = Math.sin((pathLength / distance) * Math.PI) * offsetRate
-        xx += (target.position.x - xx) / i + Math.random() * offset * 2 - offset
-        yy += (target.position.y - yy) / i + Math.random() * offset * 2 - offset
+        xx += (target.x - xx) / i + Math.random() * offset * 2 - offset
+        yy += (target.y - yy) / i + Math.random() * offset * 2 - offset
         path.push({x: xx, y: yy})
     }
 
@@ -40,5 +48,5 @@ export function drawLightning(object, target, graphics) {
       if (index === 0) graphics.moveTo(point.x, point.y);
       else graphics.lineTo(point.x, point.y);
     })
-    graphics.stroke({ width: graphics.lineWidth, color: lineColor })
+    graphics.stroke({ width: lineWidth, color: lineColor })
 }

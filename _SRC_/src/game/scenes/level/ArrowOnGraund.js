@@ -1,6 +1,6 @@
 import { Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { images } from "../../../app/assets";
+import { atlases, images } from "../../../app/assets";
 import { MIN_SCALE_X, MIN_SCALE_Y } from "./Arrow";
 
 const POOL = []
@@ -9,7 +9,7 @@ const ALPHA_SPEED = 0.0003
 
 class PrototypeArrowOnGround extends Sprite {
     constructor(x, y, direction) {
-        super(images.arrow)
+        super(images.archer_arrow)
         this.anchor.set(1, 0.5)
         this.scale.set(MIN_SCALE_X, MIN_SCALE_Y)
         this.reset(x, y, direction)

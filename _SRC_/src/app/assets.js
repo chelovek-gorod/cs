@@ -26,9 +26,10 @@ export const images = {
 
 
     /*** game images ***/
-    tower: 'tower.png',
-    archer: 'archer.png',
-    arrow: 'arrow.png',
+    tower_layer_1: 'tower_layer_1.png',
+    tower_layer_2: 'tower_layer_2.png',
+    tower_layer_3: 'tower_layer_3.png',
+    archer_arrow: 'archer_arrow.png',
     arrow_point: 'arrow_point.png',
     enemy: 'enemy.png',
     hp_bar_bg: 'hp_bar_bg.png',
@@ -36,9 +37,13 @@ export const images = {
     icon_bow: 'icon_bow.png',
     icon_bow_line: 'icon_bow_line.png',
     icon_bow_bg: 'icon_bow_bg.png',
+    stone: 'stone.png'
 }
 export const atlases = {
-
+    archer: 'archer.json',
+    wizard: 'wizard.json',
+    catapult: 'catapult.json',
+    explosion: 'explosion_240x240px_28frames.json'
 }
 export const sounds = {
     

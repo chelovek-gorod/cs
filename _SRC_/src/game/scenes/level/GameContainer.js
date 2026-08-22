@@ -32,8 +32,18 @@ export default class GameContainer extends Container {
         this.addChild(this.arrowPoints)
 
         this.arrows = new Container()
+        this.stones = new Container()
+        this.particles = null
 
-        this.tower = new Tower(this.arrowPoints, this.arrowsOnGround, this.arrows)
+        this.lightnings = new Graphics()
+        this.addChild(this.lightnings)
+
+        this.enemies = new Container()
+
+        this.tower = new Tower(
+            this.arrowPoints, this.arrowsOnGround, this.arrows,
+            this.stones, this.lightnings, this.enemies, this.particles
+        )
         this.arrowStartPower = arrowPower
         this.arrowCurrentPower = this.arrowStartPower
         this.arrowComboRate = 1.2
@@ -42,7 +52,6 @@ export default class GameContainer extends Container {
         this.arrowLastTarget = null
         this.addChild(this.tower)
 
-        this.enemies = new Container()
         this.enemiesWaveIndex = 0
         this.enemiesWaveLineIndex = 0
         this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
@@ -53,6 +62,7 @@ export default class GameContainer extends Container {
         this.addChild(this.enemies)
         
         this.addChild(this.arrows)
+        this.addChild(this.stones)
 
         this.spawnSectors = [
             { start: 0, end: 90 },

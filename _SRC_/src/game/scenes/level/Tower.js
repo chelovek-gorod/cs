@@ -1,102 +1,68 @@
 import { Container, Sprite, Text } from "pixi.js";
-import { tickerAdd, tickerRemove } from "../../../app/application";
 import { images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { turnSpriteToTarget, createEnum } from "../../../utils/functions";
-import { arrowReloadTimeout, arrows, arrowShutTimeout, towerHP } from "../../state";
-import { Arrow } from "./Arrow";
+import { catapultsCount, towerHP, wizardsCount } from "../../state";
+import Archer from "./Archer";
+import Catapult from "./Catapult";
+import Wizard from "./Wizard";
 
-const MAX_ARROWS = 12
-const SHOT_TIMEOUT = 360
-const RELOAD_TIMEOUT = 1800
+const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y: 66} ]
+const CATAPULT_POINTS = [ {x: 46, y: 46}, {x: -46, y: -46}, {x: -46, y: 46}, {x: 46, y: -46} ]
 
 export default class Tower extends Container {
-    constructor(arrowPoints, arrowsOnGround, arrowsContainer) {
+    constructor(
+        arrowPoints, arrowsOnGround, arrowsContainer,
+        catapultStones, lightnings, enemies, particles
+    ) {
         super()
 
-        this.arrowsOnGround = arrowsOnGround
-        this.arrowPoints = arrowPoints
-        this.arrowsContainer = arrowsContainer
+        this.towerLayer1 = new Container()
+        this.towerLayer1Image = new Sprite(images.tower_layer_1)
+        this.towerLayer1Image.anchor.set(0.5)
+        this.towerLayer1.addChild(this.towerLayer1Image)
+        this.addChild(this.towerLayer1)
 
-        this.tower = new Sprite(images.tower)
-        this.tower.anchor.set(0.5)
-        this.addChild(this.tower)
+        for(let i = 0; i < catapultsCount; i++) {
+            // startShutTimeoutRate
+            const str = 0.25 * (i + 1)
+            const x = CATAPULT_POINTS[i].x
+            const y = CATAPULT_POINTS[i].y
+            this.towerLayer1.addChild(
+                new Catapult(x, y, catapultStones, enemies, str, particles)
+            )
+        }
 
-        this.archer = new Sprite(images.archer)
-        this.archer.anchor.set(0.5)
-        this.addChild(this.archer)
+        this.towerLayer2 = new Container()
+        this.towerLayer2Image = new Sprite(images.tower_layer_2)
+        this.towerLayer2Image.anchor.set(0.5)
+        this.towerLayer2.addChild(this.towerLayer2Image)
+        this.addChild(this.towerLayer2)
+
+        for(let i = 0; i < wizardsCount; i++) {
+            // startShutTimeoutRate
+            const str = 0.25 * (i + 1)
+            this.towerLayer2.addChild(
+                new Wizard(WIZARD_POINTS[i].x, WIZARD_POINTS[i].y, lightnings, enemies, str)
+            )
+        }
+
+        this.towerLayer3 = new Container()
+        this.towerLayer3Image = new Sprite(images.tower_layer_3)
+        this.towerLayer3Image.anchor.set(0.5)
+        this.towerLayer3.addChild(this.towerLayer3Image)
+        this.addChild(this.towerLayer3)
+ 
+        this.towerLayer3.addChild(
+            new Archer(arrowPoints, arrowsOnGround, arrowsContainer)
+        )
 
         this.hp = towerHP
         this.hpText = new Text({text: this.hp, style: styles.loading})
         this.hpText.position.set(0, -80)
         this.addChild(this.hpText)
 
-        this.stateText = new Text({text: this.state, style: styles.loading})
-        this.stateText.position.set(0, 80)
-        this.addChild(this.stateText)
-
-        this.arrows = arrows
-        this.shutTimeout = 0
-        this.reloadTimeout = 0
-        this.targetPoint = null
-        this.isPointerDown = false
-        this.isReadyToShut = true
-
-        this.arrowsLabel = new Container()
-        this.arrowsLabel.position.set(0, 40)
-        this.addChild(this.arrowsLabel)
-
-        this.arrowsLabelBg = new Sprite(images.icon_bow_bg)
-        this.arrowsLabelBg.anchor.set(0.5)
-        this.arrowsLabel.addChild(this.arrowsLabelBg)
-
-        this.arrowsLabelLine = new Sprite(images.icon_bow_line)
-        this.arrowsLabelLine.anchor.set(0, 0.5)
-        this.arrowsLabelLine.position.set(-25, 0)
-        this.arrowsLabel.addChild(this.arrowsLabelLine)
-
-        this.arrowsLabelIcon = new Sprite(images.icon_bow)
-        this.arrowsLabelIcon.anchor.set(0.5)
-        this.arrowsLabel.addChild(this.arrowsLabelIcon)
-
-        this.arrowsLabelText = new Text({text: 'x' + arrows, style: styles.arrowsCount})
-        this.arrowsLabelText.position.set(-2, -10)
-        this.arrowsLabel.addChild(this.arrowsLabelText)
-
         EventHub.on(events.setDamage, this.getDamage, this)
-        EventHub.on(events.setShutPoint, this.getShutPoint, this)
-
-        tickerAdd(this)
-    }
-
-    shut() {
-        const x = this.shutPoint.x
-        const y = this.shutPoint.y
-
-        const arrow = new Arrow(x, y, this.arrowsOnGround)
-        this.arrowsContainer.addChild(arrow)
-
-        arrow.arrowPoint.position.set(x, y)
-        this.arrowPoints.addChild(arrow.arrowPoint)
-
-        this.isReadyToShut = false
-        this.arrows--
-        this.arrowsLabelText.text = 'x' + this.arrows
-        if (this.arrows > 0) this.shutTimeout += arrowShutTimeout
-        else this.reloadTimeout += arrowReloadTimeout
-    }
-
-    getShutPoint(data) { // {x: data.x, y: data.y, type: 'up'}
-        this.shutPoint = {x: data.x, y: data.y}
-        this.archer.rotation = Math.atan2(data.y, data.x)
-
-        if (data.type === 'down') {
-            this.isPointerDown = true
-            if (this.isReadyToShut) this.shut()
-        } else if (data.type === 'up') {
-            this.isPointerDown = false
-        }
     }
 
     getDamage(value) {
@@ -104,35 +70,7 @@ export default class Tower extends Container {
         this.hpText.text = this.hp
     }
 
-    tick(deltaMs) {
-        if (this.isReadyToShut && this.isPointerDown) return this.shut()
-
-        else if (this.shutTimeout > 0) {
-            this.shutTimeout -= deltaMs
-    
-            if (this.shutTimeout <= 0) {
-                this.isReadyToShut = true
-                if (this.isPointerDown) return this.shut()
-            }
-        }
-        
-        else if (this.reloadTimeout > 0) {
-            this.reloadTimeout -= deltaMs
-
-            this.arrowsLabelLine.scale.x = Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
-    
-            if (this.reloadTimeout <= 0) {
-                this.arrows = arrows
-                this.isReadyToShut = true
-                this.arrowsLabelText.text = 'x' + this.arrows
-                if (this.isPointerDown) this.shut()
-            }
-        }
-    }
-
     kill() {
         EventHub.off(events.setDamage, this.getDamage, this)
-        EventHub.off(events.setShutPoint, this.getShutPoint, this)
-        tickerRemove(this)
     }
 }
