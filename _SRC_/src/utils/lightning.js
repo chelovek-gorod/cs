@@ -13,7 +13,7 @@ const colors = [
 ]
 let colorIndex = Math.floor(Math.random() * colors.length)
 
-const lineWidth = 2
+const lineWidth = 1.5
 
 function getDistance(sprite, target) {
     let dx = target.x - sprite.x

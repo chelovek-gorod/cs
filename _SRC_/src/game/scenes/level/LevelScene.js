@@ -1,14 +1,18 @@
 import { Container } from 'pixi.js'
-import { music } from '../../../app/assets'
+import { images, music } from '../../../app/assets'
 import { EventHub, events, setShutPoint } from '../../../app/events'
 import { getLanguage } from '../../localization'
 import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
-import BackgroundGradient from '../../BG/BackgroundGradient'
+import BackgroundTiling from '../../BG/BackgroundTiling'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import GameContainer from './GameContainer'
+import LevelUI from './LevelUI'
+import { getSafeAreaOffsets } from '../../../app/application'
+import { addGold } from '../../state'
+import { setMusicList } from '../../../app/sound'
 
 
-const musics = [ music.bgm_1, music.bgm_2, music.bgm_3, music.bgm_4 ]
+const musics = [ music.bgm_1, music.bgm_2, music.bgm_3 ]
 let currentMusicIndex = Math.floor( Math.random() * musics.length )
 function getMusic() {
     const music = musics[currentMusicIndex]
@@ -26,7 +30,7 @@ export default class LevelScene extends Container {
         this.currentLanguage = getLanguage()
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
 
-        this.bg = new BackgroundGradient([0x00aa00,0x009900])
+        this.bg = new BackgroundTiling(images.round_bg)
         setCursorPointer(this.bg)
         this.bg.on('pointerdown', this.getPointerDown, this)
         this.bg.on('pointermove', this.getPointerMove, this)
@@ -35,8 +39,6 @@ export default class LevelScene extends Container {
 
         this.gameContainer = new GameContainer()
         this.addChild(this.gameContainer)
-        this.UIContainer = null
-
 
         this.enemies = new Container()
         
@@ -45,12 +47,11 @@ export default class LevelScene extends Container {
         this.flyTexts = new Container()
         this.addChild(this.flyTexts)
 
-        /*
-        this.popup = new Popup()
-        this.addChild(this.popup)
-        */
+        this.ui = new LevelUI()
+        this.addChild(this.ui)
 
         EventHub.on( events.pauseGameplay, this.pauseGameplay, this )
+        EventHub.on( events.addGoldForKill, this.addGoldForKill, this )
 
         /*
         if ( getDeviceType().indexOf('desktop') > -1 ) {
@@ -68,19 +69,26 @@ export default class LevelScene extends Container {
         }
         */
         
-        // setMusicList( getMusic() )
-
-        
+        setMusicList( getMusic() )
     }
 
     screenResize(screenData) {
+        const safeAreaOffsets = getSafeAreaOffsets()
+
         // set scene container in center of screen
         this.position.set( screenData.centerX, screenData.centerY )
 
-        this.bg.screenResize(screenData)
-        this.gameContainer.screenResize(screenData)
+        this.gameContainer.screenResize(screenData, safeAreaOffsets)
 
-        //this.popup.screenResize(screenData)
+        const bgScale = this.gameContainer.scale.x
+        const bgScreenData = {
+            width: screenData.width / bgScale,
+            height: screenData.height / bgScale,
+        }
+        this.bg.scale.set(bgScale)
+        this.bg.screenResize(bgScreenData)
+
+        this.ui.screenResize(screenData, safeAreaOffsets)
     }
 
     pauseGameplay() {
@@ -103,6 +111,11 @@ export default class LevelScene extends Container {
         setShutPoint({x: localPos.x, y: localPos.y, type: 'up'})
     }
 
+    addGoldForKill(value) {
+        addGold(value)
+        this.ui.setGoldText()
+    }
+
     updateLanguage(lang) {
         this.currentLanguage = lang
     }
@@ -114,6 +127,8 @@ export default class LevelScene extends Container {
         this.bg.off('pointerup', this.getPointerUp, this)
         this.bg.destroy()
 
+        this.gameContainer.kill()
+
         gameplayStopSDK()
 
         if (this.handlerKeyboard) {
@@ -124,6 +139,6 @@ export default class LevelScene extends Container {
 
         EventHub.off( events.updateLanguage, this.updateLanguage, this )
         EventHub.off( events.pauseGameplay, this.pauseGameplay, this )
-        //this.tapArea.off('pointerdown', this.getFlyClick, this)
+        EventHub.off( events.addGoldForKill, this.addGoldForKill, this )
     }
 }

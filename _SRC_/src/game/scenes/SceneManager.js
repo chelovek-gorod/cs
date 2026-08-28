@@ -4,14 +4,16 @@ import { createEnum } from "../../utils/functions"
 import { EventHub, events } from "../../app/events"
 
 import LoadScene from "./load/LoadScene"
+import MenuScene from "./menu/MenuScane"
 import LevelScene from "./level/LevelScene"
 
 export const SCENE_NAME = createEnum(
-    ['Load', 'Level']
+    ['Load', 'Menu', 'Level']
 )
 
 const SCENES = {
     [SCENE_NAME.Load] : LoadScene,
+    [SCENE_NAME.Menu] : MenuScene,
     [SCENE_NAME.Level] : LevelScene,
 }
 

@@ -1,6 +1,7 @@
 import { Container, Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, images } from "../../../app/assets";
+import { atlases, images, sounds } from "../../../app/assets";
+import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import Explosion from "../../effects/Explosion";
 import { catapultDamageRadius, catapultPower } from "../../state";
@@ -45,20 +46,25 @@ class PrototypeStone extends Container {
         this.position.y += Math.sin(this.rotation) * START_OFFSET
 
         tickerAdd(this)
+        soundPlay(sounds.se_catapult_shut)
     }
 
     setDamage() {
-        this.parent.addChild( new Explosion(this.x, this.y) )
+        this.parent.addChild( new Explosion(this.x, this.y, catapultDamageRadius) )
         
         const enemies = this.enemies.children
         const enemiesCount = enemies.length
         const dmgSqRadius = catapultDamageRadius * catapultDamageRadius
-        console.log(enemies)
+        
         for (let i = 0; i < enemiesCount; i++) {
-            const dx = enemies[i].x - this.x
-            const dy = enemies[i].y - this.y
+            const enemy = enemies[i]
+            const dx = enemy.x - this.x
+            const dy = enemy.y - this.y
             const sqDist = dx * dx + dy * dy
-            if (dmgSqRadius > sqDist) enemies[i].setDamage(catapultPower)
+            const enemySqCollider = enemy.collider * enemy.collider
+            const inRadius = dmgSqRadius + enemySqCollider > sqDist
+
+            if (inRadius && enemy.hp > 0) enemy.setDamage(catapultPower)
         }
 
         tickerRemove(this)
@@ -86,7 +92,6 @@ class PrototypeStone extends Container {
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
         POOL.push(this)
-        POOL.length = 0
     }
 }
 

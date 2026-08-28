@@ -1,11 +1,8 @@
 import { Container, Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { images } from "../../../app/assets";
-import { setDamage } from "../../../app/events";
-import { createEnum, getDistance, moveSprite, turnSpriteToTarget } from "../../../utils/functions";
-import FlyText from "../../effects/FlyText";
-import { wizardPower } from "../../state";
-
+import { addGoldForKill, setDamage } from "../../../app/events";
+import { createEnum, getDistance } from "../../../utils/functions";
 
 const POOL = []
 
@@ -66,6 +63,12 @@ const ENEMY = {
     },
 }
 
+const FAST_TURN_DISTANCE = 240       // минимальное расстояние до башни для возможности поворота
+const FAST_TURN_ANGLE = 60 * (Math.PI / 180)
+const FAST_TURN_COUNT = 3            // максимум поворотов за жизнь
+const FAST_TURN_MIN_TIME = 900       // мин. время движения в новом направлении, мс
+const FAST_TURN_MAX_TIME = 1800      // макс. время движения в новом направлении, мс
+
 class PrototypeEnemy extends Container {
     constructor(x, y, type) {
         super()
@@ -99,6 +102,7 @@ class PrototypeEnemy extends Container {
         this.image.tint = ENEMY[type].tint
         this.image.scale.set( ENEMY[type].scale )
         this.lightningCount = 0
+        this.lightningDamage = 0
         this.collider = ENEMY[type].collider
         this.headSqCollider = ENEMY[type].headSqCollider
         this.towerOffset = ENEMY[type].towerOffset
@@ -108,18 +112,21 @@ class PrototypeEnemy extends Container {
 
         this.attackTimeout = 1000
 
-        const rotation = Math.atan2(0-y, 0-x)
-        this.image.rotation = rotation
-        this.directionSin = Math.sin(rotation)
-        this.directionCos = Math.cos(rotation)
+        this.turnToTower()
+
+        if (type === TYPES.FAST) {
+            this.turnCount = FAST_TURN_COUNT
+            this.turnTimer = FAST_TURN_MIN_TIME + Math.random() * (FAST_TURN_MAX_TIME - FAST_TURN_MIN_TIME)
+            this.isOnTurn = false
+        }
 
         tickerAdd(this)
     }
 
-    onLightning() {
-        this.setDamage(wizardPower)
+    onLightning(power) {
         this.image.tint = 0x000000
         this.lightningCount = 6
+        this.lightningDamage += power
     }
 
     setDamage(power) {
@@ -136,10 +143,85 @@ class PrototypeEnemy extends Container {
         if (this.hp === 0) requestAnimationFrame( this.die.bind(this) )
     }
 
+    turnToTower() {
+        const angleToTower = Math.atan2(0 - this.y, 0 - this.x)
+        this.directionCos = Math.cos(angleToTower)
+        this.directionSin = Math.sin(angleToTower)
+        this.image.rotation = angleToTower
+    }
+
+    moveForward(deltaMs) {
+        const pathSize = this.speed * deltaMs
+        this.x += this.directionCos * pathSize
+        this.y += this.directionSin * pathSize
+
+        this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
+        if (!this.isOnMove) {
+            setDamage(this.damage)
+            if (this.type === TYPES.BOMB) this.die()
+        }
+    }
+
+    moveWithTurns(deltaMs) {
+        const pathSize = this.speed * deltaMs
+        this.x += this.directionCos * pathSize
+        this.y += this.directionSin * pathSize
+
+        const distance = getDistance(this, {x: 0, y: 0})
+        if (distance <= this.towerOffset) {
+            this.isOnMove = false
+            this.isOnTurn = false
+
+            this.turnToTower()
+
+            setDamage(this.damage)
+            if (this.type === TYPES.BOMB) this.die()
+            return
+        }
+
+        if (distance < FAST_TURN_DISTANCE) {
+            this.turnToTower()
+            this.turnCount = 0
+            this.turnTimer = 0
+            return
+        }
+
+        this.turnTimer -= deltaMs
+        if (this.turnTimer > 0) return
+
+        if (this.isOnTurn) {
+            this.isOnTurn = false
+            this.turnCount--
+
+            this.turnToTower()
+        } else {
+            this.isOnTurn = true
+            const turnAngle = Math.random() < 0.5 ? FAST_TURN_ANGLE : -FAST_TURN_ANGLE
+            const oldDirCos = this.directionCos
+            const oldDirSin = this.directionSin
+            const cos = Math.cos(turnAngle)
+            const sin = Math.sin(turnAngle)
+            this.directionCos = oldDirCos * cos - oldDirSin * sin
+            this.directionSin = oldDirCos * sin + oldDirSin * cos
+            this.image.rotation = Math.atan2(this.directionSin, this.directionCos)
+        }
+
+        this.turnTimer = FAST_TURN_MIN_TIME + Math.random() * (FAST_TURN_MAX_TIME - FAST_TURN_MIN_TIME)
+    }
+
+    attackTower(deltaMs) {
+        this.attackTimeout -= deltaMs
+        if (this.attackTimeout <= 0) {
+            this.attackTimeout += 1000
+            setDamage(this.damage)
+        }
+    }
+
     die() {
         tickerRemove(this)
-        this.parent.removeChild(this)
+        if (this.parent) this.parent.removeChild(this)
         POOL.push(this)
+        addGoldForKill( this.type === TYPES.BOSS ? 5 : 1 )
     }
 
     tick(deltaMs) {
@@ -149,31 +231,26 @@ class PrototypeEnemy extends Container {
             this.lightningCount--
             if (this.lightningCount % 2 === 0) this.image.tint = ENEMY[this.type].tint
             else this.image.tint = 0x000000
+
+            if (this.lightningCount === 0) {
+                this.setDamage(this.lightningDamage)
+                this.lightningDamage = 0
+            }
             return
         }
 
         if (this.isOnMove) {
-            const pathSize = this.speed * deltaMs
-            this.x += this.directionCos * pathSize
-            this.y += this.directionSin * pathSize
-
-            this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
-            if (!this.isOnMove) {
-                setDamage(this.damage)
-                if (this.type === TYPES.BOMB) this.die()
-            }
+            if (this.type === TYPES.FAST && this.turnCount > 0) this.moveWithTurns(deltaMs)
+            else this.moveForward(deltaMs)
         } else {
-            this.attackTimeout -= deltaMs
-            if (this.attackTimeout <= 0) {
-                this.attackTimeout += 1000
-                setDamage(this.damage)
-            }
+            this.attackTower(deltaMs)
         }
     }
 
     kill() {
         tickerRemove(this)
-        POOL.length = 0
+        if (this.parent) this.parent.removeChild(this)
+        POOL.push(this)
     }
 }
 

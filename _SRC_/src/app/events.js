@@ -19,6 +19,7 @@ export const events = createEnum([
 
     'getTopResults',
 
+    'addGoldForKill',
     'setDamage',
     'setShutPoint',
     'arrowOnTarget',
@@ -57,7 +58,9 @@ export function getTopResults( ) {
 }
 
 
-
+export function addGoldForKill( value ) {
+    EventHub.emit( events.addGoldForKill, value )
+}
 
 export function setDamage( value ) {
     EventHub.emit( events.setDamage, value )

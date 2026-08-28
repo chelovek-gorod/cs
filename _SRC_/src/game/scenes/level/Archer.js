@@ -1,4 +1,4 @@
-import { AnimatedSprite, Container, Sprite, Text } from "pixi.js";
+import { AnimatedSprite, Container, Graphics, Sprite, Text } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
@@ -31,9 +31,16 @@ export default class Archer extends Container {
         this.isReadyToShut = true
 
         this.arrowsLabel = new Container()
-        this.arrowsLabel.position.set(0, 40)
+        this.arrowsLabel.position.set(0, 30)
         this.addChild(this.arrowsLabel)
 
+        this.arrowsLabelBg = new Graphics()
+        this.arrowsLabelBg.roundRect(-25, -10, 50, 20, 6)
+        this.arrowsLabelBg.fill(0xffffff)
+        this.arrowsLabelBg.alpha = 0.5
+        this.arrowsLabel.addChild(this.arrowsLabelBg)
+
+        /*
         this.arrowsLabelBg = new Sprite(images.icon_bow_bg)
         this.arrowsLabelBg.anchor.set(0.5)
         this.arrowsLabel.addChild(this.arrowsLabelBg)
@@ -42,6 +49,7 @@ export default class Archer extends Container {
         this.arrowsLabelLine.anchor.set(0, 0.5)
         this.arrowsLabelLine.position.set(-25, 0)
         this.arrowsLabel.addChild(this.arrowsLabelLine)
+        */
 
         this.arrowsLabelIcon = new Sprite(images.icon_bow)
         this.arrowsLabelIcon.anchor.set(0.5)
@@ -100,7 +108,12 @@ export default class Archer extends Container {
         else if (this.reloadTimeout > 0) {
             this.reloadTimeout -= deltaMs
 
-            this.arrowsLabelLine.scale.x = Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
+            //this.arrowsLabelLine.scale.x = Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
+            const size = 50 * Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
+            this.arrowsLabelBg.clear()
+            this.arrowsLabelBg.roundRect(-25, -10, size, 20, 6)
+            this.arrowsLabelBg.fill(0xffffff)
+            this.arrowsLabelBg.alpha = 0.5
     
             if (this.reloadTimeout <= 0) {
                 this.arrows = arrows

@@ -1,7 +1,8 @@
 import { Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, images } from "../../../app/assets";
+import { atlases, images, sounds } from "../../../app/assets";
 import { arrowOnTarget } from "../../../app/events";
+import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { arrowSpeedRate } from "../../state";
 
@@ -9,8 +10,8 @@ const POOL = []
 
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
-export const MIN_SCALE_Y = 0.5
-const MAX_SCALE_Y = 0.8
+export const MIN_SCALE_Y = 0.4
+const MAX_SCALE_Y = 0.7
 // по X сжимаем для ощущения полета по пораболе
 export const MIN_SCALE_X = MIN_SCALE_Y * 0.5
 const MAX_SCALE_X = MAX_SCALE_Y
@@ -40,6 +41,7 @@ class PrototypeArrow extends Sprite {
         this.position.y += Math.sin(this.rotation) * START_OFFSET
 
         tickerAdd(this)
+        soundPlay(sounds.se_arrow)
     }
 
     tick(deltaMs) {

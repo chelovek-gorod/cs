@@ -1,7 +1,7 @@
 import { AnimatedSprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
-import { catapultShutTimeout } from "../../state";
+import { catapultShutDistance, catapultShutTimeout } from "../../state";
 import { Stone } from "./Stone";
 
 
@@ -19,6 +19,7 @@ export default class Catapult extends AnimatedSprite {
         this.enemies = enemies
 
         this.shutTimeout = catapultShutTimeout * startShutTimeoutRate
+        this.shutSqDist = catapultShutDistance * catapultShutDistance
 
         tickerAdd(this)
     }
@@ -31,15 +32,18 @@ export default class Catapult extends AnimatedSprite {
         const enemies = this.enemies.children
         const enemiesCount = enemies.length
         for (let i = 0; i < enemiesCount; i++) {
-            if (enemies[i].hp > strongestHP) {
+            const dx = this.x - enemies[i].x
+            const dy = this.y - enemies[i].y
+            const distance = dx * dx + dy * dy
+            if (distance < this.shutSqDist && enemies[i].hp > strongestHP) {
                 strongestHP = enemies[i].hp
                 strongestEnemy = enemies[i]
             }
         }
 
         if (strongestHP <= 0) return
-
         this.rotation = Math.atan2(strongestEnemy.y, strongestEnemy.x)
+
         this.stones.addChild(
             new Stone(this.x, this.y, strongestEnemy.x, strongestEnemy.y, this.particles, this.enemies)
         )

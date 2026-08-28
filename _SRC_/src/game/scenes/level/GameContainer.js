@@ -1,11 +1,10 @@
-import { Container, Graphics, Text } from "pixi.js";
-import { getSafeAreaOffsets, tickerAdd, tickerRemove } from "../../../app/application";
+import { Container, Graphics } from "pixi.js";
+import { tickerAdd, tickerRemove } from "../../../app/application";
 import { EventHub, events, showPopup } from "../../../app/events";
-import { styles } from "../../../app/styles";
 import FlyText from "../../effects/FlyText";
 import { POPUP_TYPE } from "../../popup/popupTypes";
 import { addRound, arrowPower, round } from "../../state";
-import { ArrowOnGround } from "./ArrowOnGraund";
+import { ArrowOnGround } from "./ArrowOnGround";
 import { Enemy } from "./Enemy";
 import Tower from "./Tower";
 import { getRoundWaves } from "./waves"; 
@@ -23,22 +22,21 @@ export default class GameContainer extends Container {
         super()
 
         WAVES = getRoundWaves(round)
-        console.log(WAVES)
-
-        this.arrowsOnGround = new Container()
-        this.addChild(this.arrowsOnGround)
 
         this.arrowPoints = new Container()
         this.addChild(this.arrowPoints)
+
+        this.arrowsOnGround = new Container()
+        this.addChild(this.arrowsOnGround)
 
         this.arrows = new Container()
         this.stones = new Container()
         this.particles = null
 
         this.lightnings = new Graphics()
-        this.addChild(this.lightnings)
 
         this.enemies = new Container()
+        this.addChild(this.enemies)
 
         this.tower = new Tower(
             this.arrowPoints, this.arrowsOnGround, this.arrows,
@@ -59,8 +57,8 @@ export default class GameContainer extends Container {
         this.isLineSpawning = false
         this.enemySpawnQueue = []
         this.enemySpawnTimer = 0
-        this.addChild(this.enemies)
         
+        this.addChild(this.lightnings)
         this.addChild(this.arrows)
         this.addChild(this.stones)
 
@@ -74,46 +72,36 @@ export default class GameContainer extends Container {
         this.isWaveSpawnedCompletely = false
         this.popupDelay = 0
 
-        this.roundText = new Text({text: '', style: styles.loading})
-        this.roundText.anchor.set(0.5)
-        this.addChild(this.roundText)
-        this.updateRoundText()
-
         EventHub.on(events.arrowOnTarget, this.arrowOnTarget, this)
 
         tickerAdd(this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
+
+        requestAnimationFrame( () => {
+            this.parent.ui.setWaveText(this.enemiesWaveIndex + 1, WAVES.length)
+        })
     }
 
-    screenResize(screenData) {
+    screenResize(screenData, safeAreaOffsets) {
         let scale = 1
-        const safeAreaOffsets = getSafeAreaOffsets()
         if (screenData.isLandscape) {
-            const width = screenData.width + safeAreaOffsets.left + safeAreaOffsets.right
+            const width = screenData.width - safeAreaOffsets.left - safeAreaOffsets.right
             scale = Math.min( MAX_SCALE, width / SIZE )
         } else {
-            const height = screenData.height + safeAreaOffsets.top + safeAreaOffsets.bottom
+            const height = screenData.height - safeAreaOffsets.top - safeAreaOffsets.bottom
             scale = Math.min( MAX_SCALE, height / SIZE )
         }
+
+        this.scale.set(scale)
 
         // Обновляем секторы спавна в зависимости от масштаба и ориентации
         this.updateSpawnSectors(scale, screenData)
 
-        const startPoint = -SIZE * 0.5 * scale
-        const scaledSize = SIZE * scale
         this.testGraphics.clear()
-        this.testGraphics.rect(startPoint, startPoint, scaledSize, scaledSize)
-        this.testGraphics.stroke({width: 6, color: 0xffff00})
-
-        const topOffset = 40
-        const safeTop = safeAreaOffsets.top || 0
-        this.roundText.position.set(0, -screenData.centerY + safeTop + topOffset)
-    }
-
-    updateRoundText() {
-        this.roundText.text = `${round} (${this.enemiesWaveIndex + 1}/${WAVES.length})`
+        this.testGraphics.rect(-SIZE * 0.5, -SIZE * 0.5, SIZE, SIZE)
+        this.testGraphics.stroke({ width: 6, color: 0xffff00 })
     }
 
     updateSpawnSectors(scale, screenData) {
@@ -243,7 +231,7 @@ export default class GameContainer extends Container {
             return
         }
 
-        this.updateRoundText()
+        this.parent.ui.setWaveText(this.enemiesWaveIndex + 1, WAVES.length)
         // Устанавливаем таймер первой линии новой волны
         this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][0].timeout
         this.isWaveSpawnedCompletely = false
@@ -343,17 +331,21 @@ export default class GameContainer extends Container {
         else this.handleSpawning(deltaMs)
     }
 
+    clearContainer(container) {
+        for(let i = 0; i < container.children.length; i++) {
+            const child = container.children[0]
+            if ('kill' in child) child.kill()
+            else child.destroy({children: true})
+        }
+        this.removeChild(container)
+    }
+
     kill() {
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
         tickerRemove(this)
 
-        this.removeChild(this.arrowsOnGround)
-        this.arrowsOnGround.destroy({children: true})
-
-        this.removeChild(this.arrowPoints)
-        this.arrowPoints.destroy({children: true})
-
-        this.removeChild(this.arrows)
-        this.arrows.destroy({children: true})
+        this.clearContainer(this.arrowsOnGround)
+        this.clearContainer(this.arrowPoints)
+        this.clearContainer(this.arrows)
     }
 }

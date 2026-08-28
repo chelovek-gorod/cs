@@ -26,6 +26,9 @@ export const images = {
 
 
     /*** game images ***/
+    coin: 'coin.png',
+    round_bg: 'round_bg.png',
+    tower: 'tower.png',
     tower_layer_1: 'tower_layer_1.png',
     tower_layer_2: 'tower_layer_2.png',
     tower_layer_3: 'tower_layer_3.png',
@@ -46,10 +49,15 @@ export const atlases = {
     explosion: 'explosion_240x240px_28frames.json'
 }
 export const sounds = {
-    
+    se_arrow: 'se_arrow_shut.mp3',
+    se_wizard_shut: 'se_wizard_shut.mp3',
+    se_catapult_shut: 'se_catapult_shut.mp3',
 }
 export const music = {
-
+    bgm_menu: 'bgm_menu.mp3',
+    bgm_1: 'bgm_1.mp3',
+    bgm_2: 'bgm_2.mp3',
+    bgm_3: 'bgm_3.mp3',
 }
 
 export const assets = {fonts, images, atlases, sounds, music}
