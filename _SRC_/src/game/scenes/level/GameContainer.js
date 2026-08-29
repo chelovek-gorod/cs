@@ -3,7 +3,7 @@ import { tickerAdd, tickerRemove } from "../../../app/application";
 import { EventHub, events, showPopup } from "../../../app/events";
 import FlyText from "../../effects/FlyText";
 import { POPUP_TYPE } from "../../popup/popupTypes";
-import { addRound, arrowPower, round } from "../../state";
+import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state";
 import { ArrowOnGround } from "./ArrowOnGround";
 import { Enemy } from "./Enemy";
 import Tower from "./Tower";
@@ -22,6 +22,8 @@ export default class GameContainer extends Container {
         super()
 
         WAVES = getRoundWaves(round)
+
+        this.goldAtStart = gold
 
         this.arrowPoints = new Container()
         this.addChild(this.arrowPoints)
@@ -313,6 +315,12 @@ export default class GameContainer extends Container {
         if (this.enemies.children.length === 0) {
             if (this.popupDelay === 0) {
                 this.popupDelay = 1500
+
+                if (this.tower.hp === towerHP) {
+                    const extraGold = Math.round((gold - this.goldAtStart) * 0.5)
+                    this.parent.flyTexts.addChild( new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0) )
+                    addGold(extraGold)
+                }
                 return
             }
     

@@ -21,7 +21,7 @@ const EASY_NORMAL_MULTIPLIER = 0.7     // множитель числа NORMAL �
 
 // --- МИНИМУМЫ И МАКСИМУМЫ ДЛЯ ВОЛН И ЛИНИЙ ---
 const MIN_ENEMIES_PER_WAVE = 5                     // минимум врагов в волне
-const MAX_ENEMIES_PER_WAVE_EXTRA = 5               // добавка к раунду для максимума врагов в волне
+const MAX_ENEMIES_PER_WAVE_EXTRA = 4               // добавка к раунду для максимума врагов в волне
 const MAX_ENEMIES_PER_LINE_BASE = 5                // базовая вместимость линии
 const MAX_ENEMIES_PER_LINE_SQRT_RATE = 1           // множитель корня раунда для вместимости линии
 

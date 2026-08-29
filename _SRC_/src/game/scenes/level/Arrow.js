@@ -77,10 +77,12 @@ export const Arrow = new Proxy(PrototypeArrow, {
     construct(target, args) {
         if (POOL.length > 0) {
             const reused = POOL.pop()
-            reused.reset(...args)
-            return reused
+            if (reused.position) {
+                reused.reset(...args)
+                return reused
+            }
+            // если объект уничтожен, создаём новый
         }
-
         return new target(...args)
     }
 })
