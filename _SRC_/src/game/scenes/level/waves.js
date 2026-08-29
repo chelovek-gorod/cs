@@ -20,8 +20,8 @@ const EASY_ROUND_MODULO = 3            // раунды, кратные этом�
 const EASY_NORMAL_MULTIPLIER = 0.7     // множитель числа NORMAL в лёгком раунде
 
 // --- МИНИМУМЫ И МАКСИМУМЫ ДЛЯ ВОЛН И ЛИНИЙ ---
-const MIN_ENEMIES_PER_WAVE = 8                     // минимум врагов в волне
-const MAX_ENEMIES_PER_WAVE_EXTRA = 8               // добавка к раунду для максимума врагов в волне
+const MIN_ENEMIES_PER_WAVE = 5                     // минимум врагов в волне
+const MAX_ENEMIES_PER_WAVE_EXTRA = 5               // добавка к раунду для максимума врагов в волне
 const MAX_ENEMIES_PER_LINE_BASE = 5                // базовая вместимость линии
 const MAX_ENEMIES_PER_LINE_SQRT_RATE = 1           // множитель корня раунда для вместимости линии
 
@@ -99,7 +99,7 @@ const UNIT_DATA = {
 
 // --- ТАЙМИНГИ ---
 const FIRST_LINE_TIMEOUT_MS = 1800       // задержка перед первой линией каждой волны
-const BASE_LINE_TIMEOUT_MS = 3600        // минимальная задержка между линиями
+const BASE_LINE_TIMEOUT_MS = 2400        // минимальная задержка между линиями
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ

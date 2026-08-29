@@ -165,12 +165,11 @@ export default class GameContainer extends Container {
         const enemiesSize = enemies.length
         for(let i = 0; i < enemiesSize; i++) {
             const enemy = enemies[i]
-            const collider = enemy.collider
             const dx = data.x - enemy.x
             const dy = data.y - enemy.y
             const distSq = dx * dx + dy * dy
 
-            if (distSq < collider * collider && distSq < nearestSqDist) {
+            if (distSq < enemy.bodySqCollider && distSq < nearestSqDist) {
                 nearestSqDist = distSq
                 nearestIndex = i
             }

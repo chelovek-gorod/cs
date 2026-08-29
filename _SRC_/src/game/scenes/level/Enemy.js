@@ -10,55 +10,57 @@ export const TYPES = createEnum(['NORMAL', 'FAST', 'BOMB', 'TANK', 'BOSS'])
 
 const ALPHA_STEP = 0.001
 
+const TOWER_OFFSET = 96
+
 const ENEMY = {
     [TYPES.NORMAL] : {
         hp: 50,
         speed: 0.03,
         damage: 3,
-        scale: 1, // 64x64px + collider 0.75%
-        towerOffset: 72 + 28,
-        collider: 28,
-        headSqCollider: 10 * 10,
+        scale: 1,
+        towerOffset: TOWER_OFFSET + 28,
+        bodyCollider: 28,
+        headCollider: 10,
         tint: 0x0000ff
     },
     [TYPES.FAST] : {
         hp: 25,
         speed: 0.05,
         damage: 2,
-        scale: 0.8, // 50x50px + collider 0.75%
-        towerOffset: 72 + 23,
-        collider: 23,
-        headSqCollider: 8 * 8,
+        scale: 0.8,
+        towerOffset: TOWER_OFFSET + 23,
+        bodyCollider: 23,
+        headCollider: 8,
         tint: 0x00ffff
     },
     [TYPES.TANK] : {
         hp: 150,
         speed: 0.02,
         damage: 5,
-        scale: 2, // 128x128px + collider 0.75%
-        towerOffset: 72 + 56,
-        collider: 56,
-        headSqCollider: 20 * 20,
+        scale: 2,
+        towerOffset: TOWER_OFFSET + 56,
+        bodyCollider: 56,
+        headCollider: 20,
         tint: 0xffff00
     },
     [TYPES.BOMB] : {
         hp: 40,
         speed: 0.04,
         damage: 10,
-        scale: 1.2, // 96x96px + collider 0.75%
-        towerOffset: 72 + 34,
-        collider: 34,
-        headSqCollider: 12 * 12,
+        scale: 1.2,
+        towerOffset: TOWER_OFFSET + 34,
+        bodyCollider: 34,
+        headCollider: 12,
         tint: 0xff0000
     },
     [TYPES.BOSS] : {
         hp: 500,
         speed: 0.015,
         damage: 10,
-        scale: 3, // 128x128px + collider 0.75%
-        towerOffset: 72 + 84,
-        collider: 84,
-        headSqCollider: 30 * 30,
+        scale: 3,
+        towerOffset: TOWER_OFFSET + 84,
+        bodyCollider: 84,
+        headCollider: 30,
         tint: 0xff00ff
     },
 }
@@ -103,21 +105,26 @@ class PrototypeEnemy extends Container {
         this.image.scale.set( ENEMY[type].scale )
         this.lightningCount = 0
         this.lightningDamage = 0
-        this.collider = ENEMY[type].collider
-        this.headSqCollider = ENEMY[type].headSqCollider
+        this.bodySqCollider = ENEMY[type].bodyCollider * ENEMY[type].bodyCollider
+        this.headSqCollider = ENEMY[type].headCollider * ENEMY[type].headCollider
         this.towerOffset = ENEMY[type].towerOffset
 
         this.hpLine.tint = 0x00ff00
         this.hpLine.scale.x = 1
+        this.hpBg.position.set(-28, -64 * ENEMY[type].scale)
+        this.hpLine.position.set(-25, -64 * ENEMY[type].scale + 2)
 
         this.attackTimeout = 1000
 
         this.turnToTower()
 
+        this.isOnTurn = false
         if (type === TYPES.FAST) {
             this.turnCount = FAST_TURN_COUNT
             this.turnTimer = FAST_TURN_MIN_TIME + Math.random() * (FAST_TURN_MAX_TIME - FAST_TURN_MIN_TIME)
-            this.isOnTurn = false
+        } else {
+            this.turnCount = 0
+            this.turnTimer = 0
         }
 
         tickerAdd(this)

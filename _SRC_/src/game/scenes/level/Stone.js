@@ -61,8 +61,7 @@ class PrototypeStone extends Container {
             const dx = enemy.x - this.x
             const dy = enemy.y - this.y
             const sqDist = dx * dx + dy * dy
-            const enemySqCollider = enemy.collider * enemy.collider
-            const inRadius = dmgSqRadius + enemySqCollider > sqDist
+            const inRadius = dmgSqRadius + enemy.bodySqCollider > sqDist
 
             if (inRadius && enemy.hp > 0) enemy.setDamage(catapultPower)
         }
