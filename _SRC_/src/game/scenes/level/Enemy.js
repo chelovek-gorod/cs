@@ -6,6 +6,13 @@ import { createEnum, getDistance } from "../../../utils/functions";
 
 const POOL = []
 
+export function clearEnemyPool() {
+    while (POOL.length > 0) {
+        const enemy = POOL.pop()
+        enemy.destroy({children: true})
+    }
+}
+
 export const TYPES = createEnum(['NORMAL', 'FAST', 'BOMB', 'TANK', 'BOSS'])
 
 const ALPHA_STEP = 0.001
@@ -252,12 +259,6 @@ class PrototypeEnemy extends Container {
         } else {
             this.attackTower(deltaMs)
         }
-    }
-
-    kill() {
-        tickerRemove(this)
-        if (this.parent) this.parent.removeChild(this)
-        POOL.push(this)
     }
 }
 

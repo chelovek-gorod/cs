@@ -1,16 +1,17 @@
 import { Container, Graphics, Text } from 'pixi.js'
 import { images, music } from '../../../app/assets'
-import { EventHub, events, startScene } from '../../../app/events'
+import { EventHub, events, showPopup, startScene } from '../../../app/events'
 import { getLanguage } from '../../localization'
 import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundTiling from '../../BG/BackgroundTiling'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import { getSafeAreaOffsets } from '../../../app/application'
-import { addCatapultCount, addGold, addWizardsCount, catapultsCount, catapultsCountMax, getCatapultPrice, getWizardPrice, gold, round, wizardsCount, wizardsCountMax } from '../../state'
+import { addCatapultCount, addGold, addLevel, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, getCatapultPrice, getWizardPrice, gold, level, levelStartPrice, round, wizardsCount, wizardsCountMax } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import { SCENE_NAME } from '../SceneManager'
 import { styles } from '../../../app/styles'
 import MenuUI from './MenuUI'
+import { POPUP_TYPE } from '../../popup/popupTypes'
 
 export default class MenuScene extends Container {
     constructor() {
@@ -53,6 +54,16 @@ export default class MenuScene extends Container {
             this.menuContainer.removeChild(this.btnAddCatapult)
             this.btnAddCatapult.destroy({ children: true })
         }
+        if (this.btnAddLevel) {
+            this.clearButton(this.btnAddLevel, this.addLevel)
+            this.menuContainer.removeChild(this.btnAddLevel)
+            this.btnAddLevel.destroy({ children: true })
+        }
+        if (this.btnAddGold) {
+            this.clearButton(this.btnAddGold, this.addGold)
+            this.menuContainer.removeChild(this.btnAddGold)
+            this.btnAddGold.destroy({ children: true })
+        }
         if (this.btnStartNextRound) {
             this.clearButton(this.btnStartNextRound, this.startNextRound)
             this.menuContainer.removeChild(this.btnStartNextRound)
@@ -62,6 +73,7 @@ export default class MenuScene extends Container {
         // Вычисляем цены
         this.wizardPrice = getWizardPrice()
         this.catapultPrice = getCatapultPrice()
+        this.levelPrice = (level + 1) * levelStartPrice
 
         // Кнопка мага
         this.btnAddWizard = this.setButton(
@@ -75,6 +87,20 @@ export default class MenuScene extends Container {
             '+CATAPULT', 90, -200, this.catapultPrice,
             'add on tower',
             (this.catapultPrice > gold || catapultsCount === 4) ? null : this.addCatapult
+        )
+
+        // Кнопка уровня
+        this.btnAddLevel = this.setButton(
+            '+LEVEL', -90, -100, this.levelPrice,
+            'upgrade',
+            (this.levelPrice > gold) ? null : this.addLevel
+        )
+
+        // Кнопка золота
+        this.btnAddGold = this.setButton(
+            '+ GOLD', 90, -100, adGoldBonus,
+            'for AD',
+            this.addGold
         )
 
         // Кнопка старта
@@ -165,6 +191,19 @@ export default class MenuScene extends Container {
 
         addCatapultCount()
         addGold(-this.catapultPrice)
+        this.refreshButtons()
+    }
+
+    addLevel() {
+        if (gold < this.levelPrice) return
+
+        addGold(-this.levelPrice)
+        showPopup(POPUP_TYPE.UPGRADE)
+        this.refreshButtons()
+    }
+
+    addGold() {
+        addGold(adGoldBonus)
         this.refreshButtons()
     }
 

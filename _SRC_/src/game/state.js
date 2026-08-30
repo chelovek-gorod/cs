@@ -9,6 +9,10 @@ export let isLeaderboardAvailable = false
 // player and game data
 export let gold = 0
 export let round = 1
+export let level = 0
+export const levelStartPrice = 10
+export const adGoldBonus = 12
+
 export let towerHP = 100
 export const towerHPStep = 10
 export const towerHPMax = 250
@@ -25,8 +29,8 @@ export let arrowReloadTimeout = 1800
 export const arrowReloadTimeoutStep = 30
 export const arrowReloadTimeoutMax = 900
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.005
-export const arrowSpeedRateMax = 0.1
+export const arrowSpeedRateStep = 0.01
+export const arrowSpeedRateMax = 0.09
 
 export let catapultsCount = 0
 export const catapultsCountMax = 4
@@ -60,6 +64,8 @@ export const wizardShutDistanceMax = 600
 
 export function addGold(value) { gold += value }
 export function addRound() { round++ }
+export function addLevel() { level++ }
+
 export function addTowerHP() { towerHP = Math.min(towerHPMax, towerHP + towerHPStep) }
 
 export function addArrow() { arrows = Math.min(arrowsMax, arrows + arrowsStep) }
@@ -105,6 +111,8 @@ export function getWizardMaxDistance() { return Math.ceil(wizardShutDistance * w
 export function resetAllProgress() {
     gold = 0
     round = 1
+    level = 0
+
     towerHP = 100
 
     arrows = 10
@@ -129,7 +137,7 @@ export function resetAllProgress() {
 
 export function getStateData() {
     const gameState =  {
-        gold, round, towerHP,
+        gold, round, level, towerHP,
         arrows, arrowPower, arrowShutTimeout, arrowReloadTimeout, arrowSpeedRate,
         catapultsCount, catapultPower, catapultDamageRadius, catapultShutTimeout, catapultShutDistance,
         wizardsCount, wizardPower, wizardTargetsCount, wizardShutTimeout, wizardShutDistance
@@ -142,6 +150,7 @@ export function setStoredState(savedState) {return
 
     if ('gold' in savedState) gold = savedState.gold
     if ('round' in savedState) round = savedState.round
+    if ('level' in savedState) level = savedState.level
     if ('towerHP' in savedState) towerHP = savedState.towerHP
     if ('arrows' in savedState) arrows = savedState.arrows
     if ('arrowPower' in savedState) arrowPower = savedState.arrowPower

@@ -1,199 +1,231 @@
-import { createEnum } from "../../../utils/functions"
 import { TYPES } from "./Enemy"
 
 // ============================================================
-//  КОНФИГ ГЕНЕРАТОРА ВОЛН
-//  Все значения можно менять без изменения логики генератора
+//  КОНФИГ ГЕНЕРАТОРА ВОЛН (ПРОСТАЯ ВЕРСИЯ)
 // ============================================================
 
-// --- ОБЩАЯ ФОРМУЛА ЧИСЛА NORMAL В РАУНДЕ ---
-// TotalNormal(round) = A + B * round + C * round^1.5 + D * round^2
-const NORMAL_FORMULA = {
-    A: 5,          // базовое число врагов
-    B: 1,          // линейный коэффициент
-    C: 0.5,        // коэффициент степени 1.5
-    D: 0.1         // коэффициент квадратичного роста
-}
+// --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
+const MIN_ENEMIES_PER_ROUND = 5
+const ENEMIES_PER_ROUND_FORMULA_BASE = 4 // раунд 7 -> base = 4 + 7
+const EASY_ROUND_MODULO = 3 // раунды кратные 3 -> легче
+const EASY_NORMAL_MULTIPLIER = 0.7 // в них 70% врагов
 
-// --- ЛЁГКИЕ РАУНДЫ ---
-const EASY_ROUND_MODULO = 3            // раунды, кратные этому числу, считаются лёгкими
-const EASY_NORMAL_MULTIPLIER = 0.7     // множитель числа NORMAL в лёгком раунде
+// --- РАЗМЕР ВОЛНЫ ---
+const MIN_ENEMIES_PER_WAVE = 7 // базовый минимум врагов в одной волне
+// То есть на 1‑м раунде минимум 7 врагов в волне.
+const ADDITIONAL_ENEMIES_IN_WAVES_DIVIDER = 3 // делитель номера раунда
+// Если раунд 10, то 7 + floor(10/3) = 7+3 = 10 минимум.
 
-// --- МИНИМУМЫ И МАКСИМУМЫ ДЛЯ ВОЛН И ЛИНИЙ ---
-const MIN_ENEMIES_PER_WAVE = 5                     // минимум врагов в волне
-const MAX_ENEMIES_PER_WAVE_EXTRA = 4               // добавка к раунду для максимума врагов в волне
-const MAX_ENEMIES_PER_LINE_BASE = 5                // базовая вместимость линии
-const MAX_ENEMIES_PER_LINE_SQRT_RATE = 1           // множитель корня раунда для вместимости линии
+// --- ТАЙМИНГИ (экспортируем для GameContainer) ---
+export const FIRST_WAVE_TIMEOUT = 1800
+export const WAVE_TIMEOUT = 1200
+export const WAVE_NEXT_ENEMY_TIMEOUT_MAX = 900 
+export const WAVE_NEXT_ENEMY_TIMEOUT_MIN = 120 
+// this.enemySpawnInterval = Math.max(WAVE_NEXT_ENEMY_TIMEOUT_MIN, WAVE_NEXT_ENEMY_TIMEOUT_MAX - round)
+// Получается, чем выше раунд, тем быстрее спавнятся враги, но не быстрее 120 мс.
 
-// --- ПАТТЕРНЫ ВОЛН ---
-const WAVE_PATTERNS = [
-    [0.4, 0.2, 0.4],
-    [0.4, 0.3, 0.3],
-    [0.4, 0.4, 0.2],
-]
+// --- ПАКЕТНЫЙ СПАВН (экспортируем) ---
+export const MAX_WAVE_SPAWN_TIME = 12000 // мс
+// Если в текущей волне спавн дольше 12 секунд, то начинается пакетный спавн.
 
-// --- ПАТТЕРНЫ ЛИНИЙ ---
-const LINE_PATTERNS = [
-    [0.5, 0.2, 0.3],
-    [0.4, 0.2, 0.4],
-    [0.6, 0.2, 0.2],
-    [0.5, 0.1, 0.4],
-    [0.4, 0.3, 0.3],
-    [0.6, 0.1, 0.3],
-    [0.7, 0.1, 0.2],
-]
+// --- СТРОКА ЧЕТВЕРТЕЙ (для долей заполнения и перемешивания) ---
+const QUARTER_STRING = '123231132'
 
-// --- СПЕЦ-ЮНИТЫ (появление и лимиты) ---
+// --- ПРИОРИТЕТ ЗАМЕЩЕНИЯ ---
 const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.FAST]
 
-const PLACEMENT_TYPE = createEnum([
-    'first_line_of_first_wave',  // первая линия первой волны раунда
-    'first_line_of_each_wave',   // первая линия каждой волны раунда
-    'last_line_of_last_wave',    // последняя линия последней волны раунда
-    'last_line_of_each_wave',    // последняя линия каждой волны раунда
-    'middle_lines_of_each_wave', // средняя линия каждой волны (если линий чётное количество - две средние)
-    'evenly_from_start',         // равномерное распределение, начиная с первой линии
-    'evenly_from_end',           // равномерное распределение, начиная с последней линии
-    'from_last_line_backwards'   // размещение с последней линии и далее назад по предыдущим
-])
-
+// --- ДАННЫЕ СПЕЦ ЮНИТОВ (упрощённые) ---
+// unlockRound - с какого раунда появляются
+// replacementLimit - сколько % от NORMAL заменят
+// countDivisor - бля босса - вывод каждый раунд кратный 10
+// bossLineRatio: 0.75 - бля босса, всегда заменяет до 75%
 const UNIT_DATA = {
     [TYPES.FAST]: {
         unlockRound: 3,
-        replacementLimit: 0.2,
-        rules: [
-            { multiplicity: 5, placement: PLACEMENT_TYPE.first_line_of_first_wave, maxLineRatio: 0.5 },
-            { multiplicity: 7, placement: PLACEMENT_TYPE.evenly_from_start, maxLineRatio: 0.5 },
-            { multiplicity: 2, placement: PLACEMENT_TYPE.first_line_of_each_wave, maxLineRatio: 0.5 },
-            { multiplicity: 1, placement: PLACEMENT_TYPE.last_line_of_each_wave, maxLineRatio: 0.5 }
-        ]
+        replacementLimit: 0.3
     },
     [TYPES.BOMB]: {
         unlockRound: 5,
-        replacementLimit: 0.1,
-        rules: [
-            { multiplicity: 6, placement: PLACEMENT_TYPE.middle_lines_of_each_wave, maxLineRatio: 0.5 },
-            { multiplicity: 8, placement: PLACEMENT_TYPE.evenly_from_end, maxLineRatio: 0.5 },
-            { multiplicity: 10, placement: PLACEMENT_TYPE.first_line_of_each_wave, maxLineRatio: 0.5 },
-            { multiplicity: 9, placement: PLACEMENT_TYPE.first_line_of_first_wave, maxLineRatio: 0.5 },
-            { multiplicity: 1, placement: PLACEMENT_TYPE.last_line_of_each_wave, maxLineRatio: 0.5 }
-        ]
+        replacementLimit: 0.1
     },
     [TYPES.TANK]: {
         unlockRound: 8,
-        replacementLimit: 0.4,
-        rules: [
-            { multiplicity: 4, placement: PLACEMENT_TYPE.last_line_of_last_wave, maxLineRatio: 0.5 },
-            { multiplicity: 6, placement: PLACEMENT_TYPE.first_line_of_first_wave, maxLineRatio: 0.5 },
-            { multiplicity: 8, placement: PLACEMENT_TYPE.last_line_of_each_wave, maxLineRatio: 0.5 },
-            { multiplicity: 1, placement: PLACEMENT_TYPE.last_line_of_each_wave, maxLineRatio: 1 }
-        ]
+        replacementLimit: 0.5 
     },
     [TYPES.BOSS]: {
         unlockRound: 10,
         countDivisor: 10,
-        placement: PLACEMENT_TYPE.from_last_line_backwards,
-        maxLineRatio: 0.5
+        bossLineRatio: 0.75
     }
 }
-
-// --- ТАЙМИНГИ ---
-const FIRST_LINE_TIMEOUT_MS = 1800       // задержка перед первой линией каждой волны
-const BASE_LINE_TIMEOUT_MS = 2400        // минимальная задержка между линиями
 
 // ============================================================
 //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================
 
-/**
- * Вычисляет общее число NORMAL в раунде по формуле.
- */
+// Общее число NORMAL в раунде с учётом лёгких раундов
 function getTotalNormal(round) {
-    const { A, B, C, D } = NORMAL_FORMULA
-    let total = A + B * round + C * Math.pow(round, 1.5) + D * Math.pow(round, 2)
+    const base = ENEMIES_PER_ROUND_FORMULA_BASE + round
+    let total = base
 
     if (round % EASY_ROUND_MODULO === 0 && round % 10 !== 0) {
-        total = Math.floor(total * EASY_NORMAL_MULTIPLIER)
+        total = Math.ceil(total * EASY_NORMAL_MULTIPLIER)
     }
 
-    // Не меньше минимально допустимого числа в одной волне (чтобы волна не пустовала)
-    const minTotal = MIN_ENEMIES_PER_WAVE
-    return Math.max(minTotal, Math.floor(total))
+    return Math.max(MIN_ENEMIES_PER_ROUND, total)
 }
 
-/**
- * Подбирает количество волн на основе общего числа врагов и ограничений на волну.
- */
+// Минимальный размер одной волны для текущего раунда
+function getMinWaveSize(round) {
+    return MIN_ENEMIES_PER_WAVE + Math.floor(round / ADDITIONAL_ENEMIES_IN_WAVES_DIVIDER)
+}
+
+// Количество волн: totalNormal делим на минимальный размер волны с округлением вверх
 function determineWavesCount(round, totalNormal) {
-    let waves = Math.max(1, Math.ceil(Math.sqrt(round)))
-
-    const maxPerWave = MAX_ENEMIES_PER_WAVE_EXTRA + round
-    let average = totalNormal / waves
-
-    // Увеличиваем число волн, если среднее превышает максимум
-    while (average > maxPerWave) {
-        waves++
-        average = totalNormal / waves
-    }
-
-    // Уменьшаем число волн, если среднее меньше минимума (но не меньше 1)
-    while (average < MIN_ENEMIES_PER_WAVE && waves > 1) {
-        waves--
-        average = totalNormal / waves
-    }
-
-    return waves
+    const minWaveSize = getMinWaveSize(round)
+    return Math.max(1, Math.ceil(totalNormal / minWaveSize))
 }
 
-/**
- * Строит нормализованный массив весов для заданного количества элементов (волн или линий),
- * используя паттерн, выбранный по индексу. Веса строятся с конца: последний элемент получает
- * первый коэффициент паттерна и т.д. При нехватке коэффициентов переходим к следующему паттерну.
- */
-function buildWeights(count, patternIndex, patterns) {
-    if (count === 0) return []
+// Распределяем NORMAL по волнам, начиная с последней (последняя получает больше)
+function distributeNormal(totalNormal, wavesCount, minWaveSize) {
+    const counts = new Array(wavesCount).fill(0)
+    let remaining = totalNormal
 
-    const weights = new Array(count)
-    let patternPos = patternIndex
-    let coeffPos = 0
+    for (let i = wavesCount - 1; i >= 0 && remaining > 0; i--) {
+        const take = Math.min(remaining, minWaveSize)
+        counts[i] = take
+        remaining -= take
+    }
 
-    for (let i = count - 1; i >= 0; i--) {
-        const pattern = patterns[patternPos]
-        weights[i] = pattern[coeffPos]
+    return counts
+}
 
-        coeffPos++
-        if (coeffPos >= pattern.length) {
-            coeffPos = 0
-            patternPos = (patternPos + 1) % patterns.length
+// Получаем следующую цифру из строки четвертей и возвращаем следующий индекс
+function getNextQuarterDigit(quarterIndex) {
+    const digit = QUARTER_STRING[quarterIndex % QUARTER_STRING.length]
+    return { digit: Number(digit), nextIndex: quarterIndex + 1 }
+}
+
+// Применяем спецюнитов (кроме BOSS) к волнам
+function applySpecialUnits(round, wavesData, totalNormal, startQuarterIndex) {
+    let quarterIndex = startQuarterIndex
+
+    for (const type of PRIORITY_ORDER) {
+        if (type === TYPES.BOSS) continue // боссов обрабатываем отдельно
+
+        const unitConfig = UNIT_DATA[type]
+        if (!unitConfig || round < unitConfig.unlockRound) continue
+
+        let remaining = Math.floor(totalNormal * unitConfig.replacementLimit)
+        if (remaining <= 0) continue
+
+        // Этап 1: приоритетное размещение с конца, доля из строки четвертей
+        for (let i = wavesData.length - 1; i >= 0 && remaining > 0; i--) {
+            const wave = wavesData[i]
+            if (wave.normal <= 0) continue
+
+            const { digit, nextIndex } = getNextQuarterDigit(quarterIndex)
+            quarterIndex = nextIndex
+            const fraction = digit / 4
+            const maxReplace = Math.floor(wave.normal * fraction)
+
+            const canReplace = Math.min(remaining, wave.normal, maxReplace)
+            if (canReplace > 0) {
+                wave.normal -= canReplace
+                wave.special[type] = (wave.special[type] || 0) + canReplace
+                remaining -= canReplace
+            }
+        }
+
+        // Этап 2: если остались юниты, добиваем равномерно с конца
+        if (remaining > 0) {
+            for (let i = wavesData.length - 1; i >= 0 && remaining > 0; i--) {
+                const wave = wavesData[i]
+                if (wave.normal <= 0) continue
+
+                const canReplace = Math.min(remaining, wave.normal)
+                if (canReplace > 0) {
+                    wave.normal -= canReplace
+                    wave.special[type] = (wave.special[type] || 0) + canReplace
+                    remaining -= canReplace
+                }
+            }
         }
     }
 
-    // Нормализуем
-    const sum = weights.reduce((s, w) => s + w, 0)
-    if (sum <= 0) return weights.map(() => 1 / count)
-
-    return weights.map(w => w / sum)
+    return quarterIndex
 }
 
-/**
- * Распределяет total по count групп с помощью весов. Возвращает массив целых чисел,
- * сумма которых равна total. Округление вниз, остаток добавляем в последнюю группу.
- */
-function distributeByWeights(total, weights) {
-    const count = weights.length
-    const result = new Array(count).fill(0)
+// Добавляем боссов
+function applyBosses(round, wavesData) {
+    const bossConfig = UNIT_DATA[TYPES.BOSS]
+    if (round % bossConfig.unlockRound !== 0) return
 
-    let assigned = 0
-    for (let i = 0; i < count; i++) {
-        if (i === count - 1) {
-            result[i] = total - assigned // последний получает остаток
-        } else {
-            result[i] = Math.floor(total * weights[i])
-            assigned += result[i]
+    const bossCount = Math.floor(round / bossConfig.countDivisor)
+    if (bossCount <= 0) return
+
+    let remainingBoss = bossCount
+
+    // Этап 1: по 75% от NORMAL в каждой волне, начиная с последней
+    for (let i = wavesData.length - 1; i >= 0 && remainingBoss > 0; i--) {
+        const wave = wavesData[i]
+        if (wave.normal <= 0) continue
+
+        const maxReplace = Math.floor(wave.normal * bossConfig.bossLineRatio)
+        const canReplace = Math.min(remainingBoss, wave.normal, maxReplace)
+
+        if (canReplace > 0) {
+            wave.normal -= canReplace
+            wave.special[TYPES.BOSS] = (wave.special[TYPES.BOSS] || 0) + canReplace
+            remainingBoss -= canReplace
         }
     }
 
-    return result
+    // Этап 2: добиваем остаток равномерно с конца
+    if (remainingBoss > 0) {
+        for (let i = wavesData.length - 1; i >= 0 && remainingBoss > 0; i--) {
+            const wave = wavesData[i]
+            if (wave.normal <= 0) continue
+
+            const canReplace = Math.min(remainingBoss, wave.normal)
+            if (canReplace > 0) {
+                wave.normal -= canReplace
+                wave.special[TYPES.BOSS] += canReplace
+                remainingBoss -= canReplace
+            }
+        }
+    }
+}
+
+// Перемешиваем юнитов внутри каждой волны, используя строку четвертей
+function shuffleWaves(wavesData, startQuarterIndex) {
+    let quarterIndex = startQuarterIndex
+
+    for (const wave of wavesData) {
+        const units = []
+
+        // Собираем все типы врагов: сначала NORMAL, потом специальные
+        for (const type of [TYPES.NORMAL, TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.FAST]) {
+            const count = type === TYPES.NORMAL ? wave.normal : (wave.special[type] || 0)
+            for (let i = 0; i < count; i++) units.push(type)
+        }
+
+        const front = []
+        const middle = []
+        const back = []
+
+        for (const unit of units) {
+            const { digit, nextIndex } = getNextQuarterDigit(quarterIndex)
+            quarterIndex = nextIndex
+            if (digit === 1) front.push(unit)
+            else if (digit === 2) middle.push(unit)
+            else back.push(unit)
+        }
+
+        wave.units = [...front, ...middle, ...back]
+    }
+
+    return quarterIndex
 }
 
 // ============================================================
@@ -205,228 +237,30 @@ export function getRoundWaves(round) {
 
     // 2. Число волн
     const wavesCount = determineWavesCount(round, totalNormal)
+    const minWaveSize = getMinWaveSize(round)
 
-    // 3. Выбираем паттерн волн
-    const wavePatternIndex = round % WAVE_PATTERNS.length
-    const waveWeights = buildWeights(wavesCount, wavePatternIndex, WAVE_PATTERNS)
+    // 3. Распределяем NORMAL по волнам
+    const normalCounts = distributeNormal(totalNormal, wavesCount, minWaveSize)
 
-    // 4. Распределяем NORMAL по волнам
-    const enemiesInWaves = distributeByWeights(totalNormal, waveWeights)
+    // 4. Инициализируем данные волн
+    const wavesData = normalCounts.map(normal => ({
+        normal,
+        special: {},
+        units: []
+    }))
 
-    // 5. Выбираем паттерн линий (для всех волн один и тот же в этом раунде)
-    const linePatternIndex = round % LINE_PATTERNS.length
-    const maxLineCapacity = MAX_ENEMIES_PER_LINE_BASE + Math.sqrt(round) * MAX_ENEMIES_PER_LINE_SQRT_RATE
+    // 5. Применяем спецюнитов (кроме BOSS)
+    let quarterIndex = 0
+    quarterIndex = applySpecialUnits(round, wavesData, totalNormal, quarterIndex)
 
-    // 6. Для каждой волны распределяем её врагов по линиям
-    const wavesData = []
+    // 6. Применяем BOSS
+    applyBosses(round, wavesData)
 
-    for (let w = 0; w < wavesCount; w++) {
-        const enemiesInWave = enemiesInWaves[w]
+    // 7. Перемешиваем юнитов внутри волн
+    shuffleWaves(wavesData, quarterIndex)
 
-        // Определяем количество линий
-        let linesInWave = Math.max(1, Math.ceil(enemiesInWave / maxLineCapacity))
-
-        // Строим веса для линий этой волны
-        const lineWeights = buildWeights(linesInWave, linePatternIndex, LINE_PATTERNS)
-
-        // Распределяем врагов по линиям
-        let enemiesInLines = distributeByWeights(enemiesInWave, lineWeights)
-
-        // Проверяем, что ни одна линия не превысила максимум
-        while (Math.max(...enemiesInLines) > maxLineCapacity && linesInWave < enemiesInWave) {
-            linesInWave++
-            const newWeights = buildWeights(linesInWave, linePatternIndex, LINE_PATTERNS)
-            enemiesInLines = distributeByWeights(enemiesInWave, newWeights)
-        }
-
-        // Создаём массив линий с изначальным составом только NORMAL
-        const waveLines = enemiesInLines.map(count => ({
-            enemies: { [TYPES.NORMAL]: count }
-        }))
-
-        wavesData.push({
-            waveIndex: w,
-            lines: waveLines
-        })
-    }
-
-    // 7. Добавляем спец-юнитов (кроме BOSS)
-    for (const type of PRIORITY_ORDER) {
-        if (type === TYPES.BOSS) continue
-        const unitConfig = UNIT_DATA[type]
-        if (!unitConfig || round < unitConfig.unlockRound) continue
-
-        const targetTotal = Math.floor(totalNormal * unitConfig.replacementLimit)
-        if (targetTotal <= 0) continue
-
-        const rule = unitConfig.rules.find(rule => round % rule.multiplicity === 0)
-        if (!rule) continue
-
-        const placement = rule.placement
-        const maxLineRatio = rule.maxLineRatio
-
-        // Формируем плоский список всех линий
-        const flatLines = []
-        for (const wave of wavesData) {
-            for (const line of wave.lines) {
-                flatLines.push(line)
-            }
-        }
-
-        // Определяем целевые линии для приоритетного размещения
-        let targetLines = []
-        switch (placement) {
-            case PLACEMENT_TYPE.first_line_of_first_wave:
-                targetLines = [flatLines[0]]
-                break
-            case PLACEMENT_TYPE.first_line_of_each_wave:
-                targetLines = wavesData.map(wave => wave.lines[0])
-                break
-            case PLACEMENT_TYPE.last_line_of_last_wave:
-                targetLines = [flatLines[flatLines.length - 1]]
-                break
-            case PLACEMENT_TYPE.last_line_of_each_wave:
-                targetLines = wavesData.map(wave => wave.lines[wave.lines.length - 1])
-                break
-            case PLACEMENT_TYPE.middle_lines_of_each_wave:
-                targetLines = []
-                for (const wave of wavesData) {
-                    const lines = wave.lines
-                    const mid = Math.floor(lines.length / 2)
-                    if (lines.length % 2 === 0) {
-                        targetLines.push(lines[mid - 1], lines[mid])
-                    } else {
-                        targetLines.push(lines[mid])
-                    }
-                }
-                break
-            case PLACEMENT_TYPE.evenly_from_start:
-                targetLines = flatLines.slice()
-                break
-            case PLACEMENT_TYPE.evenly_from_end:
-                targetLines = flatLines.slice().reverse()
-                break
-            default:
-                targetLines = []
-        }
-
-        // Этап 1: приоритетное размещение
-        let remaining = targetTotal
-        for (const line of targetLines) {
-            if (remaining <= 0) break
-
-            const totalInLine = Object.values(line.enemies).reduce((s, c) => s + c, 0)
-            const maxAllowed = Math.floor(totalInLine * maxLineRatio)
-            const currentType = line.enemies[type] || 0
-            const availableNormal = line.enemies[TYPES.NORMAL] || 0
-
-            const canAdd = Math.min(remaining, availableNormal, maxAllowed - currentType)
-            if (canAdd > 0) {
-                line.enemies[type] = currentType + canAdd
-                line.enemies[TYPES.NORMAL] -= canAdd
-                remaining -= canAdd
-            }
-        }
-
-        // Этап 2: остаточное распределение по всем линиям
-        if (remaining > 0) {
-            let allLinesOrdered
-            switch (placement) {
-                case PLACEMENT_TYPE.first_line_of_first_wave:
-                case PLACEMENT_TYPE.first_line_of_each_wave:
-                case PLACEMENT_TYPE.evenly_from_start:
-                    allLinesOrdered = flatLines.slice()
-                    break
-                case PLACEMENT_TYPE.last_line_of_last_wave:
-                case PLACEMENT_TYPE.last_line_of_each_wave:
-                case PLACEMENT_TYPE.evenly_from_end:
-                    allLinesOrdered = flatLines.slice().reverse()
-                    break
-                case PLACEMENT_TYPE.middle_lines_of_each_wave:
-                    allLinesOrdered = flatLines.slice().sort((a, b) => {
-                        const mid = Math.floor(flatLines.length / 2)
-                        return Math.abs(flatLines.indexOf(a) - mid) - Math.abs(flatLines.indexOf(b) - mid)
-                    })
-                    break
-                default:
-                    allLinesOrdered = flatLines.slice()
-            }
-
-            let attempts = 0
-            const maxAttempts = allLinesOrdered.length * 10
-            while (remaining > 0 && attempts < maxAttempts) {
-                for (const line of allLinesOrdered) {
-                    if (remaining <= 0) break
-
-                    const totalInLine = Object.values(line.enemies).reduce((s, c) => s + c, 0)
-                    const maxAllowed = Math.floor(totalInLine * maxLineRatio)
-                    const currentType = line.enemies[type] || 0
-                    const availableNormal = line.enemies[TYPES.NORMAL] || 0
-
-                    const canAdd = Math.min(remaining, availableNormal, maxAllowed - currentType)
-                    if (canAdd > 0) {
-                        line.enemies[type] = currentType + canAdd
-                        line.enemies[TYPES.NORMAL] -= canAdd
-                        remaining -= canAdd
-                    }
-                }
-                attempts++
-            }
-        }
-    }
-
-    // 8. Добавляем боссов, если раунд кратен 10
-    if (round % UNIT_DATA[TYPES.BOSS].unlockRound === 0) {
-        const bossConfig = UNIT_DATA[TYPES.BOSS]
-        const bossCount = Math.floor(round / bossConfig.countDivisor)
-        let remainingBoss = bossCount
-
-        if (remainingBoss > 0) {
-            const maxRatio = bossConfig.maxLineRatio
-            const flatLines = []
-            for (const wave of wavesData) {
-                for (const line of wave.lines) {
-                    flatLines.push(line)
-                }
-            }
-
-            // Идём с конца
-            for (let i = flatLines.length - 1; i >= 0 && remainingBoss > 0; i--) {
-                const line = flatLines[i]
-                const totalInLine = Object.values(line.enemies).reduce((s, c) => s + c, 0)
-                const maxAllowed = Math.floor(totalInLine * maxRatio)
-                const currentBoss = line.enemies[TYPES.BOSS] || 0
-                const availableNormal = line.enemies[TYPES.NORMAL] || 0
-
-                const canAdd = Math.min(remainingBoss, availableNormal, maxAllowed - currentBoss)
-                if (canAdd > 0) {
-                    line.enemies[TYPES.BOSS] = currentBoss + canAdd
-                    line.enemies[TYPES.NORMAL] -= canAdd
-                    remainingBoss -= canAdd
-                }
-            }
-        }
-    }
-
-    // 9. Формируем итоговый массив волн с таймингами
-    const resultWaves = []
-    for (const wave of wavesData) {
-        const waveLines = []
-        for (let l = 0; l < wave.lines.length; l++) {
-            const line = wave.lines[l]
-
-            const timeout = l === 0 ? FIRST_LINE_TIMEOUT_MS : BASE_LINE_TIMEOUT_MS
-
-            // Фильтруем типы с нулевым количеством
-            const enemies = {}
-            for (const [type, count] of Object.entries(line.enemies)) {
-                if (count > 0) enemies[type] = count
-            }
-
-            waveLines.push({ timeout, enemies })
-        }
-        resultWaves.push(waveLines)
-    }
+    // 8. Возвращаем массив волн: каждая волна — массив типов врагов
+    const resultWaves = wavesData.map(wave => wave.units)
 
     console.log('РАУНД:', round, '\nволны:', JSON.stringify(resultWaves))
 

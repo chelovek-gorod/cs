@@ -23,7 +23,7 @@ const SCENE_ALPHA_MAX = 1
 const BLOCKER_COLOR = 0x000000
 
 let sceneManager = null
-let lastSceneName = ''
+export let lastSceneName = ''
 
 export default class SceneManager {
     constructor() {

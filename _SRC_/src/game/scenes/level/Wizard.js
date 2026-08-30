@@ -120,8 +120,6 @@ export default class Wizard extends AnimatedSprite {
         this.shutCount = 6
         this.gotoAndPlay(0)
         soundPlay(sounds.se_wizard_shut)
-
-        console.log(this.chainDamages)
     }
 
     tick(deltaMs) {

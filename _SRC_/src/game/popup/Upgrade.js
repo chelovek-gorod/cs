@@ -2,9 +2,10 @@ import { Container, Graphics, Text } from "pixi.js"
 import { styles } from "../../app/styles"
 import { createEnum, setCursorPointer } from "../../utils/functions"
 import { EventHub, events, startScene } from "../../app/events"
-import { SCENE_NAME } from "../scenes/SceneManager"
+import { lastSceneName, SCENE_NAME } from "../scenes/SceneManager"
 import { addArrow, addArrowPower, addArrowReloadTimeout, addArrowShutTimeout, addArrowSpeedRate,
     addCatapultDamageRadius, addCatapultPower, addCatapultShutDistance, addCatapultShutTimeout,
+    addLevel,
     addTowerHP, addWizardPower, addWizardShutDistance, addWizardShutTimeout, addWizardTargetsCount,
     arrowPowerStep, arrowReloadTimeout, arrowReloadTimeoutMax, arrows, arrowShutTimeout,
     arrowShutTimeoutMax, arrowsMax, arrowSpeedRate, arrowSpeedRateMax, arrowsStep, catapultDamageRadius,
@@ -249,7 +250,9 @@ export default class Upgrade extends Container {
             case UPGRADE_TYPE.WIZARD_DISTANCE: addWizardShutDistance(); break
         }
 
+        addLevel()
         EventHub.emit(events.closePopup)
-        startScene(SCENE_NAME.Menu)
+
+        if (lastSceneName === SCENE_NAME.Level) startScene(SCENE_NAME.Menu)
     }
 }

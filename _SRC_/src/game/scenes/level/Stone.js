@@ -8,6 +8,13 @@ import { catapultDamageRadius, catapultPower } from "../../state";
 
 const POOL = []
 
+export function clearStonePool() {
+    while (POOL.length > 0) {
+        const enemy = POOL.pop()
+        enemy.destroy({children: true})
+    }
+}
+
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
 const MIN_SCALE = 0.36
@@ -23,18 +30,18 @@ class PrototypeStone extends Container {
         this.image.anchor.set(0.5)
         this.addChild(this.image)
 
-        this.particles = particles
-        this.enemies = enemies
-
         this.speed = 0.24
         this.turnSpeed = 0.006
 
-        this.reset(x, y, targetX, targetY)
+        this.reset(x, y, targetX, targetY, particles, enemies)
     }
   
-    reset(x, y, targetX, targetY) {
+    reset(x, y, targetX, targetY, particles, enemies) {
         this.position.set(x, y)
         this.target = {x: targetX, y: targetY}
+
+        this.particles = particles
+        this.enemies = enemies
 
         this.path = 0
         const dx = x - targetX
@@ -55,14 +62,13 @@ class PrototypeStone extends Container {
         const enemies = this.enemies.children
         const enemiesCount = enemies.length
         const dmgSqRadius = catapultDamageRadius * catapultDamageRadius
-        
+
         for (let i = 0; i < enemiesCount; i++) {
             const enemy = enemies[i]
             const dx = enemy.x - this.x
             const dy = enemy.y - this.y
             const sqDist = dx * dx + dy * dy
             const inRadius = dmgSqRadius + enemy.bodySqCollider > sqDist
-
             if (inRadius && enemy.hp > 0) enemy.setDamage(catapultPower)
         }
 

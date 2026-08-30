@@ -1,16 +1,16 @@
-import { Container, Graphics } from "pixi.js";
-import { tickerAdd, tickerRemove } from "../../../app/application";
-import { EventHub, events, showPopup } from "../../../app/events";
-import FlyText from "../../effects/FlyText";
-import { POPUP_TYPE } from "../../popup/popupTypes";
-import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state";
-import { ArrowOnGround } from "./ArrowOnGround";
-import { Enemy } from "./Enemy";
-import Tower from "./Tower";
-import { getRoundWaves } from "./waves"; 
+import { Container, Graphics } from "pixi.js"
+import { tickerAdd, tickerRemove } from "../../../app/application"
+import { EventHub, events, showPopup } from "../../../app/events"
+import FlyText from "../../effects/FlyText"
+import { POPUP_TYPE } from "../../popup/popupTypes"
+import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state"
+import { ArrowOnGround } from "./ArrowOnGround"
+import { clearEnemyPool, Enemy } from "./Enemy"
+import Tower from "./Tower"
+import { getRoundWaves, FIRST_WAVE_TIMEOUT, WAVE_TIMEOUT, WAVE_NEXT_ENEMY_TIMEOUT_MAX,
+    WAVE_NEXT_ENEMY_TIMEOUT_MIN, MAX_WAVE_SPAWN_TIME } from "./waves"
 
 let WAVES
-const ENEMY_SPAWN_INTERVAL_MS = 600   // интервал между появлением отдельных врагов в линии
 
 const SIZE = 800
 const MAX_SCALE = 1.3
@@ -44,6 +44,7 @@ export default class GameContainer extends Container {
             this.arrowPoints, this.arrowsOnGround, this.arrows,
             this.stones, this.lightnings, this.enemies, this.particles
         )
+
         this.arrowStartPower = arrowPower
         this.arrowCurrentPower = this.arrowStartPower
         this.arrowComboRate = 1.2
@@ -52,14 +53,21 @@ export default class GameContainer extends Container {
         this.arrowLastTarget = null
         this.addChild(this.tower)
 
+        // ---- Управление волнами ----
         this.enemiesWaveIndex = 0
-        this.enemiesWaveLineIndex = 0
-        this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
+        this.enemiesSpawnTimeout = FIRST_WAVE_TIMEOUT   // задержка перед первой волной
         this.allWavesSpawned = false
-        this.isLineSpawning = false
-        this.enemySpawnQueue = []
-        this.enemySpawnTimer = 0
-        
+        this.isWaveSpawning = false                     // идёт ли спавн текущей волны
+        this.isWaveSpawnedCompletely = false            // все враги волны заспавнены, ждём зачистки
+        this.enemySpawnQueue = []                       // очередь типов врагов текущей волны
+        this.enemySpawnTimer = 0                        // таймер до следующего пакета
+        this.enemySpawnInterval = Math.max(
+            WAVE_NEXT_ENEMY_TIMEOUT_MIN,
+            WAVE_NEXT_ENEMY_TIMEOUT_MAX - round
+        )
+        this.wavePackets = []                           // размеры пакетов для пакетного спавна
+        this.currentPacketIndex = 0
+
         this.addChild(this.lightnings)
         this.addChild(this.arrows)
         this.addChild(this.stones)
@@ -71,17 +79,15 @@ export default class GameContainer extends Container {
             { start: 270, end: 360 },
         ]
 
-        this.isWaveSpawnedCompletely = false
         this.popupDelay = 0
 
         EventHub.on(events.arrowOnTarget, this.arrowOnTarget, this)
-
         tickerAdd(this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
 
-        requestAnimationFrame( () => {
+        requestAnimationFrame(() => {
             this.parent.ui.setWaveText(this.enemiesWaveIndex + 1, WAVES.length)
         })
     }
@@ -90,15 +96,14 @@ export default class GameContainer extends Container {
         let scale = 1
         if (screenData.isLandscape) {
             const width = screenData.width - safeAreaOffsets.left - safeAreaOffsets.right
-            scale = Math.min( MAX_SCALE, width / SIZE )
+            scale = Math.min(MAX_SCALE, width / SIZE)
         } else {
             const height = screenData.height - safeAreaOffsets.top - safeAreaOffsets.bottom
-            scale = Math.min( MAX_SCALE, height / SIZE )
+            scale = Math.min(MAX_SCALE, height / SIZE)
         }
 
         this.scale.set(scale)
 
-        // Обновляем секторы спавна в зависимости от масштаба и ориентации
         this.updateSpawnSectors(scale, screenData)
 
         this.testGraphics.clear()
@@ -159,7 +164,7 @@ export default class GameContainer extends Container {
         return 0
     }
 
-    arrowOnTarget(data) { /* data {x, y, direction}; enemies = [{x, y}, {x, y}] */
+    arrowOnTarget(data) {
         let nearestIndex = -1
         let nearestSqDist = Infinity
 
@@ -181,7 +186,6 @@ export default class GameContainer extends Container {
             const x = enemies[nearestIndex].x
             const y = enemies[nearestIndex].y
 
-            // check combo
             if (this.arrowLastTarget === enemies[nearestIndex]) {
                 this.arrowComboCount++
                 this.arrowCurrentPower = Math.floor(this.arrowCurrentPower * this.arrowComboRate)
@@ -193,122 +197,139 @@ export default class GameContainer extends Container {
 
             let power = this.arrowCurrentPower
 
-            // check head shut
             if (nearestSqDist < enemies[nearestIndex].headSqCollider) {
                 power *= this.arrowHeadShutRate
-                this.parent.flyTexts.addChild( new FlyText('HEAD SHUT', x, y - 18) )
+                this.parent.flyTexts.addChild(new FlyText('HEAD SHUT', x, y - 18))
             }
-                
+
             const text = this.arrowComboCount > 0
                 ? `-${power} Combo X${this.arrowComboCount}`
                 : `-${power}`
-            this.parent.flyTexts.addChild( new FlyText(text, x, y) )
+            this.parent.flyTexts.addChild(new FlyText(text, x, y))
             enemies[nearestIndex].setDamage(power)
-
-        // miss
         } else {
             this.arrowComboCount = 0
             this.arrowLastTarget = null
             this.arrowCurrentPower = this.arrowStartPower
-            this.arrowsOnGround.addChild( new ArrowOnGround(data.x, data.y, data.direction) )
+            this.arrowsOnGround.addChild(new ArrowOnGround(data.x, data.y, data.direction))
         }
     }
 
-    spawnEnemy(enemy) {
+    spawnEnemy(type) {
         const angle = this.getRandomSpawnAngle()
         const rx = Math.cos(angle) * (ENEMIES_SPAWN_RADIUS + 128)
         const ry = Math.sin(angle) * (ENEMIES_SPAWN_RADIUS + 128)
-
-        this.enemies.addChild( new Enemy(rx, ry, enemy) )
+        this.enemies.addChild(new Enemy(rx, ry, type))
     }
 
-    nextWaveLine() {
-        // Переход к следующей волне после зачистки текущей
-        this.enemiesWaveLineIndex = 0
-        this.enemiesWaveIndex++
+    // Строит массив размеров пакетов так, чтобы спавн волны длился не дольше MAX_WAVE_SPAWN_TIME
+    buildWavePackets(queueLength) {
+        const maxTicks = Math.floor(MAX_WAVE_SPAWN_TIME / WAVE_NEXT_ENEMY_TIMEOUT_MIN)
+        if (queueLength <= maxTicks) {
+            return null // пакетный спавн не нужен
+        }
 
-        if (this.enemiesWaveIndex === WAVES.length) {
+        const packets = []
+        let remaining = queueLength
+        let step = 1
+        let index = 0
+
+        while (remaining > 0 && index < maxTicks) {
+            const add = Math.min(step, remaining)
+            packets.push(add)
+            remaining -= add
+            index++
+            if (index % 3 === 0) step++ // наращиваем пакет
+        }
+
+        if (remaining > 0) packets[packets.length - 1] += remaining
+
+        return packets
+    }
+
+    // Начинает спавн текущей волны
+    startWaveSpawning() {
+        this.enemySpawnQueue = WAVES[this.enemiesWaveIndex].slice()
+        this.isWaveSpawning = true
+        this.currentPacketIndex = 0
+
+        this.wavePackets = this.buildWavePackets(this.enemySpawnQueue.length)
+
+        this.spawnNextPacket()
+    }
+
+    // Спавнит следующий пакет или одиночного врага
+    spawnNextPacket() {
+        let packetSize = 1
+
+        if (this.wavePackets) {
+            packetSize = this.wavePackets[this.currentPacketIndex] || 0
+            this.currentPacketIndex++
+        }
+
+        for (let i = 0; i < packetSize && this.enemySpawnQueue.length > 0; i++) {
+            const type = this.enemySpawnQueue.shift()
+            this.spawnEnemy(type)
+        }
+
+        if (this.enemySpawnQueue.length === 0) {
+            this.isWaveSpawning = false
+            this.isWaveSpawnedCompletely = true
+            this.wavePackets = []
+        } else {
+            this.enemySpawnTimer = this.enemySpawnInterval
+        }
+    }
+
+    // Переход к следующей волне после зачистки
+    nextWave() {
+        this.enemiesWaveIndex++
+        if (this.enemiesWaveIndex >= WAVES.length) {
             this.allWavesSpawned = true
             return
         }
 
         this.parent.ui.setWaveText(this.enemiesWaveIndex + 1, WAVES.length)
-        // Устанавливаем таймер первой линии новой волны
-        this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][0].timeout
+        this.enemiesSpawnTimeout = WAVE_TIMEOUT
+        this.isWaveSpawning = false
         this.isWaveSpawnedCompletely = false
-        this.isLineSpawning = false
         this.enemySpawnQueue = []
-    }
-
-    startLineSpawning() {
-        const lineData = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex]
-        const enemies = lineData.enemies
-
-        // Заполняем очередь врагов
-        this.enemySpawnQueue = []
-        for (const type in enemies) {
-            let count = enemies[type]
-            while (count-- > 0) this.enemySpawnQueue.push(type)
-        }
-
-        // Сразу спавним первого врага, чтобы не было пустой паузы
-        if (this.enemySpawnQueue.length > 0) {
-            const type = this.enemySpawnQueue.shift()
-            this.spawnEnemy(type)
-            this.enemySpawnTimer = ENEMY_SPAWN_INTERVAL_MS
-        }
-
-        this.isLineSpawning = true
-    }
-
-    onLineSpawned() {
-        // Переходим к следующей линии
-        this.enemiesWaveLineIndex++
-
-        if (this.enemiesWaveLineIndex < WAVES[this.enemiesWaveIndex].length) {
-            // Запускаем таймер следующей линии
-            this.enemiesSpawnTimeout = WAVES[this.enemiesWaveIndex][this.enemiesWaveLineIndex].timeout
-        } else {
-            // Это была последняя линия волны — ждём её полной зачистки
-            this.isWaveSpawnedCompletely = true
-        }
+        this.wavePackets = []
     }
 
     handleSpawning(deltaMs) {
-        // 1. Идёт поштучный спавн текущей линии
-        if (this.isLineSpawning) {
+        // 1. Идёт спавн текущей волны
+        if (this.isWaveSpawning) {
             if (this.enemySpawnQueue.length > 0) {
                 this.enemySpawnTimer -= deltaMs
                 if (this.enemySpawnTimer <= 0) {
-                    this.enemySpawnTimer = ENEMY_SPAWN_INTERVAL_MS
-                    const type = this.enemySpawnQueue.shift()
-                    this.spawnEnemy(type)
+                    this.spawnNextPacket()
                 }
             } else {
-                // Все враги линии появились — линия полностью заспавнена
-                this.isLineSpawning = false
-                this.onLineSpawned()
+                this.isWaveSpawning = false
+                this.isWaveSpawnedCompletely = true
+                this.wavePackets = []
             }
             return
         }
 
-        // 2. Все линии волны заспавнены, ждём зачистки волны
+        // 2. Все враги волны заспавнены, ждём зачистки
         if (this.isWaveSpawnedCompletely) {
             if (this.enemies.children.length === 0) {
                 this.isWaveSpawnedCompletely = false
-                this.nextWaveLine()
+                this.nextWave()
             }
             return
         }
 
-        // 3. Таймер до следующей линии ещё идёт
+        // 3. Таймер до начала следующей волны
         if (this.enemiesSpawnTimeout > 0) {
             this.enemiesSpawnTimeout -= deltaMs
             return
         }
 
-        // 4. Таймер истёк — начинаем спавн текущей линии
-        this.startLineSpawning()
+        // 4. Таймер истёк — начинаем спавн текущей волны
+        this.startWaveSpawning()
     }
 
     handleRoundEnd(deltaMs) {
@@ -318,12 +339,12 @@ export default class GameContainer extends Container {
 
                 if (this.tower.hp === towerHP) {
                     const extraGold = Math.round((gold - this.goldAtStart) * 0.5)
-                    this.parent.flyTexts.addChild( new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0) )
+                    this.parent.flyTexts.addChild(new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0))
                     addGold(extraGold)
                 }
                 return
             }
-    
+
             this.popupDelay -= deltaMs
             if (this.popupDelay <= 0) {
                 tickerRemove(this)
@@ -339,10 +360,11 @@ export default class GameContainer extends Container {
     }
 
     clearContainer(container) {
-        for(let i = 0; i < container.children.length; i++) {
+        for (let i = 0; i < container.children.length; i++) {
             const child = container.children[0]
+            container.removeChild(child)
             if ('kill' in child) child.kill()
-            else child.destroy({children: true})
+            else child.destroy({ children: true })
         }
         this.removeChild(container)
     }
@@ -354,5 +376,6 @@ export default class GameContainer extends Container {
         this.clearContainer(this.arrowsOnGround)
         this.clearContainer(this.arrowPoints)
         this.clearContainer(this.arrows)
+        clearEnemyPool()
     }
 }

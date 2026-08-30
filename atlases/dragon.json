@@ -1,0 +1,519 @@
+{
+  "frames": {
+    "fly_19-Photoroom": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 223,
+        "h": 244
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 37,
+        "w": 223,
+        "h": 244
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_05-Photoroom": {
+      "frame": {
+        "x": 4,
+        "y": 256,
+        "w": 220,
+        "h": 320
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 7,
+        "y": 0,
+        "w": 220,
+        "h": 320
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_04-Photoroom": {
+      "frame": {
+        "x": 4,
+        "y": 584,
+        "w": 218,
+        "h": 307
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 5,
+        "y": 5,
+        "w": 218,
+        "h": 307
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_17-Photoroom": {
+      "frame": {
+        "x": 4,
+        "y": 899,
+        "w": 223,
+        "h": 196
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 62,
+        "w": 223,
+        "h": 196
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_06-Photoroom": {
+      "frame": {
+        "x": 230,
+        "y": 584,
+        "w": 221,
+        "h": 296
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 9,
+        "y": 14,
+        "w": 221,
+        "h": 296
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_08-Photoroom": {
+      "frame": {
+        "x": 235,
+        "y": 888,
+        "w": 209,
+        "h": 158
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 15,
+        "y": 83,
+        "w": 209,
+        "h": 158
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_16-Photoroom": {
+      "frame": {
+        "x": 452,
+        "y": 888,
+        "w": 220,
+        "h": 152
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 2,
+        "y": 85,
+        "w": 220,
+        "h": 152
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_03-Photoroom": {
+      "frame": {
+        "x": 232,
+        "y": 256,
+        "w": 219,
+        "h": 262
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 4,
+        "y": 28,
+        "w": 219,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_07-Photoroom": {
+      "frame": {
+        "x": 235,
+        "y": 4,
+        "w": 212,
+        "h": 243
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 12,
+        "y": 40,
+        "w": 212,
+        "h": 243
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_18-Photoroom": {
+      "frame": {
+        "x": 455,
+        "y": 4,
+        "w": 223,
+        "h": 231
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 44,
+        "w": 223,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_20-Photoroom": {
+      "frame": {
+        "x": 686,
+        "y": 4,
+        "w": 221,
+        "h": 249
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 3,
+        "y": 34,
+        "w": 221,
+        "h": 249
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_15-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 243,
+        "w": 216,
+        "h": 122
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 6,
+        "y": 100,
+        "w": 216,
+        "h": 122
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_14-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 373,
+        "w": 212,
+        "h": 101
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 10,
+        "y": 111,
+        "w": 212,
+        "h": 101
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_01-Photoroom": {
+      "frame": {
+        "x": 683,
+        "y": 261,
+        "w": 220,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 3,
+        "y": 48,
+        "w": 220,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_09-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 482,
+        "w": 209,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 15,
+        "y": 119,
+        "w": 209,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_13-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 576,
+        "w": 208,
+        "h": 93
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 14,
+        "y": 115,
+        "w": 208,
+        "h": 93
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_11-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 677,
+        "w": 207,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 16,
+        "y": 122,
+        "w": 207,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_12-Photoroom": {
+      "frame": {
+        "x": 459,
+        "y": 765,
+        "w": 206,
+        "h": 86
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 16,
+        "y": 118,
+        "w": 206,
+        "h": 86
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_10-Photoroom": {
+      "frame": {
+        "x": 673,
+        "y": 765,
+        "w": 207,
+        "h": 76
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 16,
+        "y": 124,
+        "w": 207,
+        "h": 76
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_21-Photoroom": {
+      "frame": {
+        "x": 680,
+        "y": 849,
+        "w": 220,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 3,
+        "y": 48,
+        "w": 220,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fly_02-Photoroom": {
+      "frame": {
+        "x": 676,
+        "y": 489,
+        "w": 220,
+        "h": 219
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 3,
+        "y": 49,
+        "w": 220,
+        "h": 219
+      },
+      "sourceSize": {
+        "w": 230,
+        "h": 320
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "dragon.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 911,
+      "h": 1099
+    },
+    "scale": 1
+  }
+}
