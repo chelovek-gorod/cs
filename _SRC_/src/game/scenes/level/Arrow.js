@@ -68,7 +68,6 @@ class PrototypeArrow extends Sprite {
         if (this.parent) this.parent.removeChild(this)
         if (this.arrowPoint.parent) this.arrowPoint.parent.removeChild(this.arrowPoint)
         POOL.push(this)
-        POOL.length = 0
     }
 }
 

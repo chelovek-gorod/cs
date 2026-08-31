@@ -33,7 +33,7 @@ export const MAX_WAVE_SPAWN_TIME = 12000 // мс
 const QUARTER_STRING = '123231132'
 
 // --- ПРИОРИТЕТ ЗАМЕЩЕНИЯ ---
-const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.FAST]
+const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.SHOOTER, TYPES.FAST]
 
 // --- ДАННЫЕ СПЕЦ ЮНИТОВ (упрощённые) ---
 // unlockRound - с какого раунда появляются
@@ -43,6 +43,10 @@ const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.FAST]
 const UNIT_DATA = {
     [TYPES.FAST]: {
         unlockRound: 3,
+        replacementLimit: 0.2
+    },
+    [TYPES.SHOOTER]: {
+        unlockRound: 2,
         replacementLimit: 0.3
     },
     [TYPES.BOMB]: {
@@ -51,7 +55,7 @@ const UNIT_DATA = {
     },
     [TYPES.TANK]: {
         unlockRound: 8,
-        replacementLimit: 0.5 
+        replacementLimit: 0.4 
     },
     [TYPES.BOSS]: {
         unlockRound: 10,
@@ -66,7 +70,7 @@ const UNIT_DATA = {
 
 // Общее число NORMAL в раунде с учётом лёгких раундов
 function getTotalNormal(round) {
-    let total = Math.round((ENEMIES_PER_ROUND_FORMULA_BASE + round) * DIFFICULTY_MULTIPLIER)
+    let total = Math.floor((ENEMIES_PER_ROUND_FORMULA_BASE + round) * DIFFICULTY_MULTIPLIER)
 
     if (round % EASY_ROUND_MODULO === 0 && round % 10 !== 0) {
         total = Math.ceil(total * EASY_NORMAL_MULTIPLIER)
@@ -205,7 +209,7 @@ function shuffleWaves(wavesData, startQuarterIndex) {
         const units = []
 
         // Собираем все типы врагов: сначала NORMAL, потом специальные
-        for (const type of [TYPES.NORMAL, TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.FAST]) {
+        for (const type of Object.keys(TYPES)) {
             const count = type === TYPES.NORMAL ? wave.normal : (wave.special[type] || 0)
             for (let i = 0; i < count; i++) units.push(type)
         }

@@ -60,10 +60,9 @@ class PrototypeStone extends Container {
         this.parent.addChild( new Explosion(this.x, this.y, catapultDamageRadius) )
         
         const enemies = this.enemies.children
-        const enemiesCount = enemies.length
         const dmgSqRadius = catapultDamageRadius * catapultDamageRadius
 
-        for (let i = 0; i < enemiesCount; i++) {
+        for (let i = enemies.length - 1; i >= 0; i--) {
             const enemy = enemies[i]
             const dx = enemy.x - this.x
             const dy = enemy.y - this.y

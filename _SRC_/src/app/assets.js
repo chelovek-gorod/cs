@@ -35,6 +35,7 @@ export const images = {
     archer_arrow: 'archer_arrow.png',
     arrow_point: 'arrow_point.png',
     enemy: 'enemy.png',
+    enemy_arrow: 'enemy_arrow.png',
     hp_bar_bg: 'hp_bar_bg.png',
     hp_bar_line: 'hp_bar_line.png',
     icon_bow: 'icon_bow.png',
@@ -47,7 +48,9 @@ export const atlases = {
     wizard: 'wizard.json',
     catapult: 'catapult.json',
     explosion: 'explosion_240x240px_28frames.json',
-    enemy_runner: 'enemy_runner.json'
+    enemy_runner: 'enemy_runner.json',
+    enemy_shooter: 'enemy_shooter.json',
+    enemy_other: 'enemy_other.json',
 }
 export const sounds = {
     se_arrow: 'se_arrow_shut.mp3',

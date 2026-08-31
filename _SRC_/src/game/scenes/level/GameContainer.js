@@ -6,6 +6,7 @@ import { POPUP_TYPE } from "../../popup/popupTypes"
 import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state"
 import { ArrowOnGround } from "./ArrowOnGround"
 import { clearEnemyPool, Enemy } from "./Enemy"
+import { clearStonePool } from "./Stone"
 import Tower from "./Tower"
 import { getRoundWaves, FIRST_WAVE_TIMEOUT, WAVE_TIMEOUT, WAVE_NEXT_ENEMY_TIMEOUT_MAX,
     WAVE_NEXT_ENEMY_TIMEOUT_MIN, MAX_WAVE_SPAWN_TIME } from "./waves"
@@ -48,6 +49,8 @@ export default class GameContainer extends Container {
             this.stones, this.lightnings, this.enemies, this.particles
         )
 
+        this.enemyArrows = new Container()
+
         this.arrowStartPower = arrowPower
         this.arrowCurrentPower = this.arrowStartPower
         this.arrowComboRate = 1.2
@@ -72,6 +75,7 @@ export default class GameContainer extends Container {
         this.currentPacketIndex = 0
 
         this.addChild(this.lightnings)
+        this.addChild(this.enemyArrows)
         this.addChild(this.arrows)
         this.addChild(this.stones)
 
@@ -222,7 +226,7 @@ export default class GameContainer extends Container {
         const angle = this.getRandomSpawnAngle()
         const rx = Math.cos(angle) * (ENEMIES_SPAWN_RADIUS + 128)
         const ry = Math.sin(angle) * (ENEMIES_SPAWN_RADIUS + 128)
-        this.enemies.addChild(new Enemy(rx, ry, type, this.deadEnemies))
+        this.enemies.addChild(new Enemy(rx, ry, type, this.deadEnemies, this.enemyArrows))
     }
 
     // Строит массив размеров пакетов так, чтобы спавн волны длился не дольше MAX_WAVE_SPAWN_TIME
@@ -381,6 +385,8 @@ export default class GameContainer extends Container {
         this.clearContainer(this.arrowsOnGround)
         this.clearContainer(this.arrowPoints)
         this.clearContainer(this.arrows)
+        this.clearContainer(this.enemyArrows)
         clearEnemyPool()
+        clearStonePool()
     }
 }
