@@ -6,7 +6,8 @@ import { TYPES } from "./Enemy"
 
 // --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
 const MIN_ENEMIES_PER_ROUND = 5
-const ENEMIES_PER_ROUND_FORMULA_BASE = 4 // раунд 7 -> base = 4 + 7
+const ENEMIES_PER_ROUND_FORMULA_BASE = 4 // раунд 7 -> total = 4 + 7
+const DIFFICULTY_MULTIPLIER = 1.2 // усложнение от роста раунда -> раунд 7 -> total = (4 + 7) * 1.2
 const EASY_ROUND_MODULO = 3 // раунды кратные 3 -> легче
 const EASY_NORMAL_MULTIPLIER = 0.7 // в них 70% врагов
 
@@ -65,8 +66,7 @@ const UNIT_DATA = {
 
 // Общее число NORMAL в раунде с учётом лёгких раундов
 function getTotalNormal(round) {
-    const base = ENEMIES_PER_ROUND_FORMULA_BASE + round
-    let total = base
+    let total = Math.round((ENEMIES_PER_ROUND_FORMULA_BASE + round) * DIFFICULTY_MULTIPLIER)
 
     if (round % EASY_ROUND_MODULO === 0 && round % 10 !== 0) {
         total = Math.ceil(total * EASY_NORMAL_MULTIPLIER)

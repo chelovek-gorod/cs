@@ -46,7 +46,8 @@ export const atlases = {
     archer: 'archer.json',
     wizard: 'wizard.json',
     catapult: 'catapult.json',
-    explosion: 'explosion_240x240px_28frames.json'
+    explosion: 'explosion_240x240px_28frames.json',
+    enemy_runner: 'enemy_runner.json'
 }
 export const sounds = {
     se_arrow: 'se_arrow_shut.mp3',

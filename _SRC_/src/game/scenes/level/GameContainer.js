@@ -25,6 +25,9 @@ export default class GameContainer extends Container {
 
         this.goldAtStart = gold
 
+        this.deadEnemies = new Container()
+        this.addChild(this.deadEnemies)
+
         this.arrowPoints = new Container()
         this.addChild(this.arrowPoints)
 
@@ -219,7 +222,7 @@ export default class GameContainer extends Container {
         const angle = this.getRandomSpawnAngle()
         const rx = Math.cos(angle) * (ENEMIES_SPAWN_RADIUS + 128)
         const ry = Math.sin(angle) * (ENEMIES_SPAWN_RADIUS + 128)
-        this.enemies.addChild(new Enemy(rx, ry, type))
+        this.enemies.addChild(new Enemy(rx, ry, type, this.deadEnemies))
     }
 
     // Строит массив размеров пакетов так, чтобы спавн волны длился не дольше MAX_WAVE_SPAWN_TIME
@@ -373,6 +376,8 @@ export default class GameContainer extends Container {
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
         tickerRemove(this)
 
+        this.clearContainer(this.deadEnemies)
+        this.clearContainer(this.enemies)
         this.clearContainer(this.arrowsOnGround)
         this.clearContainer(this.arrowPoints)
         this.clearContainer(this.arrows)

@@ -117,7 +117,7 @@ export default class Wizard extends AnimatedSprite {
             drawLightning(this.chainTargets[i - 1], this.chainTargets[i], this.lightnings)
         }
     
-        this.shutCount = 6
+        this.shutCount = 12
         this.gotoAndPlay(0)
         soundPlay(sounds.se_wizard_shut)
     }
