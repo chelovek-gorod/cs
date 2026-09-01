@@ -57,7 +57,7 @@ class PrototypeStone extends Container {
     }
 
     setDamage() {
-        this.parent.addChild( new Explosion(this.x, this.y, catapultDamageRadius) )
+        this.parent.addChild( new Explosion(this.x, this.y, 'explosion_stone', catapultDamageRadius) )
         
         const enemies = this.enemies.children
         const dmgSqRadius = catapultDamageRadius * catapultDamageRadius

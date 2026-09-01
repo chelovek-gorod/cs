@@ -19,9 +19,6 @@ enemy goblin bomber
 https://sketchfab.com/3d-models/3drt-goblin-sapper-3b750caca74e4019819612170d15fd6d
 https://sketchfab.com/3d-models/vicious-barrel-goblins-dd4dc45f7f1a49ad8ac69c999cefa718
 
-enemy goblin robot-spider
-https://sketchfab.com/3d-models/coal-powered-spider-walker-animation-f92654ae17944ca288226e22e95d99aa
-
 enemy goblin
 https://sketchfab.com/3d-models/goblin-a4354ed9bf724af28772bc89056b1ba5
 https://sketchfab.com/3d-models/goblin-animated-character-275b6d217d27442bbffcc97b7cd0cc6c

@@ -1,8 +1,13 @@
 import { TYPES } from "./Enemy"
 
-// ============================================================
-//  КОНФИГ ГЕНЕРАТОРА ВОЛН (ПРОСТАЯ ВЕРСИЯ)
-// ============================================================
+const ALL_TYPES_ORDER = [
+    TYPES.NORMAL,
+    TYPES.BOSS,
+    TYPES.TANK,
+    TYPES.BOMB,
+    TYPES.SHOOTER,
+    TYPES.FAST,
+]
 
 // --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
 const MIN_ENEMIES_PER_ROUND = 5
@@ -50,7 +55,7 @@ const UNIT_DATA = {
         replacementLimit: 0.3
     },
     [TYPES.BOMB]: {
-        unlockRound: 5,
+        unlockRound: 3,
         replacementLimit: 0.1
     },
     [TYPES.TANK]: {
@@ -209,7 +214,7 @@ function shuffleWaves(wavesData, startQuarterIndex) {
         const units = []
 
         // Собираем все типы врагов: сначала NORMAL, потом специальные
-        for (const type of Object.keys(TYPES)) {
+        for (const type of ALL_TYPES_ORDER) {
             const count = type === TYPES.NORMAL ? wave.normal : (wave.special[type] || 0)
             for (let i = 0; i < count; i++) units.push(type)
         }

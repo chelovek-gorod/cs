@@ -12,7 +12,7 @@ import { addGold } from '../../state'
 import { setMusicList } from '../../../app/sound'
 
 
-const musics = [ music.bgm_1, music.bgm_2, music.bgm_3 ]
+const musics = [ music.bgm_1, music.bgm_2, music.bgm_3, music.bgm_4, music.bgm_5, music.bgm_6, music.bgm_7 ]
 let currentMusicIndex = Math.floor( Math.random() * musics.length )
 function getMusic() {
     const music = musics[currentMusicIndex]

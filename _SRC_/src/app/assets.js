@@ -47,9 +47,11 @@ export const atlases = {
     archer: 'archer.json',
     wizard: 'wizard.json',
     catapult: 'catapult.json',
-    explosion: 'explosion_240x240px_28frames.json',
+    explosion_stone: 'explosion_240x240px_28frames.json',
+    explosion_bomb: 'explosion_192x192px_25frames.json',
     enemy_runner: 'enemy_runner.json',
     enemy_shooter: 'enemy_shooter.json',
+    enemy_bomber: 'enemy_bomber.json',
     enemy_other: 'enemy_other.json',
 }
 export const sounds = {
@@ -62,6 +64,10 @@ export const music = {
     bgm_1: 'bgm_1.mp3',
     bgm_2: 'bgm_2.mp3',
     bgm_3: 'bgm_3.mp3',
+    bgm_4: 'bgm_4.mp3',
+    bgm_5: 'bgm_5.mp3',
+    bgm_6: 'bgm_6.mp3',
+    bgm_7: 'bgm_7.mp3',
 }
 
 export const assets = {fonts, images, atlases, sounds, music}

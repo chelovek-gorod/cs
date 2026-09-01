@@ -3,6 +3,7 @@ import { tickerAdd, tickerRemove } from "../../../app/application"
 import { atlases, images } from "../../../app/assets"
 import { addGoldForKill, setDamage } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
+import Explosion from "../../effects/Explosion"
 import { EnemyArrow } from "./EnemyArrow"
 
 const POOL = []
@@ -30,6 +31,7 @@ const ENEMY = {
         damage: 3,
         attackTimeout: 1000, // время атаки = attackTimeout + длительность анимации атаки
         attackStartFrameIndex: 7,
+        reward: 1,
         scale: 0.8,
         towerOffset: TOWER_OFFSET + Math.ceil(86 * 0.8),
         bodyCollider: Math.ceil(64 * 0.8),
@@ -39,10 +41,11 @@ const ENEMY = {
     [TYPES.FAST]: {
         atlas: 'enemy_runner',
         hp: 25,
-        speed: 0.06,
+        speed: 0.07,
         damage: 1,
         attackTimeout: 500,
         attackStartFrameIndex: 7,
+        reward: 1,
         scale: 1,
         towerOffset: TOWER_OFFSET + 48,
         bodyCollider: 24,
@@ -52,10 +55,11 @@ const ENEMY = {
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
         hp: 50,
-        speed: 0.04,
+        speed: 0.05,
         damage: 2,
         attackTimeout: 1500,
         attackStartFrameIndex: 8,
+        reward: 1,
         scale: 1,
         towerOffset: TOWER_OFFSET + 150,
         bodyCollider: 24,
@@ -69,6 +73,7 @@ const ENEMY = {
         damage: 5,
         attackTimeout: 1500,
         attackStartFrameIndex: 7,
+        reward: 1,
         scale: 1.2,
         towerOffset: TOWER_OFFSET + Math.ceil(86 * 1.2),
         bodyCollider: Math.ceil(64 * 1.2),
@@ -76,17 +81,18 @@ const ENEMY = {
         tint: 0xffff66
     },
     [TYPES.BOMB]: {
-        atlas: 'enemy_other',
+        atlas: 'enemy_bomber',
         hp: 40,
         speed: 0.05,
         damage: 25,
         attackTimeout: Infinity,
         attackStartFrameIndex: 0,
+        reward: 1,
         scale: 1,
-        towerOffset: TOWER_OFFSET + Math.ceil(86 * 1),
-        bodyCollider: Math.ceil(64 * 1),
-        headCollider: Math.ceil(24 * 1),
-        tint: 0xff6666
+        towerOffset: TOWER_OFFSET + 20,
+        bodyCollider: 24,
+        headCollider: 12,
+        tint: 0xffffff
     },
     [TYPES.BOSS]: {
         atlas: 'enemy_other',
@@ -95,6 +101,7 @@ const ENEMY = {
         damage: 10,
         attackTimeout: 750,
         attackStartFrameIndex: 7,
+        reward: 1,
         scale: 2,
         towerOffset: TOWER_OFFSET + Math.ceil(86 * 2),
         bodyCollider: Math.ceil(64 * 2),
@@ -103,11 +110,11 @@ const ENEMY = {
     },
 }
 
-const FAST_TURN_DISTANCE = 240
-const FAST_TURN_ANGLE = 60 * (Math.PI / 180)
+const FAST_TURN_DISTANCE = TOWER_OFFSET + 90
+const FAST_TURN_ANGLE = 50 * (Math.PI / 180)
 const FAST_TURN_COUNT = 3
-const FAST_TURN_MIN_TIME = 900
-const FAST_TURN_MAX_TIME = 1800
+const FAST_TURN_MIN_TIME = 600
+const FAST_TURN_MAX_TIME = 1200
 
 class PrototypeEnemy extends Container {
     constructor(x, y, type, deadEnemiesContainer, enemyArrows) {
@@ -140,6 +147,8 @@ class PrototypeEnemy extends Container {
 
         this.atlasName = ENEMY[type].atlas
         this.deadEnemiesContainer = deadEnemiesContainer
+
+        this.reward = ENEMY[type].reward
 
         this.isOnMove = true
         this.maxHp = ENEMY[type].hp
@@ -271,6 +280,11 @@ class PrototypeEnemy extends Container {
             this.lightningCount = 0
             this.lightningDamage = 0
 
+            if (this.type === TYPES.BOMB) {
+                this.addExplosion(false)
+                return
+            }
+
             if (this.deadEnemiesContainer && this.parent !== this.deadEnemiesContainer) {
                 if (this.parent) this.parent.removeChild(this)
                 this.deadEnemiesContainer.addChild(this)
@@ -298,12 +312,8 @@ class PrototypeEnemy extends Container {
 
         this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
         if (!this.isOnMove) {
-            if (this.type === TYPES.BOMB) {
-                setDamage(this.damage)
-                this.isDying = true
-            } else {
-                this.startAttack()
-            }
+            if (this.type === TYPES.BOMB) this.addExplosion(true)
+            else this.startAttack()
         }
     }
 
@@ -318,12 +328,9 @@ class PrototypeEnemy extends Container {
             this.isOnTurn = false
             this.turnToTower()
 
-            if (this.type === TYPES.BOMB) {
-                setDamage(this.damage)
-                this.isDying = true
-            } else {
-                this.startAttack()
-            }
+            if (this.type === TYPES.BOMB) this.addExplosion(true)
+            else this.startAttack()
+            
             return
         }
 
@@ -381,12 +388,27 @@ class PrototypeEnemy extends Container {
         }
     }
 
+    addExplosion(isTowerDamage = true) {
+        if (this.parent) {
+            this.parent.parent.addChild(
+                new Explosion(this.x, this.y, 'explosion_bomb', 128)
+            )
+            this.parent.removeChild(this)
+        }
+
+        if (isTowerDamage) setDamage(this.damage)
+
+        tickerRemove(this)
+        POOL.push(this)
+        addGoldForKill(this.reward)
+    }
+
     die() {
         if (!this.parent) return
         tickerRemove(this)
         this.parent.removeChild(this)
         POOL.push(this)
-        addGoldForKill(this.type === TYPES.BOSS ? 5 : 1)
+        addGoldForKill(this.reward)
     }
 
     tick(deltaMs) {

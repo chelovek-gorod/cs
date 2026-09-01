@@ -3,10 +3,10 @@ import { atlases } from "../../app/assets";
 
 
 export default class Explosion extends AnimatedSprite {
-    constructor(x, y, radius) {
-        super(atlases.explosion.animations.effect)
+    constructor(x, y, atlasName, radius) {
+        super(atlases[atlasName].animations.effect)
 
-        const visualRadius = 64
+        const visualRadius = atlasName === 'explosion_stone' ? 64 : 128
         const scale = radius / visualRadius
         this.scale.set(scale)
 
@@ -20,7 +20,7 @@ export default class Explosion extends AnimatedSprite {
 
         this.damageCircle = new Graphics()
         this.damageCircle.circle(0, 0, visualRadius)
-        this.damageCircle.stroke({ width: 3, color: 0xff0000 })
+        this.damageCircle.stroke({ width: 2, color: 0xff0000 })
         this.addChild(this.damageCircle)
     }
 
