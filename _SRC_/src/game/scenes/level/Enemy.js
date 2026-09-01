@@ -1,4 +1,4 @@
-import { Container, AnimatedSprite, Sprite } from "pixi.js"
+import { Container, AnimatedSprite, Sprite, Graphics } from "pixi.js"
 import { tickerAdd, tickerRemove } from "../../../app/application"
 import { atlases, images } from "../../../app/assets"
 import { addGoldForKill, setDamage } from "../../../app/events"
@@ -29,12 +29,12 @@ const ENEMY = {
         hp: 40,
         speed: 0.04,
         damage: 4,
-        attackTimeout: 1000, // время атаки = attackTimeout + длительность анимации атаки
+        attackTimeout: 800, // время атаки = attackTimeout + длительность анимации атаки
         attackStartFrameIndex: 5,
         reward: 1,
         scale: 1,
-        towerOffset: TOWER_OFFSET + 36,
-        bodyCollider: 20,
+        towerOffset: TOWER_OFFSET + 30,
+        bodyCollider: 24,
         headCollider: 12,
         tint: 0xffffff
     },
@@ -126,6 +126,10 @@ class PrototypeEnemy extends Container {
         this.image.loop = true
         this.addChild(this.image)
 
+        //test collider
+        this.colliderCircle = new Graphics()
+        this.addChild(this.colliderCircle)
+
         this.hpBar = new Container()
         this.addChild(this.hpBar)
         this.hpBg = new Sprite(images.hp_bar_bg)
@@ -142,6 +146,14 @@ class PrototypeEnemy extends Container {
         this.type = type
         this.position.set(x, y)
         this.alpha = 0
+
+        // test collider
+        this.colliderCircle.clear()
+        this.colliderCircle.circle(0, 0, ENEMY[type].headCollider)
+        this.colliderCircle.stroke({color: 0xff0000, width: 1})
+        this.colliderCircle.circle(0, 0, ENEMY[type].bodyCollider)
+        this.colliderCircle.stroke({color: 0xff0000, width: 1})
+        // --- //
 
         this.enemyArrows = this.type === TYPES.SHOOTER ? enemyArrows : null
 
@@ -188,6 +200,7 @@ class PrototypeEnemy extends Container {
         this.iceTimeout = 0
         this.isDying = false
 
+        this.state = null
         this.setState(ENEMY_STATE.WALK)
         tickerAdd(this)
     }

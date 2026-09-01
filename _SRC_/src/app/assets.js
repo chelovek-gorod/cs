@@ -50,7 +50,7 @@ export const atlases = {
     catapult: 'catapult.json',
     explosion_stone: 'explosion_240x240px_28frames.json',
     explosion_bomb: 'explosion_192x192px_25frames.json',
-    enemy_normal: 'enemy_normal.json',
+    enemy_normal: 'enemy_normal_hit.json',
     enemy_runner: 'enemy_runner.json',
     enemy_shooter: 'enemy_shooter.json',
     enemy_bomber: 'enemy_bomber.json',
