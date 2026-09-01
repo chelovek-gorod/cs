@@ -30,7 +30,7 @@ export default class LevelScene extends Container {
         this.currentLanguage = getLanguage()
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
 
-        this.bg = new BackgroundTiling(images.round_bg)
+        this.bg = new BackgroundTiling(images.winter_bg)
         setCursorPointer(this.bg)
         this.bg.on('pointerdown', this.getPointerDown, this)
         this.bg.on('pointermove', this.getPointerMove, this)

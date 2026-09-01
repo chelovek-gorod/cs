@@ -222,6 +222,22 @@ export default class MenuScene extends Container {
 
     kill() {
         this.bg.destroy()
+
+        if (this.menuContainer) {
+            this.menuContainer.destroy({ children: true })
+            this.menuContainer = null
+        }
+
+        if (this.flyTexts) {
+            this.flyTexts.destroy({ children: true })
+            this.flyTexts = null
+        }
+
+        if (this.ui) {
+            this.ui.destroy({ children: true })
+            this.ui = null
+        }
+
         gameplayStopSDK()
 
         if (this.handlerKeyboard) {

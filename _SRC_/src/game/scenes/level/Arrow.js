@@ -8,6 +8,16 @@ import { arrowSpeedRate } from "../../state";
 
 const POOL = []
 
+export function clearArrowPool() {
+    while (POOL.length > 0) {
+        const arrow = POOL.pop()
+        if (arrow.destroyed) continue
+        if (arrow.parent) arrow.parent.removeChild(arrow)
+        if (arrow.arrowPoint && arrow.arrowPoint.parent) arrow.arrowPoint.parent.removeChild(arrow.arrowPoint)
+        arrow.destroy({ children: true })
+    }
+}
+
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
 export const MIN_SCALE_Y = 0.4

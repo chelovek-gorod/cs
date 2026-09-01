@@ -6,6 +6,8 @@ import { createEnum } from "../utils/functions"
 export let isAdAvailable = true
 export let isLeaderboardAvailable = false
 
+// !!! ПРИ ПРАВКАХ СТАРТОВЫХ СТАТ - ОБНОВИТЬ ЗНАЧЕНИЯ в resetAllProgress()
+
 // player and game data
 export let gold = 0
 export let round = 1
@@ -23,29 +25,29 @@ export const arrowsMax = 25
 export let arrowPower = 10
 export const arrowPowerStep = 1
 export let arrowShutTimeout = 480
-export const arrowShutTimeoutStep = 30
+export const arrowShutTimeoutStep = 36
 export const arrowShutTimeoutMax = 120
 export let arrowReloadTimeout = 1800
-export const arrowReloadTimeoutStep = 30
+export const arrowReloadTimeoutStep = 90
 export const arrowReloadTimeoutMax = 900
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.01
-export const arrowSpeedRateMax = 0.09
+export const arrowSpeedRateStep = 0.08
+export const arrowSpeedRateMax = 0.10
 
 export let catapultsCount = 0
 export const catapultsCountMax = 4
 export const catapultBasePrice = 40
 export let catapultPower = 36
-export const catapultPowerStep = 3
+export const catapultPowerStep = 2
 export let catapultDamageRadius = 48 // 48
 export const catapultDamageRadiusStep = 16
-export const catapultDamageRadiusMax = 128
+export const catapultDamageRadiusMax = 96
 export let catapultShutTimeout = 3200
-export const catapultShutTimeoutStep = 100
+export const catapultShutTimeoutStep = 200
 export const catapultShutTimeoutMax = 1200
 export let catapultShutDistance = 360
 export const catapultShutDistanceStep = 60
-export const catapultShutDistanceMax = 720
+export const catapultShutDistanceMax = 600
 
 export let wizardsCount = 0
 export const wizardsCountMax = 4
@@ -56,11 +58,11 @@ export let wizardTargetsCount = 1 // 1
 export const wizardTargetsCountMax = 9
 export const wizardTargetRadiusRate = 0.5 // цепь бьет не больше чем на 50% расстояния от wizardShutDistance
 export let wizardShutTimeout = 1800
-export const wizardShutTimeoutStep = 30
+export const wizardShutTimeoutStep = 90
 export const wizardShutTimeoutMax = 900
 export let wizardShutDistance = 240 // 240
-export const wizardShutDistanceStep = 30
-export const wizardShutDistanceMax = 600
+export const wizardShutDistanceStep = 24
+export const wizardShutDistanceMax = 480
 
 export function addGold(value) { gold += value }
 export function addRound() { round++ }

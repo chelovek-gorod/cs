@@ -28,6 +28,7 @@ export const images = {
     /*** game images ***/
     coin: 'coin.png',
     round_bg: 'round_bg.png',
+    winter_bg: 'winter_bg.png',
     tower: 'tower.png',
     tower_layer_1: 'tower_layer_1.png',
     tower_layer_2: 'tower_layer_2.png',
@@ -49,9 +50,11 @@ export const atlases = {
     catapult: 'catapult.json',
     explosion_stone: 'explosion_240x240px_28frames.json',
     explosion_bomb: 'explosion_192x192px_25frames.json',
+    enemy_normal: 'enemy_normal.json',
     enemy_runner: 'enemy_runner.json',
     enemy_shooter: 'enemy_shooter.json',
     enemy_bomber: 'enemy_bomber.json',
+    enemy_tank: 'enemy_tank.json',
     enemy_other: 'enemy_other.json',
 }
 export const sounds = {

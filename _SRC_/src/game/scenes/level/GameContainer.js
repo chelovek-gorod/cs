@@ -4,8 +4,10 @@ import { EventHub, events, showPopup } from "../../../app/events"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
 import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state"
+import { clearArrowPool } from "./Arrow"
 import { ArrowOnGround } from "./ArrowOnGround"
 import { clearEnemyPool, Enemy } from "./Enemy"
+import { clearEnemyArrowPool } from "./EnemyArrow"
 import { clearStonePool } from "./Stone"
 import Tower from "./Tower"
 import { getRoundWaves, FIRST_WAVE_TIMEOUT, WAVE_TIMEOUT, WAVE_NEXT_ENEMY_TIMEOUT_MAX,
@@ -388,5 +390,7 @@ export default class GameContainer extends Container {
         this.clearContainer(this.enemyArrows)
         clearEnemyPool()
         clearStonePool()
+        clearArrowPool()
+        clearEnemyArrowPool()
     }
 }

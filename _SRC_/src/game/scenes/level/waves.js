@@ -51,16 +51,16 @@ const UNIT_DATA = {
         replacementLimit: 0.2
     },
     [TYPES.SHOOTER]: {
-        unlockRound: 2,
+        unlockRound: 5,
         replacementLimit: 0.3
     },
     [TYPES.BOMB]: {
-        unlockRound: 3,
+        unlockRound: 8,
         replacementLimit: 0.1
     },
     [TYPES.TANK]: {
-        unlockRound: 8,
-        replacementLimit: 0.4 
+        unlockRound: 13,
+        replacementLimit: 0.2 
     },
     [TYPES.BOSS]: {
         unlockRound: 10,

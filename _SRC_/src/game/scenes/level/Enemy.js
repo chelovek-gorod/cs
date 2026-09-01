@@ -25,25 +25,25 @@ const LIGHTNING_FRAMES = 12
 
 const ENEMY = {
     [TYPES.NORMAL]: {
-        atlas: 'enemy_other',
-        hp: 50,
-        speed: 0.03,
-        damage: 3,
+        atlas: 'enemy_normal',
+        hp: 40,
+        speed: 0.04,
+        damage: 4,
         attackTimeout: 1000, // время атаки = attackTimeout + длительность анимации атаки
-        attackStartFrameIndex: 7,
+        attackStartFrameIndex: 5,
         reward: 1,
-        scale: 0.8,
-        towerOffset: TOWER_OFFSET + Math.ceil(86 * 0.8),
-        bodyCollider: Math.ceil(64 * 0.8),
-        headCollider: Math.ceil(24 * 0.8),
-        tint: 0x6666ff
+        scale: 1,
+        towerOffset: TOWER_OFFSET + 36,
+        bodyCollider: 20,
+        headCollider: 12,
+        tint: 0xffffff
     },
     [TYPES.FAST]: {
         atlas: 'enemy_runner',
-        hp: 25,
-        speed: 0.07,
-        damage: 1,
-        attackTimeout: 500,
+        hp: 20,
+        speed: 0.08,
+        damage: 2,
+        attackTimeout: 700,
         attackStartFrameIndex: 7,
         reward: 1,
         scale: 1,
@@ -54,10 +54,10 @@ const ENEMY = {
     },
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
-        hp: 50,
+        hp: 40,
         speed: 0.05,
         damage: 2,
-        attackTimeout: 1500,
+        attackTimeout: 900,
         attackStartFrameIndex: 8,
         reward: 1,
         scale: 1,
@@ -67,18 +67,18 @@ const ENEMY = {
         tint: 0xffffff
     },
     [TYPES.TANK]: {
-        atlas: 'enemy_other',
-        hp: 150,
+        atlas: 'enemy_tank',
+        hp: 400,
         speed: 0.03,
-        damage: 5,
+        damage: 10,
         attackTimeout: 1500,
         attackStartFrameIndex: 7,
-        reward: 1,
-        scale: 1.2,
-        towerOffset: TOWER_OFFSET + Math.ceil(86 * 1.2),
-        bodyCollider: Math.ceil(64 * 1.2),
-        headCollider: Math.ceil(24 * 1.2),
-        tint: 0xffff66
+        reward: 2,
+        scale: 1,
+        towerOffset: TOWER_OFFSET + 60,
+        bodyCollider: 52,
+        headCollider: 26,
+        tint: 0xffffff
     },
     [TYPES.BOMB]: {
         atlas: 'enemy_bomber',
@@ -96,10 +96,10 @@ const ENEMY = {
     },
     [TYPES.BOSS]: {
         atlas: 'enemy_other',
-        hp: 500,
+        hp: 1000,
         speed: 0.02,
-        damage: 10,
-        attackTimeout: 750,
+        damage: 12,
+        attackTimeout: 1200,
         attackStartFrameIndex: 7,
         reward: 1,
         scale: 2,
@@ -175,7 +175,7 @@ class PrototypeEnemy extends Container {
         this.turnToTower()
 
         this.isOnTurn = false
-        if (type === TYPES.FAST) {
+        if (type === TYPES.FAST || type === TYPES.BOMB) {
             this.turnCount = FAST_TURN_COUNT
             this.turnTimer = FAST_TURN_MIN_TIME + Math.random() * (FAST_TURN_MAX_TIME - FAST_TURN_MIN_TIME)
         } else {
@@ -186,7 +186,6 @@ class PrototypeEnemy extends Container {
         this.isOnHit = false
         this.isIce = false
         this.iceTimeout = 0
-        this.hitTimer = 0
         this.isDying = false
 
         this.setState(ENEMY_STATE.WALK)
@@ -194,6 +193,8 @@ class PrototypeEnemy extends Container {
     }
 
     setState(newState) {
+        this.image.onComplete = null   // всегда сбрасываем старый onComplete
+
         // Для ATTACK разрешаем повторный вызов, чтобы перезапускать анимацию
         if (this.state === newState && newState !== ENEMY_STATE.ATTACK) return
 
@@ -280,7 +281,7 @@ class PrototypeEnemy extends Container {
             this.lightningCount = 0
             this.lightningDamage = 0
 
-            if (this.type === TYPES.BOMB) {
+            if (this.type === TYPES.BOMB || this.type === TYPES.TANK) {
                 this.addExplosion(false)
                 return
             }
@@ -293,8 +294,16 @@ class PrototypeEnemy extends Container {
             this.setState(ENEMY_STATE.DIE)
         } else {
             this.isOnHit = true
-            this.hitTimer = 300
             this.setState(ENEMY_STATE.HIT)
+
+            this.image.onComplete = () => {
+                this.isOnHit = false
+                this.image.onComplete = null
+
+                // Возобновляем прежнее поведение
+                if (this.isOnMove) this.setState(ENEMY_STATE.WALK)
+                else this.startAttack()
+            }
         }
     }
 
@@ -443,18 +452,11 @@ class PrototypeEnemy extends Container {
             return
         }
 
-        if (this.isOnHit) {
-            this.hitTimer -= deltaMs
-            if (this.hitTimer > 0) {
-                this.setState(ENEMY_STATE.HIT)
-                return
-            }
-            this.isOnHit = false
-        }
+        if (this.isOnHit) return
 
         if (this.isOnMove) {
             this.setState(ENEMY_STATE.WALK)
-            if (this.type === TYPES.FAST && this.turnCount > 0) {
+            if (this.turnCount > 0) {
                 this.moveWithTurns(deltaMs)
             } else {
                 this.moveForward(deltaMs)

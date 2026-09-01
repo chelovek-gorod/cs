@@ -7,6 +7,15 @@ import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 
 const POOL = []
 
+export function clearEnemyArrowPool() {
+    while (POOL.length > 0) {
+        const arrow = POOL.pop()
+        if (arrow.destroyed) continue
+        if (arrow.parent) arrow.parent.removeChild(arrow)
+        arrow.destroy({ children: true })
+    }
+}
+
 const FORWARD_OFFSET = 32
 const SIDE_OFFSET = 6
 
