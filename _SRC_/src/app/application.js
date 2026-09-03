@@ -16,6 +16,11 @@ let isGamePaused = false
 // ticker list
 let tickerArr = []
 let tickerSet = new Set() // для быстрой проверки наличия объекта в тикере
+const afterTickerCallbacks = new Set() // хранит колбэки для вызова по окончании работы тикера
+export function setAfterTickerCallbacks(callback) {
+    if (typeof callback === 'function') afterTickerCallbacks.add(callback)
+    else console.error('callback for afterTickerCallbacks is not a function')
+}
 
 // queues
 const tickerAddQueue = new Set()
@@ -329,6 +334,12 @@ function tick(time) {
             if (obj.kill) obj.kill()
             if (obj.destroy) obj.destroy({ children: true })
         }
+    }
+
+    if (afterTickerCallbacks.size > 0) {
+        const callbacks = Array.from(afterTickerCallbacks)
+        afterTickerCallbacks.clear()
+        for (let i = callbacks.length - 1; i >= 0; i--) callbacks[i]()
     }
 }
 

@@ -17,11 +17,11 @@ export const adGoldBonus = 12
 
 export let towerHP = 100
 export const towerHPStep = 10
-export const towerHPMax = 250
+export const towerHPMax = 200
 
 export let arrows = 10
 export const arrowsStep = 1
-export const arrowsMax = 25
+export const arrowsMax = 20
 export let arrowPower = 10
 export const arrowPowerStep = 1
 export let arrowShutTimeout = 480
@@ -31,32 +31,32 @@ export let arrowReloadTimeout = 1800
 export const arrowReloadTimeoutStep = 90
 export const arrowReloadTimeoutMax = 900
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.08
+export const arrowSpeedRateStep = 0.008
 export const arrowSpeedRateMax = 0.10
 
 export let catapultsCount = 0
 export const catapultsCountMax = 4
 export const catapultBasePrice = 40
-export let catapultPower = 36
+export let catapultPower = 30
 export const catapultPowerStep = 2
-export let catapultDamageRadius = 48 // 48
-export const catapultDamageRadiusStep = 16
-export const catapultDamageRadiusMax = 96
+export let catapultDamageRadius = 50 // 50
+export const catapultDamageRadiusStep = 7
+export const catapultDamageRadiusMax = 120
 export let catapultShutTimeout = 3200
 export const catapultShutTimeoutStep = 200
 export const catapultShutTimeoutMax = 1200
-export let catapultShutDistance = 360
-export const catapultShutDistanceStep = 60
+export let catapultShutDistance = 300
+export const catapultShutDistanceStep = 30
 export const catapultShutDistanceMax = 600
 
 export let wizardsCount = 0
 export const wizardsCountMax = 4
 export const wizardBasePrice = 25
-export let wizardPower = 18 // 18
+export let wizardPower = 20 // 20
 export const wizardPowerStep = 1
 export let wizardTargetsCount = 1 // 1
-export const wizardTargetsCountMax = 9
-export const wizardTargetRadiusRate = 0.5 // цепь бьет не больше чем на 50% расстояния от wizardShutDistance
+export const wizardTargetsCountMax = 11// main + 10 additional targets
+export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShutDistance
 export let wizardShutTimeout = 1800
 export const wizardShutTimeoutStep = 90
 export const wizardShutTimeoutMax = 900
@@ -124,13 +124,13 @@ export function resetAllProgress() {
     arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
 
     catapultsCount = 0
-    catapultPower = 36
-    catapultDamageRadius = 64
+    catapultPower = 30
+    catapultDamageRadius = 50
     catapultShutTimeout = 3200
-    catapultShutDistance = 360
+    catapultShutDistance = 300
 
     wizardsCount = 0
-    wizardPower = 18
+    wizardPower = 20
     wizardTargetsCount = 1
     wizardShutTimeout = 1800
     wizardShutDistance = 240

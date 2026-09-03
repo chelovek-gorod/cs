@@ -4,7 +4,7 @@ import { atlases, images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
 import { arrowReloadTimeout, arrows, arrowShutTimeout } from "../../state";
-import { Arrow } from "./Arrow";
+import { createArrow } from "./Arrow";
 
 
 export default class Archer extends Container {
@@ -67,7 +67,7 @@ export default class Archer extends Container {
     shut() {
         this.archer.gotoAndPlay(0)
 
-        const arrow = new Arrow(this.shutPointX, this.shutPointY, this.arrowsOnGround)
+        const arrow = createArrow(this.shutPointX, this.shutPointY, this.arrowsOnGround)
         this.arrowsContainer.addChild(arrow)
 
         arrow.arrowPoint.position.set(this.shutPointX, this.shutPointY)

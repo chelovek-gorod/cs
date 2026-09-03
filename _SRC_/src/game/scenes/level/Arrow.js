@@ -1,21 +1,23 @@
 import { Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, images, sounds } from "../../../app/assets";
+import { images, sounds } from "../../../app/assets";
 import { arrowOnTarget } from "../../../app/events";
 import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
+import { createObjectPool } from "../../../utils/pool";
 import { arrowSpeedRate } from "../../state";
 
-const POOL = []
+const ARROW_POOL = createObjectPool(100)
 
-export function clearArrowPool() {
-    while (POOL.length > 0) {
-        const arrow = POOL.pop()
-        if (arrow.destroyed) continue
-        if (arrow.parent) arrow.parent.removeChild(arrow)
-        if (arrow.arrowPoint && arrow.arrowPoint.parent) arrow.arrowPoint.parent.removeChild(arrow.arrowPoint)
-        arrow.destroy({ children: true })
+export function createArrow(x, y) {
+    let arrow = ARROW_POOL.get()
+    if (arrow) {
+        arrow.reset(x, y)
+    } else {
+        arrow = new Arrow(x, y)
+        ARROW_POOL.add(arrow)
     }
+    return arrow
 }
 
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
@@ -28,7 +30,7 @@ const MAX_SCALE_X = MAX_SCALE_Y
 
 const START_OFFSET = 20
 
-class PrototypeArrow extends Sprite {
+class Arrow extends Sprite {
     constructor(x, y) {
         super(images.archer_arrow)
         this.anchor.set(1, 0.5)
@@ -69,7 +71,7 @@ class PrototypeArrow extends Sprite {
             tickerRemove(this)
             this.parent.removeChild(this)
             this.arrowPoint.parent.removeChild(this.arrowPoint)
-            POOL.push(this)
+            ARROW_POOL.put(this)
         }
     }
 
@@ -77,21 +79,5 @@ class PrototypeArrow extends Sprite {
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
         if (this.arrowPoint.parent) this.arrowPoint.parent.removeChild(this.arrowPoint)
-        POOL.push(this)
     }
 }
-
-// Экспортируем прокси, который перехватывает вызов 'new'
-export const Arrow = new Proxy(PrototypeArrow, {
-    construct(target, args) {
-        if (POOL.length > 0) {
-            const reused = POOL.pop()
-            if (reused.position) {
-                reused.reset(...args)
-                return reused
-            }
-            // если объект уничтожен, создаём новый
-        }
-        return new target(...args)
-    }
-})

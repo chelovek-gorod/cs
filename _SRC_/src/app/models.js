@@ -58,4 +58,96 @@ https://sketchfab.com/3d-models/magma-elemental-7bba42cfc8bf4c5b893692154e03d714
 enemy fire wolfe
 https://sketchfab.com/3d-models/infernal-magma-hound-free-lava-creature-asset-bd8290074df34eb99f174edb176fcc46
 
+
+Основные
+Goblin – гоблин
+
+Orc – орк
+
+Troll – тролль
+
+Ogre – огр
+
+Skeleton – скелет
+
+Zombie – зомби
+
+Ghoul – гуль
+
+Wraith – призрак (дух)
+
+Lich – лич (могущественный маг-нежить)
+
+Demon – демон
+
+Imp – бес/чертёнок
+
+Fiend – исчадие ада
+
+Gargoyle – гаргулья
+
+Dark Elf / Drow – тёмный эльф
+
+Warlock – чернокнижник
+
+Cultist – культист
+
+Berserker – берсеркер
+
+Shaman – шаман
+
+Witch – ведьма
+
+Всякая нечисть и монстры
+Ratman / Skaven – крысолюд
+
+Kobold – кобольд (мелкий ящероподобный)
+
+Gnoll – гнолл (гиеноподобный)
+
+Lizardman – ящер
+
+Drake – дрейк (малый дракон)
+
+Wyvern – виверна
+
+Chimera – химера
+
+Manticore – мантикора
+
+Harpy – гарпия
+
+Golem – голем
+
+Elemental – элементаль
+
+Slime – слизень
+
+Mimic – мимик
+
+Spiderling / Spider – паук/паучара
+
+Scorpion – скорпион
+
+Bat – летучая мышь
+
+Wolf / Dire Wolf – волк / лютый волк
+
+Для боссов или редких врагов
+Demon Lord – повелитель демонов
+
+Dark Knight – тёмный рыцарь
+
+Fallen Angel – падший ангел
+
+Abomination – чудовище/аберрация
+
+Behemoth – бегемот
+
+Leviathan – левиафан
+
+Elder Dragon – древний дракон
+
+Necromancer – некромант
+
 */

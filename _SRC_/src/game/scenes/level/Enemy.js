@@ -3,16 +3,21 @@ import { tickerAdd, tickerRemove } from "../../../app/application"
 import { atlases, images } from "../../../app/assets"
 import { addGoldForKill, setDamage } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
+import { createObjectPool } from "../../../utils/pool"
 import Explosion from "../../effects/Explosion"
-import { EnemyArrow } from "./EnemyArrow"
+import { createEnemyArrow } from "./EnemyArrow"
 
-const POOL = []
+const ENEMY_POOL = createObjectPool(100)
 
-export function clearEnemyPool() {
-    while (POOL.length > 0) {
-        const enemy = POOL.pop()
-        enemy.destroy({children: true})
+export function createEnemy(x, y, type, deadEnemiesContainer, enemyArrows) {
+    let enemy = ENEMY_POOL.get()
+    if (enemy) {
+        enemy.reset(x, y, type, deadEnemiesContainer, enemyArrows)
+    } else {
+        enemy = new Enemy(x, y, type, deadEnemiesContainer, enemyArrows)
+        ENEMY_POOL.add(enemy)
     }
+    return enemy
 }
 
 export const TYPES = createEnum(['NORMAL', 'FAST', 'SHOOTER', 'BOMB', 'TANK', 'BOSS'])
@@ -32,11 +37,9 @@ const ENEMY = {
         attackTimeout: 800, // время атаки = attackTimeout + длительность анимации атаки
         attackStartFrameIndex: 5,
         reward: 1,
-        scale: 1,
         towerOffset: TOWER_OFFSET + 30,
         bodyCollider: 24,
         headCollider: 12,
-        tint: 0xffffff
     },
     [TYPES.FAST]: {
         atlas: 'enemy_runner',
@@ -44,13 +47,11 @@ const ENEMY = {
         speed: 0.08,
         damage: 2,
         attackTimeout: 700,
-        attackStartFrameIndex: 7,
+        attackStartFrameIndex: 9,
         reward: 1,
-        scale: 1,
-        towerOffset: TOWER_OFFSET + 48,
-        bodyCollider: 24,
-        headCollider: 12,
-        tint: 0xffffff
+        towerOffset: TOWER_OFFSET + 24,
+        bodyCollider: 20,
+        headCollider: 10,
     },
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
@@ -60,25 +61,21 @@ const ENEMY = {
         attackTimeout: 900,
         attackStartFrameIndex: 8,
         reward: 1,
-        scale: 1,
         towerOffset: TOWER_OFFSET + 150,
-        bodyCollider: 24,
-        headCollider: 12,
-        tint: 0xffffff
+        bodyCollider: 20,
+        headCollider: 10,
     },
     [TYPES.TANK]: {
         atlas: 'enemy_tank',
-        hp: 400,
+        hp: 200,
         speed: 0.03,
         damage: 10,
         attackTimeout: 1500,
         attackStartFrameIndex: 7,
         reward: 2,
-        scale: 1,
-        towerOffset: TOWER_OFFSET + 60,
-        bodyCollider: 52,
-        headCollider: 26,
-        tint: 0xffffff
+        towerOffset: TOWER_OFFSET + 48,
+        bodyCollider: 44,
+        headCollider: 0,
     },
     [TYPES.BOMB]: {
         atlas: 'enemy_bomber',
@@ -88,25 +85,21 @@ const ENEMY = {
         attackTimeout: Infinity,
         attackStartFrameIndex: 0,
         reward: 1,
-        scale: 1,
         towerOffset: TOWER_OFFSET + 20,
         bodyCollider: 24,
         headCollider: 12,
-        tint: 0xffffff
     },
     [TYPES.BOSS]: {
-        atlas: 'enemy_other',
+        atlas: 'enemy_boss',
         hp: 1000,
         speed: 0.02,
-        damage: 12,
-        attackTimeout: 1200,
-        attackStartFrameIndex: 7,
+        damage: 5,
+        attackTimeout: 600,
+        attackStartFrameIndex: 3,
         reward: 1,
-        scale: 2,
-        towerOffset: TOWER_OFFSET + Math.ceil(86 * 2),
-        bodyCollider: Math.ceil(64 * 2),
-        headCollider: Math.ceil(24 * 2),
-        tint: 0xff66ff
+        towerOffset: TOWER_OFFSET + 48,
+        bodyCollider: 36,
+        headCollider: 9,
     },
 }
 
@@ -116,7 +109,7 @@ const FAST_TURN_COUNT = 3
 const FAST_TURN_MIN_TIME = 600
 const FAST_TURN_MAX_TIME = 1200
 
-class PrototypeEnemy extends Container {
+class Enemy extends Container {
     constructor(x, y, type, deadEnemiesContainer, enemyArrows) {
         super()
 
@@ -133,10 +126,10 @@ class PrototypeEnemy extends Container {
         this.hpBar = new Container()
         this.addChild(this.hpBar)
         this.hpBg = new Sprite(images.hp_bar_bg)
-        this.hpBg.position.set(-28, -64 * ENEMY[type].scale)
+        this.hpBg.position.set(-28, -64)
         this.hpBar.addChild(this.hpBg)
         this.hpLine = new Sprite(images.hp_bar_line)
-        this.hpLine.position.set(-25, -64 * ENEMY[type].scale + 2)
+        this.hpLine.position.set(-25, -62)
         this.hpBar.addChild(this.hpLine)
 
         this.reset(x, y, type, deadEnemiesContainer, enemyArrows)
@@ -167,8 +160,6 @@ class PrototypeEnemy extends Container {
         this.hp = this.maxHp
         this.speed = ENEMY[type].speed
         this.damage = ENEMY[type].damage
-        this.image.tint = ENEMY[type].tint
-        this.image.scale.set(ENEMY[type].scale)
         this.lightningCount = 0
         this.lightningDamage = 0
         this.bodySqCollider = ENEMY[type].bodyCollider * ENEMY[type].bodyCollider
@@ -177,8 +168,8 @@ class PrototypeEnemy extends Container {
 
         this.hpLine.tint = 0x00ff00
         this.hpLine.scale.x = 1
-        this.hpBg.position.set(-28, -64 * ENEMY[type].scale)
-        this.hpLine.position.set(-25, -64 * ENEMY[type].scale + 2)
+        this.hpBg.position.set(-28, -64)
+        this.hpLine.position.set(-25, -62)
 
         this.attackTimeout = ENEMY[type].attackTimeout
         this.isAttacking = false
@@ -391,7 +382,7 @@ class PrototypeEnemy extends Container {
 
         this.image.onComplete = () => {
             if (this.enemyArrows) {
-                this.enemyArrows.addChild( new EnemyArrow(this.x, this.y, this.damage) )
+                this.enemyArrows.addChild( createEnemyArrow(this.x, this.y, this.damage) )
             } else {
                 setDamage(this.damage)
             }
@@ -421,7 +412,7 @@ class PrototypeEnemy extends Container {
         if (isTowerDamage) setDamage(this.damage)
 
         tickerRemove(this)
-        POOL.push(this)
+        ENEMY_POOL.put(this)
         addGoldForKill(this.reward)
     }
 
@@ -429,7 +420,7 @@ class PrototypeEnemy extends Container {
         if (!this.parent) return
         tickerRemove(this)
         this.parent.removeChild(this)
-        POOL.push(this)
+        ENEMY_POOL.put(this)
         addGoldForKill(this.reward)
     }
 
@@ -478,17 +469,9 @@ class PrototypeEnemy extends Container {
             this.attackTower(deltaMs)
         }
     }
-}
 
-export const Enemy = new Proxy(PrototypeEnemy, {
-    construct(target, args) {
-        if (POOL.length > 0) {
-            const reused = POOL.pop()
-            if (reused.position) {
-                reused.reset(...args)
-                return reused
-            }
-        }
-        return new target(...args)
+    kill() {
+        tickerRemove(this)
+        if (this.parent) this.parent.removeChild(this)
     }
-})
+}

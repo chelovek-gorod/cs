@@ -50,12 +50,12 @@ export const atlases = {
     catapult: 'catapult.json',
     explosion_stone: 'explosion_240x240px_28frames.json',
     explosion_bomb: 'explosion_192x192px_25frames.json',
-    enemy_normal: 'enemy_normal_hit.json',
+    enemy_normal: 'enemy_normal.json',
     enemy_runner: 'enemy_runner.json',
     enemy_shooter: 'enemy_shooter.json',
     enemy_bomber: 'enemy_bomber.json',
     enemy_tank: 'enemy_tank.json',
-    enemy_other: 'enemy_other.json',
+    enemy_boss: 'enemy_boss.json',
 }
 export const sounds = {
     se_arrow: 'se_arrow_shut.mp3',

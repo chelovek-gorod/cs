@@ -70,6 +70,7 @@ export default class LevelScene extends Container {
         */
         
         setMusicList( getMusic() )
+        console.log('level ready')
     }
 
     screenResize(screenData) {

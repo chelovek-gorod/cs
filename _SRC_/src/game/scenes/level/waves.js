@@ -11,20 +11,20 @@ const ALL_TYPES_ORDER = [
 
 // --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
 const MIN_ENEMIES_PER_ROUND = 5
-const ENEMIES_PER_ROUND_FORMULA_BASE = 4 // раунд 7 -> total = 4 + 7
-const DIFFICULTY_MULTIPLIER = 1.2 // усложнение от роста раунда -> раунд 7 -> total = (4 + 7) * 1.2
+const ENEMIES_PER_ROUND_FORMULA_BASE = 3 // раунд 7 -> total = 3 + 7
+const DIFFICULTY_MULTIPLIER = 1.2 // усложнение от роста раунда -> раунд 7 -> total = (3 + 7) * 1.2
 const EASY_ROUND_MODULO = 3 // раунды кратные 3 -> легче
 const EASY_NORMAL_MULTIPLIER = 0.7 // в них 70% врагов
 
 // --- РАЗМЕР ВОЛНЫ ---
-const MIN_ENEMIES_PER_WAVE = 7 // базовый минимум врагов в одной волне
+const MIN_ENEMIES_PER_WAVE = 5 // базовый минимум врагов в одной волне
 // То есть на 1‑м раунде минимум 7 врагов в волне.
 const ADDITIONAL_ENEMIES_IN_WAVES_DIVIDER = 3 // делитель номера раунда
 // Если раунд 10, то 7 + floor(10/3) = 7+3 = 10 минимум.
 
 // --- ТАЙМИНГИ (экспортируем для GameContainer) ---
-export const FIRST_WAVE_TIMEOUT = 1800
-export const WAVE_TIMEOUT = 1200
+export const FIRST_WAVE_TIMEOUT = 1200
+export const WAVE_TIMEOUT = 600
 export const WAVE_NEXT_ENEMY_TIMEOUT_MAX = 900 
 export const WAVE_NEXT_ENEMY_TIMEOUT_MIN = 120 
 // this.enemySpawnInterval = Math.max(WAVE_NEXT_ENEMY_TIMEOUT_MIN, WAVE_NEXT_ENEMY_TIMEOUT_MAX - round)

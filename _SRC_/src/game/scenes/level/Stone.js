@@ -1,18 +1,23 @@
 import { Container, Sprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, images, sounds } from "../../../app/assets";
+import { images, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
+import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
 import { catapultDamageRadius, catapultPower } from "../../state";
 
-const POOL = []
+const STONE_POOL = createObjectPool(100)
 
-export function clearStonePool() {
-    while (POOL.length > 0) {
-        const enemy = POOL.pop()
-        enemy.destroy({children: true})
+export function createStone(x, y, targetX, targetY, particles, enemies) {
+    let stone = STONE_POOL.get()
+    if (stone) {
+        stone.reset(x, y, targetX, targetY, particles, enemies)
+    } else {
+        stone = new Stone(x, y, targetX, targetY, particles, enemies)
+        STONE_POOL.add(stone)
     }
+    return stone
 }
 
 //const SPEED_RATE = arrowSpeedRate // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
@@ -22,7 +27,7 @@ const MAX_SCALE = 1
 const MID_SCALE = MAX_SCALE - MIN_SCALE
 const START_OFFSET = -24
 
-class PrototypeStone extends Container {
+class Stone extends Container {
     constructor(x, y, targetX, targetY, particles, enemies) {
         super()
 
@@ -73,7 +78,7 @@ class PrototypeStone extends Container {
 
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
-        POOL.push(this)
+        STONE_POOL.put(this)
     }
 
     tick(deltaMs) {
@@ -95,21 +100,5 @@ class PrototypeStone extends Container {
     kill() {
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
-        POOL.push(this)
     }
 }
-
-// Экспортируем прокси, который перехватывает вызов 'new'
-export const Stone = new Proxy(PrototypeStone, {
-    construct(target, args) {
-        if (POOL.length > 0) {
-            const reused = POOL.pop()
-            if (reused.position) {
-                reused.reset(...args)
-                return reused
-            }
-            // если объект уничтожен, создаём новый
-        }
-        return new target(...args)
-    }
-})

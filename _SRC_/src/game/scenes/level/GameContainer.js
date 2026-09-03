@@ -4,11 +4,8 @@ import { EventHub, events, showPopup } from "../../../app/events"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
 import { addGold, addRound, arrowPower, gold, round, towerHP } from "../../state"
-import { clearArrowPool } from "./Arrow"
-import { ArrowOnGround } from "./ArrowOnGround"
-import { clearEnemyPool, Enemy } from "./Enemy"
-import { clearEnemyArrowPool } from "./EnemyArrow"
-import { clearStonePool } from "./Stone"
+import { createArrowOnGround } from "./ArrowOnGround"
+import { createEnemy } from "./Enemy"
 import Tower from "./Tower"
 import { getRoundWaves, FIRST_WAVE_TIMEOUT, WAVE_TIMEOUT, WAVE_NEXT_ENEMY_TIMEOUT_MAX,
     WAVE_NEXT_ENEMY_TIMEOUT_MIN, MAX_WAVE_SPAWN_TIME } from "./waves"
@@ -220,7 +217,7 @@ export default class GameContainer extends Container {
             this.arrowComboCount = 0
             this.arrowLastTarget = null
             this.arrowCurrentPower = this.arrowStartPower
-            this.arrowsOnGround.addChild(new ArrowOnGround(data.x, data.y, data.direction))
+            this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
         }
     }
 
@@ -228,7 +225,7 @@ export default class GameContainer extends Container {
         const angle = this.getRandomSpawnAngle()
         const rx = Math.cos(angle) * (ENEMIES_SPAWN_RADIUS + 128)
         const ry = Math.sin(angle) * (ENEMIES_SPAWN_RADIUS + 128)
-        this.enemies.addChild(new Enemy(rx, ry, type, this.deadEnemies, this.enemyArrows))
+        this.enemies.addChild(createEnemy(rx, ry, type, this.deadEnemies, this.enemyArrows))
     }
 
     // Строит массив размеров пакетов так, чтобы спавн волны длился не дольше MAX_WAVE_SPAWN_TIME
@@ -388,9 +385,5 @@ export default class GameContainer extends Container {
         this.clearContainer(this.arrowPoints)
         this.clearContainer(this.arrows)
         this.clearContainer(this.enemyArrows)
-        clearEnemyPool()
-        clearStonePool()
-        clearArrowPool()
-        clearEnemyArrowPool()
     }
 }

@@ -2,7 +2,7 @@ import { AnimatedSprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
 import { catapultShutDistance, catapultShutTimeout } from "../../state";
-import { Stone } from "./Stone";
+import { createStone } from "./Stone";
 
 
 export default class Catapult extends AnimatedSprite {
@@ -45,7 +45,7 @@ export default class Catapult extends AnimatedSprite {
         this.rotation = Math.atan2(strongestEnemy.y, strongestEnemy.x)
 
         this.stones.addChild(
-            new Stone(this.x, this.y, strongestEnemy.x, strongestEnemy.y, this.particles, this.enemies)
+            createStone(this.x, this.y, strongestEnemy.x, strongestEnemy.y, this.particles, this.enemies)
         )
         this.gotoAndPlay(0)
     }

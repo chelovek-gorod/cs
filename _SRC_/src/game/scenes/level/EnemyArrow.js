@@ -4,22 +4,25 @@ import { images, sounds } from "../../../app/assets";
 import { setDamage } from "../../../app/events";
 import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
+import { createObjectPool } from "../../../utils/pool";
 
-const POOL = []
+const ENEMY_ARROW_POOL = createObjectPool(100)
 
-export function clearEnemyArrowPool() {
-    while (POOL.length > 0) {
-        const arrow = POOL.pop()
-        if (arrow.destroyed) continue
-        if (arrow.parent) arrow.parent.removeChild(arrow)
-        arrow.destroy({ children: true })
+export function createEnemyArrow(x, y, power) {
+    let arrow = ENEMY_ARROW_POOL.get()
+    if (arrow) {
+        arrow.reset(x, y, power)
+    } else {
+        arrow = new EnemyArrow(x, y, power)
+        ENEMY_ARROW_POOL.add(arrow)
     }
+    return arrow
 }
 
-const FORWARD_OFFSET = 32
-const SIDE_OFFSET = 6
+const FORWARD_OFFSET = 48
+const SIDE_OFFSET = 4
 
-class PrototypeEnemyArrow extends Sprite {
+class EnemyArrow extends Sprite {
     constructor(x, y, power) {
         super(images.enemy_arrow)
         this.anchor.set(1, 0.5)
@@ -48,7 +51,7 @@ class PrototypeEnemyArrow extends Sprite {
         if( moveToTarget(this, this.target, this.speed * deltaMs) ) {
             tickerRemove(this)
             this.parent.removeChild(this)
-            POOL.push(this)
+            ENEMY_ARROW_POOL.put(this)
             setDamage(this.power)
         }
     }
@@ -56,20 +59,5 @@ class PrototypeEnemyArrow extends Sprite {
     kill() {
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
-        POOL.push(this)
     }
 }
-
-// Экспортируем прокси, который перехватывает вызов 'new'
-export const EnemyArrow = new Proxy(PrototypeEnemyArrow, {
-    construct(target, args) {
-        if (POOL.length > 0) {
-            const reused = POOL.pop()
-            if (reused.position) {
-                reused.reset(...args)
-                return reused
-            }
-        }
-        return new target(...args)
-    }
-})

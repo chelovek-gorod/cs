@@ -1,11 +1,13 @@
 import { Graphics } from "pixi.js"
-import { getAppScreen, kill, sceneAdd, sceneRemove, tickerAdd, tickerRemove } from "../../app/application"
+import { getAppScreen, kill, sceneAdd, sceneRemove, setAfterTickerCallbacks, tickerAdd, tickerRemove } from "../../app/application"
 import { createEnum } from "../../utils/functions"
 import { EventHub, events } from "../../app/events"
 
 import LoadScene from "./load/LoadScene"
-import MenuScene from "./menu/MenuScane"
+import MenuScene from "./menu/MenuScene"
 import LevelScene from "./level/LevelScene"
+import { clearAllPools } from "../../utils/pool"
+import { popupManager } from "../popup/PopupManager"
 
 export const SCENE_NAME = createEnum(
     ['Load', 'Menu', 'Level']
@@ -17,9 +19,9 @@ const SCENES = {
     [SCENE_NAME.Level] : LevelScene,
 }
 
-const SCENE_ALPHA_STEP = 0.0012
-const SCENE_ALPHA_MIN = 0
-const SCENE_ALPHA_MAX = 1
+const BLOCKER_ALPHA_STEP = 0.0012
+const BLOCKER_ALPHA_MIN = 0
+const BLOCKER_ALPHA_MAX = 1
 const BLOCKER_COLOR = 0x000000
 
 let sceneManager = null
@@ -29,45 +31,47 @@ export default class SceneManager {
     constructor() {
         if (sceneManager) return sceneManager
 
-        this.scenesQueue = []
-        this.screenData = getAppScreen()
-
         sceneManager = this
 
-        this.blocker = this.createScreenBlocker()
+        this.currentScene = null
+        this.nextSceneName = ''
+        this.screenData = getAppScreen()
 
-        this.beforeSceneReplaceCallback = null
+        this.blocker = this.createScreenBlocker()
+        this.isBlockerAlphaAdd = false
 
         EventHub.on( events.screenResize, this.screenResize, this)
         EventHub.on( events.startScene, this.startNewScene, this)
     }
 
     startNewScene(sceneName) {
-        if (sceneName in SCENES) {
-            
-            this.add( new SCENES[sceneName]() )
-            lastSceneName = sceneName
-            
-        } else {
-            console.error('WRONG SCENE NAME:', sceneName)
+        if (sceneName === lastSceneName) return
+        
+        if (sceneName in SCENES === false) {
+            return console.error('WRONG SCENE NAME:', sceneName)
         }
-    }
 
-    setOnBeforeSceneReplace(callback) {
-        this.beforeSceneReplaceCallback = callback
+        this.nextSceneName = sceneName
+
+        if (lastSceneName === '') {
+            this.addNextScene()
+            return
+        }
+
+        this.isBlockerAlphaAdd = true
+        this.showScreenBlocker()
+        tickerAdd(this)
     }
 
     screenResize(screenData) {
         this.screenData = screenData
         this.updateScreenBlockerSize()
-        if (this.scenesQueue.length > 0) this.updateSceneSize()
+        this.updateSceneSize()
     }
     
     updateSceneSize() {
-        for (let i = 0; i < this.scenesQueue.length; i++) {
-            if ('screenResize' in this.scenesQueue[i]) {
-                this.scenesQueue[i].screenResize(this.screenData)
-            }
+        if (this.currentScene && 'screenResize' in this.currentScene) {
+            this.currentScene.screenResize(this.screenData)
         }
     }
 
@@ -75,7 +79,7 @@ export default class SceneManager {
         const blocker = new Graphics()
         blocker.rect(0, 0, this.screenData.width, this.screenData.height)
         blocker.fill(BLOCKER_COLOR)
-        blocker.alpha = SCENE_ALPHA_MIN
+        blocker.alpha = BLOCKER_ALPHA_MAX
         blocker.interactive = true
         blocker.cursor = "default"
         blocker.visible = false
@@ -92,69 +96,75 @@ export default class SceneManager {
         sceneAdd(this.blocker)
         document.body.style.cursor = "default"
         this.blocker.cursor = "default"
+        this.blocker.alpha = this.isBlockerAlphaAdd ? BLOCKER_ALPHA_MIN : BLOCKER_ALPHA_MAX
     }
     hideScreenBlocker() {
         this.blocker.visible = false
         sceneRemove(this.blocker)
-
-        if ('launchScene' in this.scenesQueue[0]) this.scenesQueue[0].launchScene()
     }
 
-    add( scene ) {
-        this.scenesQueue.push(scene)
-        if (this.scenesQueue.length === 1) {
-            this.updateSceneSize()
-            sceneAdd(this.scenesQueue[0])
-        }
+    addNextScene() {
+        clearAllPools()
+
+        lastSceneName = this.nextSceneName
+        this.currentScene = new SCENES[this.nextSceneName]()
+        sceneAdd(this.currentScene)
+        this.updateSceneSize()
+
+        this.isBlockerAlphaAdd = false
         this.showScreenBlocker()
         tickerAdd(this)
     }
 
-    replaceScenes() {
-        if (this.beforeSceneReplaceCallback) {
-            this.beforeSceneReplaceCallback()
-        }
+    removePreviousScene() {
+        if (popupManager) popupManager.reset()
 
-        sceneRemove(this.scenesQueue[0])
-        kill(this.scenesQueue[0])
-        
-        this.scenesQueue = [ this.scenesQueue[this.scenesQueue.length - 1] ]
-        this.updateSceneSize()
-
+        tickerRemove(this)
+        sceneRemove(this.currentScene)
         sceneRemove(this.blocker)
-        sceneAdd(this.scenesQueue[0])
-        this.blocker.interactive = false
-        this.blocker.cursor = "default"
-        sceneAdd(this.blocker)
+        kill(this.currentScene)
+
+        setAfterTickerCallbacks( this.addNextScene.bind(this) )
     }
 
-    scenesReady() {
+    newSceneReady() {
+        lastSceneName = this.nextSceneName
         tickerRemove(this)
         this.hideScreenBlocker()
+
+        if ('launchScene' in this.currentScene) this.currentScene.launchScene()
     }
 
     tick(delta) {
-        const alphaStep = delta * SCENE_ALPHA_STEP
+        if (!this.blocker) return
 
-        // если есть сцена на добавление
-        if (this.scenesQueue.length > 1) {
-            this.blocker.alpha = Math.min(SCENE_ALPHA_MAX, this.blocker.alpha + alphaStep)
-            if (this.blocker.alpha === SCENE_ALPHA_MAX) this.replaceScenes()
-            return
+        const alphaStep = delta * BLOCKER_ALPHA_STEP
+
+        if (this.isBlockerAlphaAdd) {
+            this.blocker.alpha = Math.min(BLOCKER_ALPHA_MAX, this.blocker.alpha + alphaStep)
+            if (this.blocker.alpha === BLOCKER_ALPHA_MAX) this.removePreviousScene()
+        } else {
+            this.blocker.alpha = Math.max(BLOCKER_ALPHA_MIN, this.blocker.alpha - alphaStep)
+            if (this.blocker.alpha === BLOCKER_ALPHA_MIN) this.newSceneReady()
         }
-
-        // сцена заменена
-        this.blocker.alpha = Math.max(SCENE_ALPHA_MIN, this.blocker.alpha - alphaStep)
-        if (this.blocker.alpha === SCENE_ALPHA_MIN) this.scenesReady()
     }
 
     kill() {
         EventHub.off( events.screenResize, this.screenResize, this)
         EventHub.off( events.startScene, this.startNewScene, this)
-        while(this.scenesQueue.length) kill(this.scenesQueue[0])
+
+        tickerRemove(this)
         if (this.blocker) {
             sceneRemove(this.blocker)
-            kill(this.blocker)
+            this.blocker.destroy()
+            this.blocker = null
+        }
+
+        if (this.currentScene) {
+            sceneRemove(this.currentScene)
+            kill(this.currentScene)
+            this.currentScene = null
+            lastSceneName = null
         }
     }
 }

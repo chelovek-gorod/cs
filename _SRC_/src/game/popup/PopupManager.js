@@ -5,12 +5,13 @@ import Settings from "./Settings"
 import { POPUP_TYPE } from "./popupTypes"
 import Upgrade from "./Upgrade"
 
+export let popupManager = null
+
 export default class PopupManager {
     constructor() {
-        if (PopupManager.instance) {
-            return PopupManager.instance
-        }
-        PopupManager.instance = this
+        if (popupManager) return popupManager
+        
+        popupManager = this
 
         this.currentPopup = null
         this.queue = []
