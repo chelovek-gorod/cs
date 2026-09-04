@@ -34,7 +34,7 @@ export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - s
 export const arrowSpeedRateStep = 0.016
 export const arrowSpeedRateMax = 0.10
 
-export let catapultsCount = 2
+export let catapultsCount = 0
 export const catapultsCountMax = 4
 export const catapultBasePrice = 50
 export let catapultPower = 30
