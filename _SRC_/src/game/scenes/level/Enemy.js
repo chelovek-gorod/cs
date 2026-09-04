@@ -5,16 +5,17 @@ import { addGoldForKill, setDamage } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
 import { createObjectPool } from "../../../utils/pool"
 import Explosion from "../../effects/Explosion"
+import { createHpBar } from "./EnemiesHpBar"
 import { createEnemyArrow } from "./EnemyArrow"
 
 const ENEMY_POOL = createObjectPool(100)
 
-export function createEnemy(x, y, type, deadEnemiesContainer, enemyArrows) {
+export function createEnemy(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer) {
     let enemy = ENEMY_POOL.get()
     if (enemy) {
-        enemy.reset(x, y, type, deadEnemiesContainer, enemyArrows)
+        enemy.reset(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer)
     } else {
-        enemy = new Enemy(x, y, type, deadEnemiesContainer, enemyArrows)
+        enemy = new Enemy(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer)
         ENEMY_POOL.add(enemy)
     }
     return enemy
@@ -32,7 +33,7 @@ const ENEMY = {
     [TYPES.NORMAL]: {
         atlas: 'enemy_normal',
         hp: 40,
-        speed: 0.04,
+        speed: 0.03,
         damage: 4,
         attackTimeout: 800, // время атаки = attackTimeout + длительность анимации атаки
         attackStartFrameIndex: 5,
@@ -45,20 +46,20 @@ const ENEMY = {
         atlas: 'enemy_runner',
         hp: 20,
         speed: 0.08,
-        damage: 2,
+        damage: 3,
         attackTimeout: 700,
         attackStartFrameIndex: 9,
         reward: 1,
-        towerOffset: TOWER_OFFSET + 24,
+        towerOffset: TOWER_OFFSET + 12,
         bodyCollider: 20,
         headCollider: 10,
     },
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
-        hp: 40,
-        speed: 0.05,
+        hp: 50,
+        speed: 0.04,
         damage: 2,
-        attackTimeout: 900,
+        attackTimeout: 600,
         attackStartFrameIndex: 8,
         reward: 1,
         towerOffset: TOWER_OFFSET + 150,
@@ -67,8 +68,8 @@ const ENEMY = {
     },
     [TYPES.TANK]: {
         atlas: 'enemy_tank',
-        hp: 200,
-        speed: 0.03,
+        hp: 400,
+        speed: 0.02,
         damage: 10,
         attackTimeout: 1500,
         attackStartFrameIndex: 7,
@@ -79,8 +80,8 @@ const ENEMY = {
     },
     [TYPES.BOMB]: {
         atlas: 'enemy_bomber',
-        hp: 40,
-        speed: 0.05,
+        hp: 30,
+        speed: 0.07,
         damage: 25,
         attackTimeout: Infinity,
         attackStartFrameIndex: 0,
@@ -92,14 +93,14 @@ const ENEMY = {
     [TYPES.BOSS]: {
         atlas: 'enemy_boss',
         hp: 1000,
-        speed: 0.02,
+        speed: 0.06,
         damage: 5,
         attackTimeout: 600,
-        attackStartFrameIndex: 3,
+        attackStartFrameIndex: 0,
         reward: 1,
-        towerOffset: TOWER_OFFSET + 48,
-        bodyCollider: 36,
-        headCollider: 9,
+        towerOffset: TOWER_OFFSET + 64,
+        bodyCollider: 50,
+        headCollider: 15,
     },
 }
 
@@ -110,7 +111,7 @@ const FAST_TURN_MIN_TIME = 600
 const FAST_TURN_MAX_TIME = 1200
 
 class Enemy extends Container {
-    constructor(x, y, type, deadEnemiesContainer, enemyArrows) {
+    constructor(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer) {
         super()
 
         this.image = new AnimatedSprite(atlases[ENEMY[type].atlas].animations.walk)
@@ -123,19 +124,12 @@ class Enemy extends Container {
         this.colliderCircle = new Graphics()
         this.addChild(this.colliderCircle)
 
-        this.hpBar = new Container()
-        this.addChild(this.hpBar)
-        this.hpBg = new Sprite(images.hp_bar_bg)
-        this.hpBg.position.set(-28, -64)
-        this.hpBar.addChild(this.hpBg)
-        this.hpLine = new Sprite(images.hp_bar_line)
-        this.hpLine.position.set(-25, -62)
-        this.hpBar.addChild(this.hpLine)
+        this.hpBar = createHpBar(x, y)
 
-        this.reset(x, y, type, deadEnemiesContainer, enemyArrows)
+        this.reset(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer)
     }
 
-    reset(x, y, type, deadEnemiesContainer, enemyArrows) {
+    reset(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer) {
         this.type = type
         this.position.set(x, y)
         this.alpha = 0
@@ -166,10 +160,9 @@ class Enemy extends Container {
         this.headSqCollider = ENEMY[type].headCollider * ENEMY[type].headCollider
         this.towerOffset = ENEMY[type].towerOffset
 
-        this.hpLine.tint = 0x00ff00
-        this.hpLine.scale.x = 1
-        this.hpBg.position.set(-28, -64)
-        this.hpLine.position.set(-25, -62)
+        this.hpContainer = hpContainer
+        this.hpBar.reset(x, y)
+        this.hpContainer.addChild(this.hpBar)
 
         this.attackTimeout = ENEMY[type].attackTimeout
         this.isAttacking = false
@@ -270,12 +263,7 @@ class Enemy extends Container {
         if (this.hp === 0) return
 
         this.hp = Math.max(0, this.hp - power)
-
-        this.hpLine.scale.x = this.hp / this.maxHp
-        if (this.hpLine.scale.x > 0.4) this.hpLine.tint = 0x00ff00
-        else if (this.hpLine.scale.x > 0.25) this.hpLine.tint = 0xffff00
-        else if (this.hpLine.scale.x > 0.12) this.hpLine.tint = 0xff7700
-        else this.hpLine.tint = 0xff0000
+        this.hpBar.setLineScale(this.hp / this.maxHp)
 
         if (this.hp === 0) {
             this.isDying = true
@@ -322,6 +310,7 @@ class Enemy extends Container {
         const pathSize = this.speed * deltaMs
         this.x += this.directionCos * pathSize
         this.y += this.directionSin * pathSize
+        this.hpBar.position.set(this.x, this.y)
 
         this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
         if (!this.isOnMove) {
@@ -334,6 +323,7 @@ class Enemy extends Container {
         const pathSize = this.speed * deltaMs
         this.x += this.directionCos * pathSize
         this.y += this.directionSin * pathSize
+        this.hpBar.position.set(this.x, this.y)
 
         const distance = getDistance(this, {x: 0, y: 0})
         if (distance <= this.towerOffset) {
@@ -402,6 +392,8 @@ class Enemy extends Container {
     }
 
     addExplosion(isTowerDamage = true) {
+        this.hpBar.release()
+
         if (this.parent) {
             this.parent.parent.addChild(
                 new Explosion(this.x, this.y, 'explosion_bomb', 128)
@@ -418,6 +410,8 @@ class Enemy extends Container {
 
     die() {
         if (!this.parent) return
+
+        this.hpBar.release()
         tickerRemove(this)
         this.parent.removeChild(this)
         ENEMY_POOL.put(this)

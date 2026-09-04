@@ -22,18 +22,6 @@ const MIN_ENEMIES_PER_WAVE = 5 // базовый минимум врагов в 
 const ADDITIONAL_ENEMIES_IN_WAVES_DIVIDER = 3 // делитель номера раунда
 // Если раунд 10, то 7 + floor(10/3) = 7+3 = 10 минимум.
 
-// --- ТАЙМИНГИ (экспортируем для GameContainer) ---
-export const FIRST_WAVE_TIMEOUT = 1200
-export const WAVE_TIMEOUT = 600
-export const WAVE_NEXT_ENEMY_TIMEOUT_MAX = 900 
-export const WAVE_NEXT_ENEMY_TIMEOUT_MIN = 120 
-// this.enemySpawnInterval = Math.max(WAVE_NEXT_ENEMY_TIMEOUT_MIN, WAVE_NEXT_ENEMY_TIMEOUT_MAX - round)
-// Получается, чем выше раунд, тем быстрее спавнятся враги, но не быстрее 120 мс.
-
-// --- ПАКЕТНЫЙ СПАВН (экспортируем) ---
-export const MAX_WAVE_SPAWN_TIME = 12000 // мс
-// Если в текущей волне спавн дольше 12 секунд, то начинается пакетный спавн.
-
 // --- СТРОКА ЧЕТВЕРТЕЙ (для долей заполнения и перемешивания) ---
 const QUARTER_STRING = '123231132'
 

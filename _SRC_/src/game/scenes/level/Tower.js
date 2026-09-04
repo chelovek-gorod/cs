@@ -1,9 +1,8 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { images } from "../../../app/assets";
-import { EventHub, events, startScene } from "../../../app/events";
+import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
 import { catapultsCount, towerHP, wizardsCount } from "../../state";
-import { SCENE_NAME } from "../SceneManager";
 import Archer from "./Archer";
 import Catapult from "./Catapult";
 import Wizard from "./Wizard";
@@ -17,6 +16,8 @@ export default class Tower extends Container {
         catapultStones, lightnings, enemies, particles
     ) {
         super()
+
+        this.isAlive = true
 
         this.image = new Sprite(images.tower)
         this.image.anchor.set(0.5)
@@ -53,9 +54,14 @@ export default class Tower extends Container {
     }
 
     getDamage(value) {
+        if (!this.isAlive) return
+
         this.hp = Math.max(0, this.hp - value)
         this.hpText.text = this.hp
-        if (this.hp === 0) startScene(SCENE_NAME.Menu)
+        if (this.hp === 0) {
+            this.isAlive = false
+            this.parent.handleRoundLose()
+        }
     }
 
     kill() {

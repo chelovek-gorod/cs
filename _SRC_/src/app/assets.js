@@ -27,15 +27,14 @@ export const images = {
 
     /*** game images ***/
     coin: 'coin.png',
+    menu_bg: 'menu_bg.png',
     round_bg: 'round_bg.png',
     winter_bg: 'winter_bg.png',
+    swamp_bg: 'swamp_bg.png',
+    lava_bg: 'lava_bg.png',
     tower: 'tower.png',
-    tower_layer_1: 'tower_layer_1.png',
-    tower_layer_2: 'tower_layer_2.png',
-    tower_layer_3: 'tower_layer_3.png',
     archer_arrow: 'archer_arrow.png',
     arrow_point: 'arrow_point.png',
-    enemy: 'enemy.png',
     enemy_arrow: 'enemy_arrow.png',
     hp_bar_bg: 'hp_bar_bg.png',
     hp_bar_line: 'hp_bar_line.png',

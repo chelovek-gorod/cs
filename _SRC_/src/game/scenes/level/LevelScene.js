@@ -7,9 +7,10 @@ import BackgroundTiling from '../../BG/BackgroundTiling'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import GameContainer from './GameContainer'
 import LevelUI from './LevelUI'
-import { getSafeAreaOffsets } from '../../../app/application'
-import { addGold } from '../../state'
+import { getSafeAreaOffsets, setAfterTickerCallbacks } from '../../../app/application'
+import { addGold, round } from '../../state'
 import { setMusicList } from '../../../app/sound'
+import EnemySpawner from './EnemySpawner'
 
 
 const musics = [ music.bgm_1, music.bgm_2, music.bgm_3, music.bgm_4, music.bgm_5, music.bgm_6, music.bgm_7 ]
@@ -30,7 +31,12 @@ export default class LevelScene extends Container {
         this.currentLanguage = getLanguage()
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
 
-        this.bg = new BackgroundTiling(images.winter_bg)
+
+        this.bg = new BackgroundTiling(
+            round % 10 === 0 ? images.lava_bg :
+            round % 3 === 0 ? images.swamp_bg :
+            images.winter_bg
+        )
         setCursorPointer(this.bg)
         this.bg.on('pointerdown', this.getPointerDown, this)
         this.bg.on('pointermove', this.getPointerMove, this)
@@ -40,15 +46,13 @@ export default class LevelScene extends Container {
         this.gameContainer = new GameContainer()
         this.addChild(this.gameContainer)
 
-        this.enemies = new Container()
-        
-        this.addChild(this.enemies)
-
         this.flyTexts = new Container()
         this.addChild(this.flyTexts)
 
         this.ui = new LevelUI()
         this.addChild(this.ui)
+
+        this.enemiesSpawner = new EnemySpawner(this.gameContainer, this.ui)
 
         EventHub.on( events.pauseGameplay, this.pauseGameplay, this )
         EventHub.on( events.addGoldForKill, this.addGoldForKill, this )
@@ -80,6 +84,7 @@ export default class LevelScene extends Container {
         this.position.set( screenData.centerX, screenData.centerY )
 
         this.gameContainer.screenResize(screenData, safeAreaOffsets)
+        this.enemiesSpawner.screenResize(screenData, this.gameContainer.scale.x)
 
         const bgScale = this.gameContainer.scale.x
         const bgScreenData = {
@@ -128,7 +133,9 @@ export default class LevelScene extends Container {
         this.bg.off('pointerup', this.getPointerUp, this)
         this.bg.destroy()
 
-        this.gameContainer.kill()
+        if (this.enemiesSpawner && this.enemiesSpawner.kill) this.enemiesSpawner.kill()
+        if (this.gameContainer && this.gameContainer.kill) this.gameContainer.kill()
+        setAfterTickerCallbacks( () => this.enemiesSpawner = null )
 
         gameplayStopSDK()
 
