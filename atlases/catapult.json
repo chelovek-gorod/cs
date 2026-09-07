@@ -1,6 +1,6 @@
 {
   "frames": {
-    "shut_15": {
+    "shoot_15": {
       "frame": {
         "x": 4,
         "y": 4,
@@ -24,7 +24,7 @@
         "y": 0.5
       }
     },
-    "shut_07": {
+    "shoot_07": {
       "frame": {
         "x": 76,
         "y": 4,
@@ -48,7 +48,7 @@
         "y": 0.5
       }
     },
-    "shut_14": {
+    "shoot_14": {
       "frame": {
         "x": 148,
         "y": 4,
@@ -72,7 +72,7 @@
         "y": 0.5
       }
     },
-    "shut_02": {
+    "shoot_02": {
       "frame": {
         "x": 220,
         "y": 4,
@@ -96,7 +96,7 @@
         "y": 0.5
       }
     },
-    "shut_16": {
+    "shoot_16": {
       "frame": {
         "x": 220,
         "y": 74,
@@ -120,7 +120,7 @@
         "y": 0.5
       }
     },
-    "shut_17": {
+    "shoot_17": {
       "frame": {
         "x": 76,
         "y": 75,
@@ -144,7 +144,7 @@
         "y": 0.5
       }
     },
-    "shut_18": {
+    "shoot_18": {
       "frame": {
         "x": 4,
         "y": 76,
@@ -168,7 +168,7 @@
         "y": 0.5
       }
     },
-    "shut_19": {
+    "shoot_19": {
       "frame": {
         "x": 147,
         "y": 75,
@@ -192,7 +192,7 @@
         "y": 0.5
       }
     },
-    "shut_20": {
+    "shoot_20": {
       "frame": {
         "x": 218,
         "y": 146,
@@ -216,7 +216,7 @@
         "y": 0.5
       }
     },
-    "shut_06": {
+    "shoot_06": {
       "frame": {
         "x": 75,
         "y": 147,
@@ -240,7 +240,7 @@
         "y": 0.5
       }
     },
-    "shut_08": {
+    "shoot_08": {
       "frame": {
         "x": 4,
         "y": 148,
@@ -264,7 +264,7 @@
         "y": 0.5
       }
     },
-    "shut_09": {
+    "shoot_09": {
       "frame": {
         "x": 146,
         "y": 147,
@@ -288,7 +288,7 @@
         "y": 0.5
       }
     },
-    "shut_10": {
+    "shoot_10": {
       "frame": {
         "x": 75,
         "y": 218,
@@ -312,7 +312,7 @@
         "y": 0.5
       }
     },
-    "shut_11": {
+    "shoot_11": {
       "frame": {
         "x": 4,
         "y": 219,
@@ -336,7 +336,7 @@
         "y": 0.5
       }
     },
-    "shut_12": {
+    "shoot_12": {
       "frame": {
         "x": 146,
         "y": 218,
@@ -360,7 +360,7 @@
         "y": 0.5
       }
     },
-    "shut_13": {
+    "shoot_13": {
       "frame": {
         "x": 217,
         "y": 218,
@@ -384,7 +384,7 @@
         "y": 0.5
       }
     },
-    "shut_01": {
+    "shoot_01": {
       "frame": {
         "x": 217,
         "y": 289,
@@ -408,7 +408,7 @@
         "y": 0.5
       }
     },
-    "shut_03": {
+    "shoot_03": {
       "frame": {
         "x": 75,
         "y": 289,
@@ -432,7 +432,7 @@
         "y": 0.5
       }
     },
-    "shut_04": {
+    "shoot_04": {
       "frame": {
         "x": 4,
         "y": 290,
@@ -456,7 +456,7 @@
         "y": 0.5
       }
     },
-    "shut_05": {
+    "shoot_05": {
       "frame": {
         "x": 146,
         "y": 289,
@@ -482,15 +482,15 @@
     }
   },
   "animations": {
-    "shut": [
-        "shut_01", "shut_05", "shut_011", "shut_17", "shut_20",
-        "shut_19", "shut_18", "shut_17", "shut_16", "shut_15", "shut_14", "shut_13", "shut_12",
-        "shut_13", "shut_14", "shut_15", "shut_16", "shut_17", "shut_18", "shut_19",
-        "shut_18", "shut_17", "shut_16", "shut_15", "shut_14", "shut_13",
-        "shut_14", "shut_15", "shut_16", "shut_17", "shut_18",
-        "shut_17", "shut_16", "shut_15", "shut_14", "shut_13", "shut_12", "shut_11",
-        "shut_10", "shut_09", "shut_08", "shut_07", "shut_06", "shut_05", "shut_04",
-        "shut_03", "shut_02", "shut_01"
+    "shoot": [
+        "shoot_01", "shoot_05", "shoot_011", "shoot_17", "shoot_20",
+        "shoot_19", "shoot_18", "shoot_17", "shoot_16", "shoot_15", "shoot_14", "shoot_13", "shoot_12",
+        "shoot_13", "shoot_14", "shoot_15", "shoot_16", "shoot_17", "shoot_18", "shoot_19",
+        "shoot_18", "shoot_17", "shoot_16", "shoot_15", "shoot_14", "shoot_13",
+        "shoot_14", "shoot_15", "shoot_16", "shoot_17", "shoot_18",
+        "shoot_17", "shoot_16", "shoot_15", "shoot_14", "shoot_13", "shoot_12", "shoot_11",
+        "shoot_10", "shoot_09", "shoot_08", "shoot_07", "shoot_06", "shoot_05", "shoot_04",
+        "shoot_03", "shoot_02", "shoot_01"
     ]
   },
   "meta": {

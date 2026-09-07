@@ -1,13 +1,13 @@
 import { AnimatedSprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
-import { catapultShutDistance, catapultShutTimeout } from "../../state";
+import { catapultShootDistance, catapultShootTimeout } from "../../state";
 import { createStone } from "./Stone";
 
 
 export default class Catapult extends AnimatedSprite {
-    constructor(x, y, catapultStones, enemies, startShutTimeoutRate, particles) {
-        super(atlases.catapult.animations.shut)
+    constructor(x, y, catapultStones, enemies, startShootTimeoutRate, particles) {
+        super(atlases.catapult.animations.shoot)
 
         this.anchor.set(0.5)
         this.animationSpeed = 0.5
@@ -18,14 +18,14 @@ export default class Catapult extends AnimatedSprite {
         this.particles = particles
         this.enemies = enemies
 
-        this.shutTimeout = catapultShutTimeout * startShutTimeoutRate
-        this.shutSqDist = catapultShutDistance * catapultShutDistance
+        this.shootTimeout = catapultShootTimeout * startShootTimeoutRate
+        this.shootSqDist = catapultShootDistance * catapultShootDistance
 
         tickerAdd(this)
     }
 
-    shut() {
-        this.shutTimeout = catapultShutTimeout
+    shoot() {
+        this.shootTimeout = catapultShootTimeout
 
         let strongestEnemy = null
         let strongestHP = -Infinity
@@ -35,7 +35,7 @@ export default class Catapult extends AnimatedSprite {
             const dx = this.x - enemies[i].x
             const dy = this.y - enemies[i].y
             const distance = dx * dx + dy * dy
-            if (distance < this.shutSqDist && enemies[i].hp > strongestHP) {
+            if (distance < this.shootSqDist && enemies[i].hp > strongestHP) {
                 strongestHP = enemies[i].hp
                 strongestEnemy = enemies[i]
             }
@@ -51,8 +51,8 @@ export default class Catapult extends AnimatedSprite {
     }
 
     tick(deltaMs) {
-        if (this.shutTimeout > 0) this.shutTimeout -= deltaMs
-        else this.shut()
+        if (this.shootTimeout > 0) this.shootTimeout -= deltaMs
+        else this.shoot()
     }
 
     kill() {

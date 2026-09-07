@@ -41,7 +41,8 @@ export const images = {
     icon_bow: 'icon_bow.png',
     icon_bow_line: 'icon_bow_line.png',
     icon_bow_bg: 'icon_bow_bg.png',
-    stone: 'stone.png'
+    stone: 'stone.png',
+    enemy_stone: 'enemy_stone.png',
 }
 export const atlases = {
     archer: 'archer.json',
@@ -53,13 +54,15 @@ export const atlases = {
     enemy_runner: 'enemy_runner.json',
     enemy_shooter: 'enemy_shooter.json',
     enemy_bomber: 'enemy_bomber.json',
+    enemy_rider: 'enemy_rider.json',
     enemy_tank: 'enemy_tank.json',
     enemy_boss: 'enemy_boss.json',
+    trap: 'trap.json',
 }
 export const sounds = {
-    se_arrow: 'se_arrow_shut.mp3',
-    se_wizard_shut: 'se_wizard_shut.mp3',
-    se_catapult_shut: 'se_catapult_shut.mp3',
+    se_arrow: 'se_arrow_shoot.mp3',
+    se_wizard_shoot: 'se_wizard_shoot.mp3',
+    se_catapult_shoot: 'se_catapult_shoot.mp3',
 }
 export const music = {
     bgm_menu: 'bgm_menu.mp3',

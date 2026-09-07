@@ -4,6 +4,7 @@ import Popup from "./Popup"
 import Settings from "./Settings"
 import { POPUP_TYPE } from "./popupTypes"
 import Upgrade from "./Upgrade"
+import Trapping from "./Trapping"
 
 export let popupManager = null
 
@@ -82,6 +83,7 @@ export default class PopupManager {
         switch (type) {
             case POPUP_TYPE.SETTINGS: return new Settings(popup)
             case POPUP_TYPE.UPGRADE: return new Upgrade(popup)
+            case POPUP_TYPE.TRAPPING: return new Trapping(popup)
         }
     }
 

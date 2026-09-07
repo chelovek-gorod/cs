@@ -3,17 +3,17 @@ import { styles } from "../../app/styles"
 import { createEnum, setCursorPointer } from "../../utils/functions"
 import { EventHub, events, startScene } from "../../app/events"
 import { lastSceneName, SCENE_NAME } from "../scenes/SceneManager"
-import { addArrow, addArrowPower, addArrowReloadTimeout, addArrowShutTimeout, addArrowSpeedRate,
-    addCatapultDamageRadius, addCatapultPower, addCatapultShutDistance, addCatapultShutTimeout,
+import { addArrow, addArrowPower, addArrowReloadTimeout, addArrowShootTimeout, addArrowSpeedRate,
+    addCatapultDamageRadius, addCatapultPower, addCatapultShootDistance, addCatapultShootTimeout,
     addLevel,
-    addTowerHP, addWizardPower, addWizardShutDistance, addWizardShutTimeout, addWizardTargetsCount,
-    arrowPowerStep, arrowReloadTimeout, arrowReloadTimeoutMax, arrows, arrowShutTimeout,
-    arrowShutTimeoutMax, arrowsMax, arrowSpeedRate, arrowSpeedRateMax, arrowsStep, catapultDamageRadius,
+    addTowerHP, addWizardPower, addWizardShootDistance, addWizardShootTimeout, addWizardTargetsCount,
+    arrowPowerStep, arrowReloadTimeout, arrowReloadTimeoutMax, arrows, arrowShootTimeout,
+    arrowShootTimeoutMax, arrowsMax, arrowSpeedRate, arrowSpeedRateMax, arrowsStep, catapultDamageRadius,
     catapultDamageRadiusMax, catapultDamageRadiusStep, catapultPowerStep, catapultsCount,
-    catapultShutDistance, catapultShutDistanceMax, catapultShutDistanceStep, catapultShutTimeout,
-    catapultShutTimeoutMax, towerHP, towerHPMax, towerHPStep, wizardPowerStep, wizardsCount,
-    wizardShutDistance, wizardShutDistanceMax, wizardShutDistanceStep, wizardShutTimeout,
-    wizardShutTimeoutMax, wizardTargetsCount, wizardTargetsCountMax } from "../state"
+    catapultShootDistance, catapultShootDistanceMax, catapultShootDistanceStep, catapultShootTimeout,
+    catapultShootTimeoutMax, towerHP, towerHPMax, towerHPStep, wizardPowerStep, wizardsCount,
+    wizardShootDistance, wizardShootDistanceMax, wizardShootDistanceStep, wizardShootTimeout,
+    wizardShootTimeoutMax, wizardTargetsCount, wizardTargetsCountMax } from "../state"
 
 
 export const UPGRADE_TYPE = createEnum([
@@ -21,19 +21,19 @@ export const UPGRADE_TYPE = createEnum([
 
     'ARROWS',
     'ARROW_POWER',
-    'ARROW_SHUT_SPEED',
+    'ARROW_SHOOT_SPEED',
     'ARROW_FLY_SPEED',
     'ARROW_RELOAD_SPEED',
 
     'CATAPULT_POWER',
     'CATAPULT_RADIUS', // catapultDamageRadius
-    'CATAPULT_RELOAD', // catapultShutTimeout
-    'CATAPULT_DISTANCE', // catapultShutDistance
+    'CATAPULT_RELOAD', // catapultShootTimeout
+    'CATAPULT_DISTANCE', // catapultShootDistance
 
     'WIZARD_POWER',
     'WIZARD_TARGETS', // wizardTargetsCount
-    'WIZARD_RELOAD', // wizardShutTimeout
-    'WIZARD_DISTANCE' // wizardShutDistance
+    'WIZARD_RELOAD', // wizardShootTimeout
+    'WIZARD_DISTANCE' // wizardShootDistance
 ])
 
 const UPGRADE_NAMES = Object.keys(UPGRADE_TYPE)
@@ -122,8 +122,8 @@ export default class Upgrade extends Container {
                 case UPGRADE_TYPE.ARROW_POWER:
                     selected.push(upgrade)
                     break
-                case UPGRADE_TYPE.ARROW_SHUT_SPEED:
-                    if (arrowShutTimeout > arrowShutTimeoutMax) {
+                case UPGRADE_TYPE.ARROW_SHOOT_SPEED:
+                    if (arrowShootTimeout > arrowShootTimeoutMax) {
                         selected.push(upgrade)
                     }
                     break
@@ -150,12 +150,12 @@ export default class Upgrade extends Container {
                     }
                     break
                 case UPGRADE_TYPE.CATAPULT_RELOAD:
-                    if (catapultsCount > 0 && catapultShutTimeout > catapultShutTimeoutMax) {
+                    if (catapultsCount > 0 && catapultShootTimeout > catapultShootTimeoutMax) {
                         selected.push(upgrade)
                     }
                     break
                 case UPGRADE_TYPE.CATAPULT_DISTANCE:
-                    if (catapultsCount > 0 && catapultShutDistance < catapultShutDistanceMax) {
+                    if (catapultsCount > 0 && catapultShootDistance < catapultShootDistanceMax) {
                         selected.push(upgrade)
                     }
                     break
@@ -172,12 +172,12 @@ export default class Upgrade extends Container {
                     }
                     break
                 case UPGRADE_TYPE.WIZARD_RELOAD:
-                    if (wizardsCount > 0 && wizardShutTimeout > wizardShutTimeoutMax) {
+                    if (wizardsCount > 0 && wizardShootTimeout > wizardShootTimeoutMax) {
                         selected.push(upgrade)
                     }
                     break
                 case UPGRADE_TYPE.WIZARD_DISTANCE:
-                    if (wizardsCount > 0 && wizardShutDistance < wizardShutDistanceMax) {
+                    if (wizardsCount > 0 && wizardShootDistance < wizardShootDistanceMax) {
                         selected.push(upgrade)
                     }
                     break
@@ -205,18 +205,18 @@ export default class Upgrade extends Container {
                 case UPGRADE_TYPE.ARROWS: desc = `+${arrowsStep} Arrow`; break
                 case UPGRADE_TYPE.ARROW_POWER: desc = `Power +${arrowPowerStep}`; break
                 case UPGRADE_TYPE.ARROW_FLY_SPEED: desc = 'Arrow Speed +10%'; break
-                case UPGRADE_TYPE.ARROW_SHUT_SPEED: desc = 'Shut Speed +10%'; break
+                case UPGRADE_TYPE.ARROW_SHOOT_SPEED: desc = 'Shoot Speed +10%'; break
                 case UPGRADE_TYPE.ARROW_RELOAD_SPEED: desc = 'Reload Speed +10%'; break
 
                 case UPGRADE_TYPE.CATAPULT_POWER: desc = `Power +${catapultPowerStep}`; break
                 case UPGRADE_TYPE.CATAPULT_RADIUS: desc = `Damage radius + ${catapultDamageRadiusStep}`; break
-                case UPGRADE_TYPE.CATAPULT_RELOAD: desc = 'Shut Speed +10%'; break
-                case UPGRADE_TYPE.CATAPULT_DISTANCE: desc = `Shut distance + ${catapultShutDistanceStep}`; break
+                case UPGRADE_TYPE.CATAPULT_RELOAD: desc = 'Shoot Speed +10%'; break
+                case UPGRADE_TYPE.CATAPULT_DISTANCE: desc = `Shoot distance + ${catapultShootDistanceStep}`; break
 
                 case UPGRADE_TYPE.WIZARD_POWER: desc = `Power +${wizardPowerStep}`; break
                 case UPGRADE_TYPE.WIZARD_TARGETS: desc = '+1 target'; break
-                case UPGRADE_TYPE.WIZARD_RELOAD: desc = 'Shut Speed +10%'; break
-                case UPGRADE_TYPE.WIZARD_DISTANCE: desc = `Shut distance + ${wizardShutDistanceStep}`; break
+                case UPGRADE_TYPE.WIZARD_RELOAD: desc = 'Shoot Speed +10%'; break
+                case UPGRADE_TYPE.WIZARD_DISTANCE: desc = `Shoot distance + ${wizardShootDistanceStep}`; break
 
                 default: desc = '+?'
             }
@@ -236,18 +236,18 @@ export default class Upgrade extends Container {
             case UPGRADE_TYPE.ARROWS: addArrow(); break
             case UPGRADE_TYPE.ARROW_POWER: addArrowPower(); break
             case UPGRADE_TYPE.ARROW_FLY_SPEED: addArrowSpeedRate(); break
-            case UPGRADE_TYPE.ARROW_SHUT_SPEED: addArrowShutTimeout(); break
+            case UPGRADE_TYPE.ARROW_SHOOT_SPEED: addArrowShootTimeout(); break
             case UPGRADE_TYPE.ARROW_RELOAD_SPEED: addArrowReloadTimeout(); break
 
             case UPGRADE_TYPE.CATAPULT_POWER: addCatapultPower(); break
             case UPGRADE_TYPE.CATAPULT_RADIUS: addCatapultDamageRadius(); break
-            case UPGRADE_TYPE.CATAPULT_RELOAD: addCatapultShutTimeout(); break
-            case UPGRADE_TYPE.CATAPULT_DISTANCE: addCatapultShutDistance(); break
+            case UPGRADE_TYPE.CATAPULT_RELOAD: addCatapultShootTimeout(); break
+            case UPGRADE_TYPE.CATAPULT_DISTANCE: addCatapultShootDistance(); break
 
             case UPGRADE_TYPE.WIZARD_POWER: addWizardPower(); break
             case UPGRADE_TYPE.WIZARD_TARGETS: addWizardTargetsCount(); break
-            case UPGRADE_TYPE.WIZARD_RELOAD: addWizardShutTimeout(); break
-            case UPGRADE_TYPE.WIZARD_DISTANCE: addWizardShutDistance(); break
+            case UPGRADE_TYPE.WIZARD_RELOAD: addWizardShootTimeout(); break
+            case UPGRADE_TYPE.WIZARD_DISTANCE: addWizardShootDistance(); break
         }
 
         addLevel()

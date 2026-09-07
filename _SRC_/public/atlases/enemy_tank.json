@@ -250,9 +250,7 @@
             "run_17", "run_17", "run_18", "run_18"
         ],
         "attack": [
-            "back_01", "back_02", "back_03", "back_04", "back_05", "back_04", "back_03", "back_02",
-            "back_01", "run_01", "forward_01", "forward_02", "forward_03", "forward_04", "forward_05",
-            "forward_04", "forward_03", "forward_02", "run_01"
+            "back_03", "back_05", "back_04", "back_03", "back_02", "back_01", "run_01"
         ],
         "hit": [
             "back_01", "back_02", "back_03", "back_04", "back_05", "back_04", "back_03", "back_02",

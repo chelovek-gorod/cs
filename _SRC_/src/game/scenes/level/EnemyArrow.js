@@ -44,7 +44,7 @@ class EnemyArrow extends Sprite {
         this.position.y = this.y + startDY * FORWARD_OFFSET + startDX * SIDE_OFFSET
 
         tickerAdd(this)
-        soundPlay(sounds.se_arrow)
+        soundPlay(sounds.se_arrow.rate(1.3))
     }
 
     tick(deltaMs) {

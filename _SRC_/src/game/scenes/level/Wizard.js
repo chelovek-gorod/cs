@@ -4,14 +4,14 @@ import { atlases, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
 import { drawLightning } from "../../../utils/lightning";
 import { getWizardPowerStep, getWizardMaxDistance, wizardPower, 
-    wizardTargetsCount, wizardShutDistance, wizardShutTimeout } from "../../state";
+    wizardTargetsCount, wizardShootDistance, wizardShootTimeout } from "../../state";
 
 const LIGHTNING_FORWARD_OFFSET = 40
 const LIGHTNING_SIDE_OFFSET = 8
 
 export default class Wizard extends AnimatedSprite {
-    constructor(x, y, lightnings, enemies, startShutTimeoutRate) {
-        super(atlases.wizard.animations.shut)
+    constructor(x, y, lightnings, enemies, startShootTimeoutRate) {
+        super(atlases.wizard.animations.shoot)
         
         this.anchor.set(0.5)
         this.animationSpeed = 0.5
@@ -21,10 +21,10 @@ export default class Wizard extends AnimatedSprite {
         this.lightnings = lightnings
         this.enemies = enemies
 
-        this.shutTimeout = wizardShutTimeout * startShutTimeoutRate
-        this.shutCount = 0
-        this.shutSqDist = wizardShutDistance * wizardShutDistance
-        this.shutPoint = {x: 0, y: 0}
+        this.shootTimeout = wizardShootTimeout * startShootTimeoutRate
+        this.shootCount = 0
+        this.shootSqDist = wizardShootDistance * wizardShootDistance
+        this.shootPoint = {x: 0, y: 0}
         this.startPoint = {x: 0, y: 0}
         this.targetPoint = null
         this.chainTargets = []   // враги в цепи
@@ -33,8 +33,8 @@ export default class Wizard extends AnimatedSprite {
         tickerAdd(this)
     }
 
-    shut() {
-        this.shutTimeout = wizardShutTimeout
+    shoot() {
+        this.shootTimeout = wizardShootTimeout
     
         // --- Найти первую цель (ближайшую) ---
         let nearestEnemy = null
@@ -53,7 +53,7 @@ export default class Wizard extends AnimatedSprite {
         }
     
         if (!nearestEnemy) return
-        if (nearestDist > this.shutSqDist) return
+        if (nearestDist > this.shootSqDist) return
     
         // Повернуть мага к первой цели
         this.rotation = Math.atan2(nearestEnemy.y, nearestEnemy.x)
@@ -117,17 +117,17 @@ export default class Wizard extends AnimatedSprite {
             drawLightning(this.chainTargets[i - 1], this.chainTargets[i], this.lightnings)
         }
     
-        this.shutCount = 12
+        this.shootCount = 12
         this.gotoAndPlay(0)
-        soundPlay(sounds.se_wizard_shut)
+        soundPlay(sounds.se_wizard_shoot)
     }
 
     tick(deltaMs) {
-        if (this.shutCount > 0) {
+        if (this.shootCount > 0) {
             this.lightnings.clear()
-            this.shutCount--
+            this.shootCount--
     
-            if (this.shutCount > 0 && this.chainTargets.length > 0) {
+            if (this.shootCount > 0 && this.chainTargets.length > 0) {
                 // Перерисовываем все сегменты цепи
                 drawLightning(this.startPoint, this.chainTargets[0], this.lightnings)
                 for (let i = 1; i < this.chainTargets.length; i++) {
@@ -136,8 +136,8 @@ export default class Wizard extends AnimatedSprite {
             }
         }
 
-        if (this.shutTimeout > 0) this.shutTimeout -= deltaMs
-        else this.shut()
+        if (this.shootTimeout > 0) this.shootTimeout -= deltaMs
+        else this.shoot()
     }
 
     kill() {

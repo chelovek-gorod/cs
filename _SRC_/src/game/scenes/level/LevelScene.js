@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js'
 import { images, music } from '../../../app/assets'
-import { EventHub, events, setShutPoint } from '../../../app/events'
+import { EventHub, events, setEnemyFirstWave, setShootPoint, showPopup } from '../../../app/events'
 import { getLanguage } from '../../localization'
 import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundTiling from '../../BG/BackgroundTiling'
@@ -8,9 +8,10 @@ import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import GameContainer from './GameContainer'
 import LevelUI from './LevelUI'
 import { getSafeAreaOffsets, setAfterTickerCallbacks } from '../../../app/application'
-import { addGold, round } from '../../state'
+import { addGold, round, traps } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import EnemySpawner from './EnemySpawner'
+import { POPUP_TYPE } from '../../popup/popupTypes'
 
 
 const musics = [ music.bgm_1, music.bgm_2, music.bgm_3, music.bgm_4, music.bgm_5, music.bgm_6, music.bgm_7 ]
@@ -31,6 +32,7 @@ export default class LevelScene extends Container {
         this.currentLanguage = getLanguage()
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
 
+        this.isArcherReadyToShoot = false
 
         this.bg = new BackgroundTiling(
             round % 10 === 0 ? images.lava_bg :
@@ -74,7 +76,13 @@ export default class LevelScene extends Container {
         */
         
         setMusicList( getMusic() )
-        console.log('level ready')
+
+        requestAnimationFrame( () => {
+            if (traps > 0) showPopup(POPUP_TYPE.TRAPPING)
+            else setEnemyFirstWave()
+        })
+
+        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
     }
 
     screenResize(screenData) {
@@ -105,21 +113,31 @@ export default class LevelScene extends Container {
     }
 
     getPointerDown(data) {
+        if (!this.isArcherReadyToShoot) return
+
         const localPos = this.bg.toLocal(data.global)
-        setShutPoint({x: localPos.x, y: localPos.y, type: 'down'})
+        setShootPoint({x: localPos.x, y: localPos.y, type: 'down'})
     }
     getPointerMove(data) {
+        if (!this.isArcherReadyToShoot) return
+
         const localPos = this.bg.toLocal(data.global)
-        setShutPoint({x: localPos.x, y: localPos.y, type: 'move'})
+        setShootPoint({x: localPos.x, y: localPos.y, type: 'move'})
     }
     getPointerUp(data) {
         const localPos = this.bg.toLocal(data.global)
-        setShutPoint({x: localPos.x, y: localPos.y, type: 'up'})
+
+        if (!this.isArcherReadyToShoot) this.gameContainer.addTrap(localPos.x, localPos.y)
+        else setShootPoint({x: localPos.x, y: localPos.y, type: 'up'})
     }
 
     addGoldForKill(value) {
         addGold(value)
         this.ui.setGoldText()
+    }
+
+    setEnemyFirstWave() {
+        this.isArcherReadyToShoot = true
     }
 
     updateLanguage(lang) {
@@ -148,5 +166,7 @@ export default class LevelScene extends Container {
         EventHub.off( events.updateLanguage, this.updateLanguage, this )
         EventHub.off( events.pauseGameplay, this.pauseGameplay, this )
         EventHub.off( events.addGoldForKill, this.addGoldForKill, this )
+
+        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
     }
 }

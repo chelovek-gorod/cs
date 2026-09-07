@@ -3,7 +3,7 @@ import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { arrowReloadTimeout, arrows, arrowShutTimeout } from "../../state";
+import { arrowReloadTimeout, arrows, arrowShootTimeout } from "../../state";
 import { createArrow } from "./Arrow";
 
 
@@ -11,7 +11,7 @@ export default class Archer extends Container {
     constructor(arrowPoints, arrowsOnGround, arrowsContainer) {
         super()
 
-        this.archer = new AnimatedSprite(atlases.archer.animations.shut)
+        this.archer = new AnimatedSprite(atlases.archer.animations.shoot)
         this.archer.anchor.set(0.5)
         this.archer.animationSpeed = 0.5
         this.archer.loop = false
@@ -22,13 +22,13 @@ export default class Archer extends Container {
         this.arrowsContainer = arrowsContainer
 
         this.arrows = arrows
-        this.shutTimeout = 0
-        this.shutPointX = 0
-        this.shutPointY = 0
+        this.shootTimeout = 0
+        this.shootPointX = 0
+        this.shootPointY = 0
         this.reloadTimeout = 0
         this.targetPoint = null
         this.isPointerDown = false
-        this.isReadyToShut = true
+        this.isReadyToShoot = true
 
         this.arrowsLabel = new Container()
         this.arrowsLabel.position.set(0, 30)
@@ -59,49 +59,49 @@ export default class Archer extends Container {
         this.arrowsLabelText.position.set(-2, -10)
         this.arrowsLabel.addChild(this.arrowsLabelText)
 
-        EventHub.on(events.setShutPoint, this.getShutPoint, this)
+        EventHub.on(events.setShootPoint, this.getShootPoint, this)
 
         tickerAdd(this)
     }
 
-    shut() {
+    shoot() {
         this.archer.gotoAndPlay(0)
 
-        const arrow = createArrow(this.shutPointX, this.shutPointY, this.arrowsOnGround)
+        const arrow = createArrow(this.shootPointX, this.shootPointY, this.arrowsOnGround)
         this.arrowsContainer.addChild(arrow)
 
-        arrow.arrowPoint.position.set(this.shutPointX, this.shutPointY)
+        arrow.arrowPoint.position.set(this.shootPointX, this.shootPointY)
         this.arrowPoints.addChild(arrow.arrowPoint)
 
-        this.isReadyToShut = false
+        this.isReadyToShoot = false
         this.arrows--
         this.arrowsLabelText.text = 'x' + this.arrows
-        if (this.arrows > 0) this.shutTimeout += arrowShutTimeout
+        if (this.arrows > 0) this.shootTimeout += arrowShootTimeout
         else this.reloadTimeout += arrowReloadTimeout
     }
 
-    getShutPoint(data) { // {x: data.x, y: data.y, type: 'up'}
-        this.shutPointX = data.x
-        this.shutPointY = data.y
+    getShootPoint(data) { // {x: data.x, y: data.y, type: 'up'}
+        this.shootPointX = data.x
+        this.shootPointY = data.y
         this.archer.rotation = Math.atan2(data.y, data.x)
 
         if (data.type === 'down') {
             this.isPointerDown = true
-            if (this.isReadyToShut) this.shut()
+            if (this.isReadyToShoot) this.shoot()
         } else if (data.type === 'up') {
             this.isPointerDown = false
         }
     }
 
     tick(deltaMs) {
-        if (this.isReadyToShut && this.isPointerDown) return this.shut()
+        if (this.isReadyToShoot && this.isPointerDown) return this.shoot()
 
-        else if (this.shutTimeout > 0) {
-            this.shutTimeout -= deltaMs
+        else if (this.shootTimeout > 0) {
+            this.shootTimeout -= deltaMs
     
-            if (this.shutTimeout <= 0) {
-                this.isReadyToShut = true
-                if (this.isPointerDown) return this.shut()
+            if (this.shootTimeout <= 0) {
+                this.isReadyToShoot = true
+                if (this.isPointerDown) return this.shoot()
             }
         }
         
@@ -117,15 +117,15 @@ export default class Archer extends Container {
     
             if (this.reloadTimeout <= 0) {
                 this.arrows = arrows
-                this.isReadyToShut = true
+                this.isReadyToShoot = true
                 this.arrowsLabelText.text = 'x' + this.arrows
-                if (this.isPointerDown) this.shut()
+                if (this.isPointerDown) this.shoot()
             }
         }
     }
 
     kill() {
-        EventHub.off(events.setShutPoint, this.getShutPoint, this)
+        EventHub.off(events.setShootPoint, this.getShootPoint, this)
         tickerRemove(this)
     }
 }

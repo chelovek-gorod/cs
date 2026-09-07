@@ -6,7 +6,7 @@ import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundImage from '../../BG/BackgroundImage'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import { getSafeAreaOffsets } from '../../../app/application'
-import { addCatapultCount, addGold, addLevel, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, getCatapultPrice, getWizardPrice, gold, level, levelStartPrice, round, wizardsCount, wizardsCountMax } from '../../state'
+import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, getCatapultPrice, getWizardPrice, gold, level, levelStartPrice, round, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import { SCENE_NAME } from '../SceneManager'
 import { styles } from '../../../app/styles'
@@ -101,7 +101,6 @@ export default class MenuScene extends Container {
         // Вычисляем цены
         this.wizardPrice = getWizardPrice()
         this.catapultPrice = getCatapultPrice()
-        this.levelPrice = (level + 1) * levelStartPrice
 
         // Кнопка мага
         // title, subtitle, description, clickAction, isAvailable, x, y
@@ -121,9 +120,9 @@ export default class MenuScene extends Container {
 
         // Кнопка уровня
         // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnAddLevel = new MenuButton(
-            '+LEVEL', this.levelPrice, 'upgrade',
-            this.addLevel.bind(this), (this.levelPrice <= gold),
+        this.btnAddTrap = new MenuButton(
+            '+1 TRAP', trapPrice, 'for enemies',
+            this.addTrap.bind(this), (trapPrice <= gold),
             -90, -100
         )
 
@@ -145,7 +144,7 @@ export default class MenuScene extends Container {
 
         this.buttonsContainer.addChild(
             this.btnAddWizard, this.btnAddCatapult,
-            this.btnAddLevel, this.btnAddGold,
+            this.btnAddTrap, this.btnAddGold,
             this.btnStartNextRound
         )
     }
@@ -154,11 +153,10 @@ export default class MenuScene extends Container {
         // Вычисляем цены
         this.wizardPrice = getWizardPrice()
         this.catapultPrice = getCatapultPrice()
-        this.levelPrice = (level + 1) * levelStartPrice
 
         this.btnAddWizard.setActive(this.wizardPrice <= gold && wizardsCount < 4)
         this.btnAddCatapult.setActive(this.catapultPrice <= gold && catapultsCount < 4)
-        this.btnAddLevel.setActive(this.levelPrice <= gold)
+        this.btnAddTrap.setActive(trapPrice <= gold)
 
         this.ui.setGoldText()
     }
@@ -193,11 +191,11 @@ export default class MenuScene extends Container {
         this.refreshButtons()
     }
 
-    addLevel() {
-        if (gold < this.levelPrice) return
+    addTrap() {
+        if (gold < trapPrice) return
 
-        addGold(-this.levelPrice)
-        showPopup(POPUP_TYPE.UPGRADE)
+        addTraps(1)
+        addGold(-trapPrice)
         this.refreshButtons()
     }
 

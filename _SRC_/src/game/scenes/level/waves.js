@@ -5,9 +5,12 @@ const ALL_TYPES_ORDER = [
     TYPES.BOSS,
     TYPES.TANK,
     TYPES.BOMB,
+    TYPES.RIDER,
     TYPES.SHOOTER,
     TYPES.FAST,
 ]
+// --- ПРИОРИТЕТ ЗАМЕЩЕНИЯ ---
+const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.RIDER, TYPES.SHOOTER, TYPES.FAST]
 
 // --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
 const MIN_ENEMIES_PER_ROUND = 5
@@ -25,9 +28,6 @@ const ADDITIONAL_ENEMIES_IN_WAVES_DIVIDER = 3 // делитель номера �
 // --- СТРОКА ЧЕТВЕРТЕЙ (для долей заполнения и перемешивания) ---
 const QUARTER_STRING = '123231132'
 
-// --- ПРИОРИТЕТ ЗАМЕЩЕНИЯ ---
-const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.SHOOTER, TYPES.FAST]
-
 // --- ДАННЫЕ СПЕЦ ЮНИТОВ (упрощённые) ---
 // unlockRound - с какого раунда появляются
 // replacementLimit - сколько % от NORMAL заменят
@@ -36,19 +36,23 @@ const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.SHOOTER, TYPES
 const UNIT_DATA = {
     [TYPES.FAST]: {
         unlockRound: 3,
-        replacementLimit: 0.2
+        replacementLimit: 0.1
     },
     [TYPES.SHOOTER]: {
         unlockRound: 5,
         replacementLimit: 0.3
     },
+    [TYPES.RIDER]: {
+        unlockRound: 1, // 8
+        replacementLimit: 0.4 // 0.2
+    },
     [TYPES.BOMB]: {
-        unlockRound: 8,
+        unlockRound: 12,
         replacementLimit: 0.1
     },
     [TYPES.TANK]: {
-        unlockRound: 13,
-        replacementLimit: 0.2 
+        unlockRound: 1, // 16
+        replacementLimit: 0.4  // 0.2
     },
     [TYPES.BOSS]: {
         unlockRound: 10,
@@ -108,7 +112,7 @@ function applySpecialUnits(round, wavesData, totalNormal, startQuarterIndex) {
     let quarterIndex = startQuarterIndex
 
     for (const type of PRIORITY_ORDER) {
-        if (type === TYPES.BOSS) continue // боссов обрабатываем отдельно
+        if (type === TYPES.NORMAL || type === TYPES.BOSS) continue // боссов обрабатываем отдельно
 
         const unitConfig = UNIT_DATA[type]
         if (!unitConfig || round < unitConfig.unlockRound) continue
@@ -246,12 +250,12 @@ export function getRoundWaves(round) {
         units: []
     }))
 
-    // 5. Применяем спецюнитов (кроме BOSS)
-    let quarterIndex = 0
-    quarterIndex = applySpecialUnits(round, wavesData, totalNormal, quarterIndex)
-
-    // 6. Применяем BOSS
+    // 5. Применяем BOSS
     applyBosses(round, wavesData)
+
+    // 6. Применяем спецюнитов (кроме BOSS)
+    let quarterIndex = 0
+    quarterIndex = applySpecialUnits(round, wavesData, totalNormal, quarterIndex)  
 
     // 7. Перемешиваем юнитов внутри волн
     shuffleWaves(wavesData, quarterIndex)

@@ -24,7 +24,7 @@ export default class Tower extends Container {
         this.addChild(this.image)
 
         for(let i = 0; i < catapultsCount; i++) {
-            // startShutTimeoutRate
+            // startShootTimeoutRate
             const str = 0.25 * (i + 1)
             const x = CATAPULT_POINTS[i].x
             const y = CATAPULT_POINTS[i].y
@@ -34,7 +34,7 @@ export default class Tower extends Container {
         }
 
         for(let i = 0; i < wizardsCount; i++) {
-            // startShutTimeoutRate
+            // startShootTimeoutRate
             const str = 0.25 * (i + 1)
             this.addChild(
                 new Wizard(WIZARD_POINTS[i].x, WIZARD_POINTS[i].y, lightnings, enemies, str)

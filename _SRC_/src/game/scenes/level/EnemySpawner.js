@@ -1,4 +1,5 @@
 import { tickerAdd, tickerRemove } from "../../../app/application"
+import { EventHub, events } from "../../../app/events"
 import { createEnum } from "../../../utils/functions"
 import { round } from "../../state"
 import { createEnemy } from "./Enemy"
@@ -63,8 +64,10 @@ export default class EnemySpawner {
         this.parentUi.setWaveText(this.waveIndex + 1, this.waves.length)
 
         this.isActive = true
-        tickerAdd(this)
+
+        EventHub.on( events.setEnemyFirstWave, this.startEnemyFirstWave, this )
     }
+    startEnemyFirstWave() { tickerAdd(this) }
 
     screenResize(screenData, scale) {
         this.isLandscape = screenData.isLandscape
@@ -248,6 +251,9 @@ export default class EnemySpawner {
     }
 
     kill() {
+        console.log('EnemySpawner.kill()')
+        EventHub.on( events.setEnemyFirstWave, this.startEnemyFirstWave, this )
+
         this.isActive = false
         tickerRemove(this)
         if (this.spawnQueue) this.spawnQueue.length = 0

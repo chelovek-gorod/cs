@@ -1,12 +1,13 @@
-import { Container, AnimatedSprite, Sprite, Graphics } from "pixi.js"
+import { Container, AnimatedSprite, Graphics } from "pixi.js"
 import { tickerAdd, tickerRemove } from "../../../app/application"
-import { atlases, images } from "../../../app/assets"
+import { atlases } from "../../../app/assets"
 import { addGoldForKill, setDamage } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
 import { createObjectPool } from "../../../utils/pool"
 import Explosion from "../../effects/Explosion"
 import { createHpBar } from "./EnemiesHpBar"
 import { createEnemyArrow } from "./EnemyArrow"
+import { createEnemyStone } from "./EnemyStone"
 
 const ENEMY_POOL = createObjectPool(100)
 
@@ -21,7 +22,7 @@ export function createEnemy(x, y, type, deadEnemiesContainer, enemyArrows, hpCon
     return enemy
 }
 
-export const TYPES = createEnum(['NORMAL', 'FAST', 'SHOOTER', 'BOMB', 'TANK', 'BOSS'])
+export const TYPES = createEnum(['NORMAL', 'FAST', 'SHOOTER', 'RIDER', 'BOMB', 'TANK', 'BOSS'])
 export const ENEMY_STATE = createEnum(['WALK', 'ATTACK', 'HIT', 'ICE', 'LIGHTNING', 'DIE'])
 
 const ALPHA_STEP = 0.001
@@ -62,7 +63,7 @@ const ENEMY = {
         attackTimeout: 600,
         attackStartFrameIndex: 8,
         reward: 1,
-        towerOffset: TOWER_OFFSET + 150,
+        towerOffset: TOWER_OFFSET + 120,
         bodyCollider: 20,
         headCollider: 10,
     },
@@ -72,10 +73,22 @@ const ENEMY = {
         speed: 0.02,
         damage: 10,
         attackTimeout: 1500,
-        attackStartFrameIndex: 7,
+        attackStartFrameIndex: 0,
         reward: 2,
-        towerOffset: TOWER_OFFSET + 48,
+        towerOffset: TOWER_OFFSET + 160,
         bodyCollider: 44,
+        headCollider: 0,
+    },
+    [TYPES.RIDER]: {
+        atlas: 'enemy_rider',
+        hp: 200,
+        speed: 0.05,
+        damage: 7,
+        attackTimeout: 1000,
+        attackStartFrameIndex: 6,
+        reward: 2,
+        towerOffset: TOWER_OFFSET + 50,
+        bodyCollider: 40,
         headCollider: 0,
     },
     [TYPES.BOMB]: {
@@ -142,7 +155,8 @@ class Enemy extends Container {
         this.colliderCircle.stroke({color: 0xff0000, width: 1})
         // --- //
 
-        this.enemyArrows = this.type === TYPES.SHOOTER ? enemyArrows : null
+        this.enemyArrows = (this.type === TYPES.SHOOTER || this.type === TYPES.TANK)
+            ? enemyArrows : null
 
         this.atlasName = ENEMY[type].atlas
         this.deadEnemiesContainer = deadEnemiesContainer
@@ -160,9 +174,8 @@ class Enemy extends Container {
         this.headSqCollider = ENEMY[type].headCollider * ENEMY[type].headCollider
         this.towerOffset = ENEMY[type].towerOffset
 
-        this.hpContainer = hpContainer
         this.hpBar.reset(x, y)
-        this.hpContainer.addChild(this.hpBar)
+        hpContainer.addChild(this.hpBar)
 
         this.attackTimeout = ENEMY[type].attackTimeout
         this.isAttacking = false
@@ -266,6 +279,8 @@ class Enemy extends Container {
         this.hpBar.setLineScale(this.hp / this.maxHp)
 
         if (this.hp === 0) {
+            this.hpBar.release()
+
             this.isDying = true
             this.isOnMove = false
             this.isOnHit = false
@@ -314,8 +329,12 @@ class Enemy extends Container {
 
         this.isOnMove = getDistance(this, {x: 0, y: 0}) > this.towerOffset
         if (!this.isOnMove) {
-            if (this.type === TYPES.BOMB) this.addExplosion(true)
-            else this.startAttack()
+            if (this.type === TYPES.BOMB) {
+                this.hpBar.release()
+                this.addExplosion(true)
+            } else {
+                this.startAttack()
+            }
         }
     }
 
@@ -331,8 +350,12 @@ class Enemy extends Container {
             this.isOnTurn = false
             this.turnToTower()
 
-            if (this.type === TYPES.BOMB) this.addExplosion(true)
-            else this.startAttack()
+            if (this.type === TYPES.BOMB) {
+                this.hpBar.release()
+                this.addExplosion(true)
+            } else {
+                this.startAttack()
+            }
             
             return
         }
@@ -372,7 +395,8 @@ class Enemy extends Container {
 
         this.image.onComplete = () => {
             if (this.enemyArrows) {
-                this.enemyArrows.addChild( createEnemyArrow(this.x, this.y, this.damage) )
+                const shieldBuild = this.type === TYPES.TANK ? createEnemyStone : createEnemyArrow
+                this.enemyArrows.addChild( shieldBuild(this.x, this.y, this.damage) )
             } else {
                 setDamage(this.damage)
             }
@@ -392,8 +416,6 @@ class Enemy extends Container {
     }
 
     addExplosion(isTowerDamage = true) {
-        this.hpBar.release()
-
         if (this.parent) {
             this.parent.parent.addChild(
                 new Explosion(this.x, this.y, 'explosion_bomb', 128)
@@ -411,7 +433,6 @@ class Enemy extends Container {
     die() {
         if (!this.parent) return
 
-        this.hpBar.release()
         tickerRemove(this)
         this.parent.removeChild(this)
         ENEMY_POOL.put(this)

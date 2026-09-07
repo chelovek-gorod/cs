@@ -21,8 +21,11 @@ export const events = createEnum([
 
     'addGoldForKill',
     'setDamage',
-    'setShutPoint',
+    'setShootPoint',
     'arrowOnTarget',
+
+    'setTrapsOnMap',
+    'setEnemyFirstWave',
 ])
 
 export function screenResize( data ) {
@@ -66,10 +69,17 @@ export function setDamage( value ) {
     EventHub.emit( events.setDamage, value )
 }
 
-export function setShutPoint( data ) {
-    EventHub.emit( events.setShutPoint, data )
+export function setShootPoint( data ) {
+    EventHub.emit( events.setShootPoint, data )
 }
 
 export function arrowOnTarget( data ) {
     EventHub.emit( events.arrowOnTarget, data )
+}
+
+export function setTrapsOnMap() {
+    EventHub.emit( events.setTrapsOnMap )
+}
+export function setEnemyFirstWave() {
+    EventHub.emit( events.setEnemyFirstWave )
 }
