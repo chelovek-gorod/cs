@@ -1,6 +1,6 @@
 {
   "frames": {
-    "fly_19-Photoroom": {
+    "fly_19": {
       "frame": {
         "x": 4,
         "y": 4,
@@ -24,7 +24,7 @@
         "y": 0.5
       }
     },
-    "fly_05-Photoroom": {
+    "fly_05": {
       "frame": {
         "x": 4,
         "y": 256,
@@ -48,7 +48,7 @@
         "y": 0.5
       }
     },
-    "fly_04-Photoroom": {
+    "fly_04": {
       "frame": {
         "x": 4,
         "y": 584,
@@ -72,7 +72,7 @@
         "y": 0.5
       }
     },
-    "fly_17-Photoroom": {
+    "fly_17": {
       "frame": {
         "x": 4,
         "y": 899,
@@ -96,7 +96,7 @@
         "y": 0.5
       }
     },
-    "fly_06-Photoroom": {
+    "fly_06": {
       "frame": {
         "x": 230,
         "y": 584,
@@ -120,7 +120,7 @@
         "y": 0.5
       }
     },
-    "fly_08-Photoroom": {
+    "fly_08": {
       "frame": {
         "x": 235,
         "y": 888,
@@ -144,7 +144,7 @@
         "y": 0.5
       }
     },
-    "fly_16-Photoroom": {
+    "fly_16": {
       "frame": {
         "x": 452,
         "y": 888,
@@ -168,7 +168,7 @@
         "y": 0.5
       }
     },
-    "fly_03-Photoroom": {
+    "fly_03": {
       "frame": {
         "x": 232,
         "y": 256,
@@ -192,7 +192,7 @@
         "y": 0.5
       }
     },
-    "fly_07-Photoroom": {
+    "fly_07": {
       "frame": {
         "x": 235,
         "y": 4,
@@ -216,7 +216,7 @@
         "y": 0.5
       }
     },
-    "fly_18-Photoroom": {
+    "fly_18": {
       "frame": {
         "x": 455,
         "y": 4,
@@ -240,7 +240,7 @@
         "y": 0.5
       }
     },
-    "fly_20-Photoroom": {
+    "fly_20": {
       "frame": {
         "x": 686,
         "y": 4,
@@ -264,7 +264,7 @@
         "y": 0.5
       }
     },
-    "fly_15-Photoroom": {
+    "fly_15": {
       "frame": {
         "x": 459,
         "y": 243,
@@ -288,7 +288,7 @@
         "y": 0.5
       }
     },
-    "fly_14-Photoroom": {
+    "fly_14": {
       "frame": {
         "x": 459,
         "y": 373,
@@ -312,7 +312,7 @@
         "y": 0.5
       }
     },
-    "fly_01-Photoroom": {
+    "fly_01": {
       "frame": {
         "x": 683,
         "y": 261,
@@ -336,7 +336,7 @@
         "y": 0.5
       }
     },
-    "fly_09-Photoroom": {
+    "fly_09": {
       "frame": {
         "x": 459,
         "y": 482,
@@ -360,7 +360,7 @@
         "y": 0.5
       }
     },
-    "fly_13-Photoroom": {
+    "fly_13": {
       "frame": {
         "x": 459,
         "y": 576,
@@ -384,7 +384,7 @@
         "y": 0.5
       }
     },
-    "fly_11-Photoroom": {
+    "fly_11": {
       "frame": {
         "x": 459,
         "y": 677,
@@ -408,7 +408,7 @@
         "y": 0.5
       }
     },
-    "fly_12-Photoroom": {
+    "fly_12": {
       "frame": {
         "x": 459,
         "y": 765,
@@ -432,7 +432,7 @@
         "y": 0.5
       }
     },
-    "fly_10-Photoroom": {
+    "fly_10": {
       "frame": {
         "x": 673,
         "y": 765,
@@ -456,7 +456,7 @@
         "y": 0.5
       }
     },
-    "fly_21-Photoroom": {
+    "fly_21": {
       "frame": {
         "x": 680,
         "y": 849,
@@ -480,7 +480,7 @@
         "y": 0.5
       }
     },
-    "fly_02-Photoroom": {
+    "fly_02": {
       "frame": {
         "x": 676,
         "y": 489,
@@ -505,9 +505,14 @@
       }
     }
   },
+  "animations": {
+    "fly": [
+        "fly_01", "fly_02", "fly_03", "fly_04", "fly_05", "fly_06", "fly_07", "fly_08", "fly_09",
+        "fly_10", "fly_11", "fly_12", "fly_13", "fly_14", "fly_15", "fly_16", "fly_17", "fly_18",
+        "fly_19", "fly_20", "fly_21"
+    ]
+  },
   "meta": {
-    "app": "http://free-tex-packer.com",
-    "version": "0.6.7",
     "image": "dragon.png",
     "format": "RGBA8888",
     "size": {

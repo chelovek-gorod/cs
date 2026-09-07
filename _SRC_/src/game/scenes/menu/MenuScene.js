@@ -6,7 +6,7 @@ import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundImage from '../../BG/BackgroundImage'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import { getSafeAreaOffsets } from '../../../app/application'
-import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, getCatapultPrice, getWizardPrice, gold, level, levelStartPrice, round, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
+import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, dragonPrice, getCatapultPrice, getWizardPrice, gold, isDragon, round, setDragon, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import { SCENE_NAME } from '../SceneManager'
 import { styles } from '../../../app/styles'
@@ -107,7 +107,7 @@ export default class MenuScene extends Container {
         this.btnAddWizard = new MenuButton(
             '+WIZARD', this.wizardPrice, 'add on tower',
             this.addWizard.bind(this), (this.wizardPrice <= gold && wizardsCount < 4),
-            -90, -200
+            -90, -120
         )
 
         // Кнопка катапульты
@@ -115,7 +115,7 @@ export default class MenuScene extends Container {
         this.btnAddCatapult = new MenuButton(
             '+CATAPULT', this.catapultPrice, 'add on tower',
             this.addCatapult.bind(this), (this.catapultPrice <= gold && catapultsCount < 4),
-            90, -200
+            90, -120
         )
 
         // Кнопка уровня
@@ -123,7 +123,15 @@ export default class MenuScene extends Container {
         this.btnAddTrap = new MenuButton(
             '+1 TRAP', trapPrice, 'for enemies',
             this.addTrap.bind(this), (trapPrice <= gold),
-            -90, -100
+            -90, -20
+        )
+
+        // Кнопка дракона
+        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
+        this.btnAddDragon = new MenuButton(
+            '+ DRAGON', dragonPrice, 'for 1 round',
+            this.addDragon.bind(this), (dragonPrice <= gold && !isDragon),
+            90, -20
         )
 
         // Кнопка золота
@@ -131,7 +139,7 @@ export default class MenuScene extends Container {
         this.btnAddGold = new MenuButton(
             '+ GOLD', adGoldBonus, 'for AD',
             this.addGold.bind(this), true,
-            90, -100
+            -90, 200
         )
 
         // Кнопка старта
@@ -139,12 +147,13 @@ export default class MenuScene extends Container {
         this.btnStartNextRound = new MenuButton(
             'START', round, 'ROUND',
             this.startNextRound.bind(this), true,
-            0, 200
+            90, 200
         )
 
         this.buttonsContainer.addChild(
             this.btnAddWizard, this.btnAddCatapult,
-            this.btnAddTrap, this.btnAddGold,
+            this.btnAddTrap, this.btnAddDragon,
+            this.btnAddGold,
             this.btnStartNextRound
         )
     }
@@ -157,6 +166,7 @@ export default class MenuScene extends Container {
         this.btnAddWizard.setActive(this.wizardPrice <= gold && wizardsCount < 4)
         this.btnAddCatapult.setActive(this.catapultPrice <= gold && catapultsCount < 4)
         this.btnAddTrap.setActive(trapPrice <= gold)
+        this.btnAddDragon.setActive( (dragonPrice <= gold && !isDragon) )
 
         this.ui.setGoldText()
     }
@@ -196,6 +206,14 @@ export default class MenuScene extends Container {
 
         addTraps(1)
         addGold(-trapPrice)
+        this.refreshButtons()
+    }
+
+    addDragon() {
+        if (gold < dragonPrice || isDragon) return
+
+        setDragon(true)
+        addGold(-dragonPrice)
         this.refreshButtons()
     }
 

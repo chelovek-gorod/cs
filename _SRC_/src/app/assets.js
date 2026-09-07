@@ -26,6 +26,8 @@ export const images = {
 
 
     /*** game images ***/
+    particle: 'particle.png',
+    spark: 'spark.png',
     coin: 'coin.png',
     menu_bg: 'menu_bg.png',
     round_bg: 'round_bg.png',
@@ -48,6 +50,7 @@ export const atlases = {
     archer: 'archer.json',
     wizard: 'wizard.json',
     catapult: 'catapult.json',
+    dragon: 'dragon.json',
     explosion_stone: 'explosion_240x240px_28frames.json',
     explosion_bomb: 'explosion_192x192px_25frames.json',
     enemy_normal: 'enemy_normal.json',

@@ -12,63 +12,66 @@ export let isLeaderboardAvailable = false
 export let gold = 0
 export let round = 1
 export let level = 0
-export const levelStartPrice = 10
+export const goldForSavingHp = 0.2
 export const adGoldBonus = 25
 
 export let towerHP = 100
-export const towerHPStep = 20
+export const towerHPStep = 10
 export const towerHPMax = 200
 
 export let arrows = 10
-export const arrowsStep = 2
+export const arrowsStep = 1
 export const arrowsMax = 20
 export let arrowPower = 10
 export const arrowPowerStep = 1
-export let arrowShootTimeout = 600
-export const arrowShootTimeoutStep = 96
-export const arrowShootTimeoutMax = 120
+export let arrowShootTimeout = 900
+export const arrowShootTimeoutStep = 70
+export const arrowShootTimeoutMax = 200
 export let arrowReloadTimeout = 1800
-export const arrowReloadTimeoutStep = 240
-export const arrowReloadTimeoutMax = 600
+export const arrowReloadTimeoutStep = 90
+export const arrowReloadTimeoutMax = 900
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.016
+export const arrowSpeedRateStep = 0.008
 export const arrowSpeedRateMax = 0.10
 
 export let catapultsCount = 0
 export const catapultsCountMax = 4
-export const catapultBasePrice = 50
+export const catapultBasePrice = 75
 export let catapultPower = 30
 export const catapultPowerStep = 2
 export let catapultDamageRadius = 50 // 50
 export const catapultDamageRadiusStep = 14
 export const catapultDamageRadiusMax = 120
-export let catapultShootTimeout = 3200
-export const catapultShootTimeoutStep = 400
-export const catapultShootTimeoutMax = 1200
+export let catapultShootTimeout = 6000
+export const catapultShootTimeoutStep = 300
+export const catapultShootTimeoutMax = 3000
 export let catapultShootDistance = 300
-export const catapultShootDistanceStep = 60
+export const catapultShootDistanceStep = 30
 export const catapultShootDistanceMax = 600
 
 export let wizardsCount = 0
 export const wizardsCountMax = 4
-export const wizardBasePrice = 35
+export const wizardBasePrice = 50
 export let wizardPower = 20 // 20
 export const wizardPowerStep = 1
 export let wizardTargetsCount = 1 // 1
-export const wizardTargetsCountMax = 6 // main + 10 additional targets
-export const wizardTargetRadiusRate = 0.35 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
-export let wizardShootTimeout = 1800
-export const wizardShootTimeoutStep = 180
-export const wizardShootTimeoutMax = 900
+export const wizardTargetsCountMax = 11 // main + 10 additional targets
+export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
+export let wizardShootTimeout = 4000
+export const wizardShootTimeoutStep = 200
+export const wizardShootTimeoutMax = 2000
 export let wizardShootDistance = 240 // 240
-export const wizardShootDistanceStep = 48
+export const wizardShootDistanceStep = 24
 export const wizardShootDistanceMax = 480
 
 export let traps = 0
 export const trapPrice = 6
-export const trapPower = 30
-export const trapDamageRadius = 120
-export const trapActivationDistance = 90
+export const trapPower = 75
+export const trapDamageRadius = 150
+export const trapActivationDistance = 75
+
+export let isDragon = false
+export const dragonPrice = 50
 
 export function addGold(value) { gold += value }
 export function addRound() { round++ }
@@ -117,6 +120,7 @@ export function getWizardPowerStep() { return Math.max(1, Math.ceil(wizardPower 
 export function getWizardMaxDistance() { return Math.ceil(wizardShootDistance * wizardTargetRadiusRate) }
 
 export function addTraps(value) { traps += value }
+export function setDragon(isAAvailable = false) { isDragon = isAAvailable }
 
 export function resetAllProgress() {
     gold = 0

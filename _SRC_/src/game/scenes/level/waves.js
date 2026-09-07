@@ -43,16 +43,16 @@ const UNIT_DATA = {
         replacementLimit: 0.3
     },
     [TYPES.RIDER]: {
-        unlockRound: 1, // 8
-        replacementLimit: 0.4 // 0.2
+        unlockRound: 8, // 8
+        replacementLimit: 0.2 // 0.2
     },
     [TYPES.BOMB]: {
         unlockRound: 12,
         replacementLimit: 0.1
     },
     [TYPES.TANK]: {
-        unlockRound: 1, // 16
-        replacementLimit: 0.4  // 0.2
+        unlockRound: 16, // 16
+        replacementLimit: 0.2  // 0.2
     },
     [TYPES.BOSS]: {
         unlockRound: 10,

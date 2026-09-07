@@ -266,6 +266,14 @@ class Enemy extends Container {
         }
     }
 
+    onIce(time) {
+        if (this.hp === 0) return
+
+        this.isIce = true
+        this.iceTimeout = time
+        this.setState(ENEMY_STATE.ICE)
+    }
+
     onLightning(power) {
         this.lightningDamage += power
         this.lightningCount = LIGHTNING_FRAMES
@@ -278,13 +286,15 @@ class Enemy extends Container {
         this.hp = Math.max(0, this.hp - power)
         this.hpBar.setLineScale(this.hp / this.maxHp)
 
+        this.isIce = false
+        this.iceTimeout = 0
+
         if (this.hp === 0) {
             this.hpBar.release()
 
             this.isDying = true
             this.isOnMove = false
             this.isOnHit = false
-            this.isIce = false
             this.lightningCount = 0
             this.lightningDamage = 0
 

@@ -5,9 +5,11 @@ import { styles } from "../../../app/styles"
 import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
-import { addGold, addRound, addTraps, arrowPower, traps } from "../../state"
+import { addGold, addRound, addTraps, arrowPower, goldForSavingHp, isDragon, setDragon, traps } from "../../state"
 import { SCENE_NAME } from "../SceneManager"
 import { createArrowOnGround } from "./ArrowOnGround"
+import Dragon from "./Dragon"
+import DragonIce from "./DragonIce"
 import Tower from "./Tower"
 import { createTrap } from "./Trap"
 
@@ -63,6 +65,15 @@ export default class GameContainer extends Container {
         this.addChild(this.arrows)
         this.addChild(this.stones)
 
+        this.dragon = null
+        if (isDragon) {
+            this.dragonIce = new DragonIce()
+            this.addChild(this.dragonIce.particleContainer)
+            this.dragon = new Dragon( this.enemies, this.dragonIce.emit.bind(this.dragonIce) )
+            this.addChild(this.dragon)
+            setDragon(false)
+        }
+        
         this.addChild(this.enemiesHp)
 
         this.resultPopupTimer = 0
@@ -193,7 +204,7 @@ export default class GameContainer extends Container {
 
     handleRoundWin() {
         if (this.tower.hp > 9) {
-            const extraGold = Math.floor(this.tower.hp * 0.1)
+            const extraGold = Math.floor(this.tower.hp * goldForSavingHp)
             this.parent.flyTexts.addChild(new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0))
             addGold(extraGold)
         }
@@ -219,6 +230,10 @@ export default class GameContainer extends Container {
 
     kill() {
         tickerRemove(this)
+        if (this.dragon) {
+            this.dragon.kill()
+            this.dragonIce.kill()
+        }
         
         if (this.trapsButton) this.removeTrapsButton()
 

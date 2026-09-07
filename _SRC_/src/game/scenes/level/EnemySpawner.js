@@ -31,6 +31,7 @@ const STATE = createEnum([
 export default class EnemySpawner {
     constructor(gameContainer, ui) {
         this.waves = getRoundWaves(round)
+        console.log('waves ready')
 
         this.parentUi = ui
 
