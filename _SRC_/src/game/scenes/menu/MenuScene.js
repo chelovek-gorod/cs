@@ -6,7 +6,7 @@ import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundImage from '../../BG/BackgroundImage'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import { getSafeAreaOffsets } from '../../../app/application'
-import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, dragonPrice, getCatapultPrice, getWizardPrice, gold, isDragon, round, setDragon, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
+import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, dragonPrice, getCatapultPrice, getWizardPrice, gold, dragons, round, addDragon, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import { SCENE_NAME } from '../SceneManager'
 import { styles } from '../../../app/styles'
@@ -130,7 +130,7 @@ export default class MenuScene extends Container {
         // title, subtitle, description, clickAction = null, isAvailable = true, x, y
         this.btnAddDragon = new MenuButton(
             '+ DRAGON', dragonPrice, 'for 1 round',
-            this.addDragon.bind(this), (dragonPrice <= gold && !isDragon),
+            this.addDragon.bind(this), (dragonPrice <= gold),
             90, -20
         )
 
@@ -166,7 +166,7 @@ export default class MenuScene extends Container {
         this.btnAddWizard.setActive(this.wizardPrice <= gold && wizardsCount < 4)
         this.btnAddCatapult.setActive(this.catapultPrice <= gold && catapultsCount < 4)
         this.btnAddTrap.setActive(trapPrice <= gold)
-        this.btnAddDragon.setActive( (dragonPrice <= gold && !isDragon) )
+        this.btnAddDragon.setActive( (dragonPrice <= gold) )
 
         this.ui.setGoldText()
     }
@@ -210,9 +210,9 @@ export default class MenuScene extends Container {
     }
 
     addDragon() {
-        if (gold < dragonPrice || isDragon) return
+        if (gold < dragonPrice) return
 
-        setDragon(true)
+        addDragon(1)
         addGold(-dragonPrice)
         this.refreshButtons()
     }

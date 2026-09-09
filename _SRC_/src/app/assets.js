@@ -47,6 +47,7 @@ export const images = {
     enemy_stone: 'enemy_stone.png',
 }
 export const atlases = {
+    chest: 'chest.json',
     archer: 'archer.json',
     wizard: 'wizard.json',
     catapult: 'catapult.json',

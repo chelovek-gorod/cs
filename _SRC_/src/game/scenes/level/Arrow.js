@@ -53,7 +53,7 @@ class Arrow extends Sprite {
         this.position.y += Math.sin(this.rotation) * START_OFFSET
 
         tickerAdd(this)
-        soundPlay(sounds.se_arrow)
+        soundPlay(sounds.se_arrow.rate(1.0))
     }
 
     tick(deltaMs) {

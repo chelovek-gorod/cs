@@ -4,20 +4,21 @@ import { images } from '../../../app/assets'
 import { createParticlePool } from '../../../utils/pool'
 
 // Параметры ледяного дыхания (можно подстроить)
-const ICE_CONFIG = {
-    PARTICLE_SCALE_BIG: 0.5,
-    PARTICLE_SCALE_SMALL: 0.2,
-    COLORS: [0xffffff, 0xdddddd, 0x00ffff],   // белый, светло-серый, голубой
-    ALPHA_START: 0.9,
-    ALPHA_DECAY: 0.0012,                     // медленное угасание
-    SPEED: 0.24,                             // выше скорость
-    SPEED_VARIANCE: 0.12,
-    SPREAD_ANGLE: 0.12,                      // уже конус (~7°)
-    SPAWN_RADIUS: 6,                         // небольшой разброс в точке рождения
-    MAX_PARTICLES: 500,
-}
+const PARTICLE_SCALE_BIG = 0.5
+const PARTICLE_SCALE_SMALL = 0.2
+const COLORS = [0xff0000, 0xffff00, 0xff6600, 0xffff00, 0xffcc00, 0xdddddd]
+const LIFE_MIN = 600   // мс
+const LIFE_MAX = 900  // мс
+const ALPHA_START = 0.7
+const ALPHA_DECAY = 0.0036                    // медленное угасание
+const SPEED = 0.18                            // выше скорость
+const SPEED_VARIANCE = 0.06
+const SPREAD_ANGLE = 0.27                     // уже конус (~7°)
+const SPAWN_RADIUS = 3                        // небольшой разброс в точке рождения
+const MAX_PARTICLES = 500
 
-export default class DragonIce extends Container {
+
+export default class DragonFire extends Container {
     constructor() {
         super()
 
@@ -31,7 +32,7 @@ export default class DragonIce extends Container {
         this.addChild(this.particleContainer)
 
         // Пул частиц
-        this.particlePool = createParticlePool(ICE_CONFIG.MAX_PARTICLES)
+        this.particlePool = createParticlePool(MAX_PARTICLES)
 
         // Активные частицы
         this.activeParticles = []
@@ -49,7 +50,7 @@ export default class DragonIce extends Container {
     emit(x, y, dirX, dirY, count) {
         const bigCount = Math.ceil(count / 3)        // больших в 2 раза меньше
         const smallCount = count - bigCount
-        const colors = ICE_CONFIG.COLORS
+        const colors = COLORS
     
         const emitOne = (scale) => {
             let particle = this.particlePool.get()
@@ -74,28 +75,29 @@ export default class DragonIce extends Container {
     
             // случайное смещение в радиусе
             const angleOffset = Math.random() * Math.PI * 2
-            const dist = Math.random() * ICE_CONFIG.SPAWN_RADIUS
+            const dist = Math.random() * SPAWN_RADIUS
             const startX = x + Math.cos(angleOffset) * dist
             const startY = y + Math.sin(angleOffset) * dist
     
             // направление с разбросом
             const baseAngle = Math.atan2(dirY, dirX)
-            const spread = (Math.random() - 0.5) * 2 * ICE_CONFIG.SPREAD_ANGLE
+            const spread = (Math.random() - 0.5) * 2 * SPREAD_ANGLE
             const finalAngle = baseAngle + spread
-            const speed = ICE_CONFIG.SPEED + Math.random() * ICE_CONFIG.SPEED_VARIANCE
+            const speed = SPEED + Math.random() * SPEED_VARIANCE
     
             particle.x = startX
             particle.y = startY
-            particle.alpha = ICE_CONFIG.ALPHA_START
+            particle.alpha = ALPHA_START
             particle.data.vx = Math.cos(finalAngle) * speed
             particle.data.vy = Math.sin(finalAngle) * speed
+            particle.data.life = LIFE_MIN + Math.random() * (LIFE_MAX - LIFE_MIN)
     
             this.particleContainer.addParticle(particle)
             this.activeParticles.push(particle)
         }
     
-        for (let i = 0; i < bigCount; i++) emitOne(ICE_CONFIG.PARTICLE_SCALE_BIG)
-        for (let i = 0; i < smallCount; i++) emitOne(ICE_CONFIG.PARTICLE_SCALE_SMALL)
+        for (let i = 0; i < bigCount; i++) emitOne(PARTICLE_SCALE_BIG)
+        for (let i = 0; i < smallCount; i++) emitOne(PARTICLE_SCALE_SMALL)
     
         if (!this.isTickerAdded) {
             tickerAdd(this)
@@ -113,7 +115,8 @@ export default class DragonIce extends Container {
             p.y += p.data.vy * deltaMs
 
             // Угасание
-            p.alpha = Math.max(0, p.alpha - ICE_CONFIG.ALPHA_DECAY * deltaMs)
+            if (p.data.life > 0) p.data.life -= deltaMs
+            else p.alpha = Math.max(0, p.alpha - ALPHA_DECAY * deltaMs)
 
             // Удаление, если частица исчезла или вышла за границы (можно добавить границы)
             if (p.alpha <= 0) {

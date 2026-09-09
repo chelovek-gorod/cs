@@ -10,7 +10,7 @@ export let isLeaderboardAvailable = false
 
 // player and game data
 export let gold = 0
-export let round = 1
+export let round = 5
 export let level = 0
 export const goldForSavingHp = 0.2
 export const adGoldBonus = 25
@@ -70,7 +70,7 @@ export const trapPower = 75
 export const trapDamageRadius = 150
 export const trapActivationDistance = 75
 
-export let isDragon = false
+export let dragons = true
 export const dragonPrice = 50
 
 export function addGold(value) { gold += value }
@@ -120,7 +120,7 @@ export function getWizardPowerStep() { return Math.max(1, Math.ceil(wizardPower 
 export function getWizardMaxDistance() { return Math.ceil(wizardShootDistance * wizardTargetRadiusRate) }
 
 export function addTraps(value) { traps += value }
-export function setDragon(isAAvailable = false) { isDragon = isAAvailable }
+export function addDragon(value) { dragons += value }
 
 export function resetAllProgress() {
     gold = 0

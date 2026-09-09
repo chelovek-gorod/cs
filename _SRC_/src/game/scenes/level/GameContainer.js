@@ -5,11 +5,12 @@ import { styles } from "../../../app/styles"
 import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
-import { addGold, addRound, addTraps, arrowPower, goldForSavingHp, isDragon, setDragon, traps } from "../../state"
+import { addGold, addRound, addTraps, arrowPower, goldForSavingHp, dragons, addDragon, traps } from "../../state"
 import { SCENE_NAME } from "../SceneManager"
 import { createArrowOnGround } from "./ArrowOnGround"
+import ChestsContainer from "./Chest"
 import Dragon from "./Dragon"
-import DragonIce from "./DragonIce"
+import DragonFire from "./DragonFire"
 import Tower from "./Tower"
 import { createTrap } from "./Trap"
 
@@ -27,6 +28,9 @@ export default class GameContainer extends Container {
         this.traps = new Container()
         this.addChild(this.traps)
         this.trapsButton = null
+
+        this.chests = new ChestsContainer()
+        this.addChild(this.chests)
 
         this.arrowPoints = new Container()
         this.addChild(this.arrowPoints)
@@ -66,12 +70,11 @@ export default class GameContainer extends Container {
         this.addChild(this.stones)
 
         this.dragon = null
-        if (isDragon) {
-            this.dragonIce = new DragonIce()
-            this.addChild(this.dragonIce.particleContainer)
-            this.dragon = new Dragon( this.enemies, this.dragonIce.emit.bind(this.dragonIce) )
+        if (dragons) {
+            this.dragonFire = new DragonFire()
+            this.addChild(this.dragonFire.particleContainer)
+            this.dragon = new Dragon( this.enemies, this.dragonFire.emit.bind(this.dragonFire) )
             this.addChild(this.dragon)
-            setDragon(false)
         }
         
         this.addChild(this.enemiesHp)
@@ -183,22 +186,36 @@ export default class GameContainer extends Container {
             }
 
             let power = this.arrowCurrentPower
+            const textPoint = this.parent.toLocal({ x, y }, this)
 
             if (nearestSqDist < enemies[nearestIndex].headSqCollider) {
                 power *= this.arrowHeadShootRate
-                this.parent.flyTexts.addChild(new FlyText('HEAD SHOOT', x, y - 18))
+                this.parent.flyTexts.addChild(
+                    new FlyText('HEAD SHOOT', textPoint.x, textPoint.y - 18)
+                )
             }
 
             const text = this.arrowComboCount > 0
                 ? `-${power} Combo X${this.arrowComboCount}`
                 : `-${power}`
-            this.parent.flyTexts.addChild(new FlyText(text, x, y))
+            this.parent.flyTexts.addChild(
+                new FlyText(text, textPoint.x, textPoint.y)
+            )
             enemies[nearestIndex].setDamage(power)
         } else {
             this.arrowComboCount = 0
             this.arrowLastTarget = null
             this.arrowCurrentPower = this.arrowStartPower
-            this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
+
+            const textPoint = this.parent.toLocal({x: data.x, y: data.y}, this)
+            if (this.chests.checkShut(data.x, data.y)) {
+                this.parent.flyTexts.addChild(
+                    new FlyText('+12 Gold', textPoint.x, textPoint.y)
+                )
+                addGold(12)
+            } else {
+                this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
+            }
         }
     }
 
@@ -232,7 +249,7 @@ export default class GameContainer extends Container {
         tickerRemove(this)
         if (this.dragon) {
             this.dragon.kill()
-            this.dragonIce.kill()
+            this.dragonFire.kill()
         }
         
         if (this.trapsButton) this.removeTrapsButton()

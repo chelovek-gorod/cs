@@ -133,3 +133,13 @@ export function moveToTarget( sprite, target, pathSize ) {
 
     return false
 }
+
+export function getRandomPointInRing(minOffset, maxOffset) {
+    if (minOffset > maxOffset) return console.error('minOffset > maxOffset')
+
+    const angle = Math.random() * _2PI
+    const minSq = minOffset * minOffset
+    const rSq = minSq + Math.random() * (maxOffset * maxOffset - minSq)
+    const r = Math.sqrt(rSq)
+    return {x: r * Math.cos(angle), y: r * Math.sin(angle)}
+}

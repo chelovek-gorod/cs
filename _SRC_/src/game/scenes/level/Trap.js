@@ -45,7 +45,7 @@ class Trap extends AnimatedSprite {
         this.isCheckFrame = Math.random() < 0.5 ? false : true
 
         tickerAdd(this)
-        soundPlay(sounds.se_catapult_shoot)
+        soundPlay(sounds.se_catapult_shoot.rate(0.8))
     }
 
     setDamage(enemies) {

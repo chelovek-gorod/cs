@@ -58,7 +58,7 @@ class Stone extends Container {
         this.position.y += Math.sin(this.rotation) * START_OFFSET
 
         tickerAdd(this)
-        soundPlay(sounds.se_catapult_shoot)
+        soundPlay(sounds.se_catapult_shoot.rate(1.0))
     }
 
     setDamage() {
