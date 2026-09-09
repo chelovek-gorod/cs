@@ -10,28 +10,28 @@ export let isLeaderboardAvailable = false
 
 // player and game data
 export let gold = 0
-export let round = 5
+export let round = 1
 export let level = 0
 export const goldForSavingHp = 0.2
 export const adGoldBonus = 25
 
 export let towerHP = 100
-export const towerHPStep = 10
+export const towerHPStep = 20
 export const towerHPMax = 200
 
 export let arrows = 10
-export const arrowsStep = 1
+export const arrowsStep = 2
 export const arrowsMax = 20
 export let arrowPower = 10
 export const arrowPowerStep = 1
 export let arrowShootTimeout = 900
-export const arrowShootTimeoutStep = 70
+export const arrowShootTimeoutStep = 140
 export const arrowShootTimeoutMax = 200
 export let arrowReloadTimeout = 1800
-export const arrowReloadTimeoutStep = 90
+export const arrowReloadTimeoutStep = 180
 export const arrowReloadTimeoutMax = 900
 export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.008
+export const arrowSpeedRateStep = 0.016
 export const arrowSpeedRateMax = 0.10
 
 export let catapultsCount = 0
@@ -43,10 +43,10 @@ export let catapultDamageRadius = 50 // 50
 export const catapultDamageRadiusStep = 14
 export const catapultDamageRadiusMax = 120
 export let catapultShootTimeout = 6000
-export const catapultShootTimeoutStep = 300
+export const catapultShootTimeoutStep = 600
 export const catapultShootTimeoutMax = 3000
 export let catapultShootDistance = 300
-export const catapultShootDistanceStep = 30
+export const catapultShootDistanceStep = 60
 export const catapultShootDistanceMax = 600
 
 export let wizardsCount = 0
@@ -55,17 +55,17 @@ export const wizardBasePrice = 50
 export let wizardPower = 20 // 20
 export const wizardPowerStep = 1
 export let wizardTargetsCount = 1 // 1
-export const wizardTargetsCountMax = 11 // main + 10 additional targets
+export const wizardTargetsCountMax = 6 // main + 5 additional targets
 export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
 export let wizardShootTimeout = 4000
-export const wizardShootTimeoutStep = 200
+export const wizardShootTimeoutStep = 400
 export const wizardShootTimeoutMax = 2000
 export let wizardShootDistance = 240 // 240
-export const wizardShootDistanceStep = 24
+export const wizardShootDistanceStep = 48
 export const wizardShootDistanceMax = 480
 
 export let traps = 0
-export const trapPrice = 6
+export const trapPrice = 3
 export const trapPower = 75
 export const trapDamageRadius = 150
 export const trapActivationDistance = 75
