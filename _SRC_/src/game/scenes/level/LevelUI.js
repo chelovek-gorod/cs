@@ -1,13 +1,13 @@
 import { Container, Text } from "pixi.js";
 import { styles } from "../../../app/styles";
-import { gold, round } from "../../state";
+import { gameState } from "../../state";
 
 
 export default class LevelUI extends Container {
     constructor() {
         super()
 
-        this.roundText = new Text({text: `Round ${round}`, style: styles.loading})
+        this.roundText = new Text({text: `Round ${gameState.round}`, style: styles.loading})
         this.roundText.anchor.set(0, 0)
         this.roundText.scale.set(0.5)
         this.addChild(this.roundText)
@@ -17,7 +17,7 @@ export default class LevelUI extends Container {
         this.addChild(this.waveText)
         this.waveText.scale.set(0.5)
 
-        this.goldText = new Text({text: `Gold ${gold}`, style: styles.loading})
+        this.goldText = new Text({text: `Gold ${gameState.gold}`, style: styles.loading})
         this.goldText.anchor.set(1, 0)
         this.goldText.scale.set(0.5)
         this.addChild(this.goldText)
@@ -38,6 +38,6 @@ export default class LevelUI extends Container {
     }
 
     setGoldText() {
-        this.goldText.text = `Gold ${gold}`
+        this.goldText.text = `Gold ${gameState.gold}`
     }
 }

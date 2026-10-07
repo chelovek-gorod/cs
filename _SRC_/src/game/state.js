@@ -6,179 +6,166 @@ import { createEnum } from "../utils/functions"
 export let isAdAvailable = true
 export let isLeaderboardAvailable = false
 
-// !!! ПРИ ПРАВКАХ СТАРТОВЫХ СТАТ - ОБНОВИТЬ ЗНАЧЕНИЯ в resetAllProgress()
+function initState() {
+    return {
+        gold: 1100,
+        round: 1,
+        
+        towerHp: 100,
+        towerHpPrice: 5,
+        towerFogCount: 0,
+        towerFogPower: 25,
+        towerFogUpgradePrice: 10,
+        towerRepairsCount: 0,
+        towerRepairHp: 25,
+        towerRepairUpgradePrice: 5,
 
-// player and game data
-export let gold = 0
-export let round = 1
-export let level = 0
+        arrowsCount: 10,
+        arrowPower: 10,
+        arrowFlyRate: 0.02,
+        arrowShootTimeout: 1000,
+        arrowReloadTimeout: 3000,
+        berserkPowerRate: 1.2,
+        berserkShoots: 12,
+
+        mineTimeout: 5 * 60 * 1000, // 5 minutes
+        mineTimeoutPrice: 100,
+        mineMaxGold: 100,
+        mineMaxGoldPrice: 80,
+
+        iceCount: 0,
+        iceDuration: 5000,
+        iceDurationPrice: 25,
+        icePowerRate: 0.5, // 0.75, 1, 1.25, 1.5, 1.75, 2
+        icePowerRatePrice: 40,
+
+        trapsCount: 0,
+        trapPower: 75, // 100, 125, 150, 175, 200
+        trapPowerPrice: 10,
+        trapRadius: 100, // activateRadius = trapRadius * 0.5
+        trapRadiusPrice: 20,
+
+        dragonsCount: 0,
+        dragonPrice: 50,
+        dragonFuel: 0,
+        dragonPower: 12,
+        dragonPowerPrice: 20,
+
+        wizardsCount: 0,
+        wizardPrice: 50,
+        wizardPower: 20,
+        wizardPowerPrice: 10,
+        wizardTimeout: 4000,
+        wizardTimeoutPrice: 10,
+        wizardDistance: 240,
+        wizardDistancePrice: 15,
+        wizardTargets: 1,
+        wizardTargetPrice: 15,
+
+        catapultsCount: 0,
+        catapultPrice: 80,
+        catapultPower: 30,
+        catapultPowerPrice: 20,
+        catapultTimeout: 6000,
+        catapultTimeoutPrice: 25,
+        catapultDistance: 300,
+        catapultDistancePrice: 30,
+        catapultRadius: 60,
+        catapultRadiusPrice: 40,
+    }
+}
+
+export let gameState = initState()
+
 export const goldForSavingHp = 0.2
 export const adGoldBonus = 25
 
-export let towerHP = 100
 export const towerHPStep = 20
 export const towerHPMax = 200
+export const towerFogPowerStep = 5
+export const towerFogPowerMax = 50
+export const towerFogPrice = 120
+export const towerRepairStep = 5
+export const towerRepairMax = 50
+export const towerRepairPrice = 75
 
-export let arrows = 10
+export const mineTimeoutStep = 30 * 1000 // 30 seconds
+export const mineTimeoutMax = 2.5 * 60 * 1000 // 2.5 minutes
+export const mineMaxGoldStep = 50
+export const mineMaxGoldMax = 300
+
+export const icePrice = 50
+export const iceAdd = 12
+export const iceDurationStep = 1000
+export const iceDurationMax = 10000
+export const icePowerRateStep = 0.25
+export const icePowerRateMax = 2
+
+export const trapPrice = 25
+export const trapsAdd = 6
+export const trapPowerStep = 25
+export const trapPowerMax = 200
+export const trapRadiusTrigger = gameState.trapRadius * 0.5
+
+export const dragonPrice = 50
+export const dragonFuelMax = 120
+export const dragonPowerStep = 6
+export const dragonPowerMax = 36
+
 export const arrowsStep = 2
 export const arrowsMax = 20
-export let arrowPower = 10
 export const arrowPowerStep = 1
-export let arrowShootTimeout = 900
-export const arrowShootTimeoutStep = 140
-export const arrowShootTimeoutMax = 200
-export let arrowReloadTimeout = 1800
-export const arrowReloadTimeoutStep = 180
-export const arrowReloadTimeoutMax = 900
-export let arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-export const arrowSpeedRateStep = 0.016
-export const arrowSpeedRateMax = 0.10
+export const arrowShootTimeoutStep = 150
+export const arrowShootTimeoutMax = 250
+export const arrowReloadTimeoutStep = 300
+export const arrowReloadTimeoutMax = 1500
+export const arrowFlyRateStep = 0.016
+export const arrowFlyRateMax = 0.10
 
-export let catapultsCount = 0
+export const berserkShootStep = 1
+export const berserkPowerRateStep = 0.1
+
 export const catapultsCountMax = 4
 export const catapultBasePrice = 75
-export let catapultPower = 30
 export const catapultPowerStep = 2
-export let catapultDamageRadius = 50 // 50
 export const catapultDamageRadiusStep = 14
 export const catapultDamageRadiusMax = 120
-export let catapultShootTimeout = 6000
 export const catapultShootTimeoutStep = 600
 export const catapultShootTimeoutMax = 3000
-export let catapultShootDistance = 300
 export const catapultShootDistanceStep = 60
 export const catapultShootDistanceMax = 600
 
-export let wizardsCount = 0
 export const wizardsCountMax = 4
 export const wizardBasePrice = 50
-export let wizardPower = 20 // 20
 export const wizardPowerStep = 1
-export let wizardTargetsCount = 1 // 1
 export const wizardTargetsCountMax = 6 // main + 5 additional targets
 export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
-export let wizardShootTimeout = 4000
 export const wizardShootTimeoutStep = 400
 export const wizardShootTimeoutMax = 2000
-export let wizardShootDistance = 240 // 240
 export const wizardShootDistanceStep = 48
 export const wizardShootDistanceMax = 480
 
-export let traps = 0
-export const trapPrice = 3
-export const trapPower = 75
-export const trapDamageRadius = 150
-export const trapActivationDistance = 75
-
-export let dragons = true
-export const dragonPrice = 50
-
-export function addGold(value) { gold += value }
-export function addRound() { round++ }
-export function addLevel() { level++ }
-
-export function addTowerHP() { towerHP = Math.min(towerHPMax, towerHP + towerHPStep) }
-
-export function addArrow() { arrows = Math.min(arrowsMax, arrows + arrowsStep) }
-export function addArrowPower() { arrowPower += arrowPowerStep }
-export function addArrowShootTimeout() {
-    arrowShootTimeout = Math.max(arrowShootTimeoutMax, arrowShootTimeout - arrowShootTimeoutStep)
+export function getHelperPrice(currentPrice) {
+    return currentPrice * 2 ** (wizardsCount + catapultsCount)
 }
-export function addArrowReloadTimeout() {
-    arrowReloadTimeout = Math.max(arrowReloadTimeoutMax, arrowReloadTimeout - arrowReloadTimeoutStep)
-}
-export function addArrowSpeedRate() {
-    arrowSpeedRate = Math.min(arrowSpeedRateMax, arrowSpeedRate + arrowSpeedRateStep)
+export function getWizardTargetMaxDistance() {
+    return Math.ceil(wizardShootDistance * wizardTargetRadiusRate)
 }
 
-export function getCatapultPrice() { return catapultBasePrice * 2 ** catapultsCount }
-export function addCatapultCount() { catapultsCount = Math.min(catapultsCountMax, catapultsCount + 1) }
-export function addCatapultPower() { catapultPower += catapultPowerStep }
-export function addCatapultDamageRadius() {
-    catapultDamageRadius = Math.min(catapultDamageRadiusMax, catapultDamageRadius + catapultDamageRadiusStep)
-}
-export function addCatapultShootTimeout() {
-    catapultShootTimeout = Math.max(catapultShootTimeoutMax, catapultShootTimeout - catapultShootTimeoutStep)
-}
-export function addCatapultShootDistance() {
-    catapultShootDistance = Math.min(catapultShootDistanceMax, catapultShootDistance + catapultShootDistanceStep)
-}
-
-export function getWizardPrice() { return wizardBasePrice * 2 ** wizardsCount }
-export function addWizardsCount() { wizardsCount = Math.min(wizardsCountMax, wizardsCount + 1) }
-export function addWizardPower() { wizardPower += wizardPowerStep }
-export function addWizardTargetsCount() {
-    wizardTargetsCount = Math.min(wizardTargetsCountMax, wizardTargetsCount + 1)
-}
-export function addWizardShootTimeout() {
-    wizardShootTimeout = Math.max(wizardShootTimeoutMax, wizardShootTimeout - wizardShootTimeoutStep)
-}
-export function addWizardShootDistance() {
-    wizardShootDistance = Math.min(wizardShootDistanceMax, wizardShootDistance + wizardShootDistanceStep)
-}
-export function getWizardPowerStep() { return Math.max(1, Math.ceil(wizardPower / wizardTargetsCount)) }
-export function getWizardMaxDistance() { return Math.ceil(wizardShootDistance * wizardTargetRadiusRate) }
-
-export function addTraps(value) { traps += value }
-export function addDragon(value) { dragons += value }
+//
 
 export function resetAllProgress() {
-    gold = 0
-    round = 1
-    level = 0
-
-    towerHP = 100
-
-    arrows = 10
-    arrowPower = 10
-    arrowShootTimeout = 480
-    arrowReloadTimeout = 1800
-    arrowSpeedRate = 0.02 // 0.03 - normal (1s to nearest side); 0.01 - slow(3s); 0.1 - fast(0.2s)
-
-    catapultsCount = 0
-    catapultPower = 30
-    catapultDamageRadius = 50
-    catapultShootTimeout = 3200
-    catapultShootDistance = 300
-
-    wizardsCount = 0
-    wizardPower = 20
-    wizardTargetsCount = 1
-    wizardShootTimeout = 1800
-    wizardShootDistance = 240
+    gameState = initState()
 }
 
-
 export function getStateData() {
-    const gameState =  {
-        gold, round, level, towerHP,
-        arrows, arrowPower, arrowShootTimeout, arrowReloadTimeout, arrowSpeedRate,
-        catapultsCount, catapultPower, catapultDamageRadius, catapultShootTimeout, catapultShootDistance,
-        wizardsCount, wizardPower, wizardTargetsCount, wizardShootTimeout, wizardShootDistance
-    }
     return gameState
 }
 
 export function setStoredState(savedState) {return
     if (!savedState) return
 
-    if ('gold' in savedState) gold = savedState.gold
-    if ('round' in savedState) round = savedState.round
-    if ('level' in savedState) level = savedState.level
-    if ('towerHP' in savedState) towerHP = savedState.towerHP
-    if ('arrows' in savedState) arrows = savedState.arrows
-    if ('arrowPower' in savedState) arrowPower = savedState.arrowPower
-    if ('arrowShootTimeout' in savedState) arrowShootTimeout = savedState.arrowShootTimeout
-    if ('arrowReloadTimeout' in savedState) arrowReloadTimeout = savedState.arrowReloadTimeout
-    if ('arrowSpeedRate' in savedState) arrowSpeedRate = savedState.arrowSpeedRate
-    if ('catapultsCount' in savedState) catapultsCount = savedState.catapultsCount
-    if ('catapultPower' in savedState) catapultPower = savedState.catapultPower
-    if ('catapultDamageRadius' in savedState) catapultDamageRadius = savedState.catapultDamageRadius
-    if ('catapultShootTimeout' in savedState) catapultShootTimeout = savedState.catapultShootTimeout
-    if ('catapultShootDistance' in savedState) catapultShootDistance = savedState.catapultShootDistance
-    if ('wizardsCount' in savedState) wizardsCount = savedState.wizardsCount
-    if ('wizardPower' in savedState) wizardPower = savedState.wizardPower
-    if ('wizardTargetsCount' in savedState) wizardTargetsCount = savedState.wizardTargetsCount
-    if ('wizardShootTimeout' in savedState) wizardShootTimeout = savedState.wizardShootTimeout
-    if ('wizardShootDistance' in savedState) wizardShootDistance = savedState.wizardShootDistance
+    for (let key in savedState) {
+        if (key in gameState) gameState[key] = savedState[key]
+    }
 }

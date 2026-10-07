@@ -1,12 +1,34 @@
 import { EventHub, events } from "../../app/events"
 import { sceneAdd, sceneRemove, kill } from "../../app/application"
+import { POPUP_TYPE } from "./popupTypes"
 import Popup from "./Popup"
 import Settings from "./Settings"
-import { POPUP_TYPE } from "./popupTypes"
 import Upgrade from "./Upgrade"
 import Trapping from "./Trapping"
+import BuildMine from "./BuildMine"
+import BuildDragon from "./BuildDragon"
+import BuildMagic from "./BuildMagic"
+import BuildTower from "./BuildTower"
+import BuildCatapult from "./BuildCatapult"
 
 export let popupManager = null
+
+function createContent(type, popup) {
+    console.log(type)
+    switch (type) {
+        case POPUP_TYPE.SETTINGS: return new Settings(popup)
+        case POPUP_TYPE.UPGRADE: return new Upgrade(popup)
+        case POPUP_TYPE.TRAPPING: return new Trapping(popup)
+
+        case POPUP_TYPE.BUILD_MINE: return new BuildMine(popup)
+        case POPUP_TYPE.BUILD_DRAGON: return new BuildDragon(popup)
+        case POPUP_TYPE.BUILD_MAGIC: return new BuildMagic(popup)
+        case POPUP_TYPE.BUILD_TOWER: return new BuildTower(popup)
+        case POPUP_TYPE.BUILD_CATAPULT: return new BuildCatapult(popup)
+        case POPUP_TYPE.BUILD_ICE: return new BuildMine(popup)
+        case POPUP_TYPE.BUILD_FIRE: return new BuildMine(popup)
+    }
+}
 
 export default class PopupManager {
     constructor() {
@@ -49,7 +71,7 @@ export default class PopupManager {
     showNext(type) {
         const popup = new Popup()
 
-        const content = this.createContent(type, popup)
+        const content = createContent(type, popup)
         if (!content) {
             console.error(`[PopupManager] Unknown content type: ${type}`)
             return
@@ -76,14 +98,6 @@ export default class PopupManager {
         if (this.queue.length > 0) {
             const nextType = this.queue.shift()
             this.showNext(nextType)
-        }
-    }
-
-    createContent(type, popup) {
-        switch (type) {
-            case POPUP_TYPE.SETTINGS: return new Settings(popup)
-            case POPUP_TYPE.UPGRADE: return new Upgrade(popup)
-            case POPUP_TYPE.TRAPPING: return new Trapping(popup)
         }
     }
 

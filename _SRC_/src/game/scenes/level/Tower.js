@@ -2,7 +2,7 @@ import { Container, Sprite, Text } from "pixi.js";
 import { images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { catapultsCount, towerHP, wizardsCount } from "../../state";
+import { gameState } from "../../state";
 import Archer from "./Archer";
 import Catapult from "./Catapult";
 import Wizard from "./Wizard";
@@ -23,7 +23,7 @@ export default class Tower extends Container {
         this.image.anchor.set(0.5)
         this.addChild(this.image)
 
-        for(let i = 0; i < catapultsCount; i++) {
+        for(let i = 0; i < gameState.catapultsCount; i++) {
             // startShootTimeoutRate
             const str = 0.25 * (i + 1)
             const x = CATAPULT_POINTS[i].x
@@ -33,7 +33,7 @@ export default class Tower extends Container {
             )
         }
 
-        for(let i = 0; i < wizardsCount; i++) {
+        for(let i = 0; i < gameState.wizardsCount; i++) {
             // startShootTimeoutRate
             const str = 0.25 * (i + 1)
             this.addChild(
@@ -45,7 +45,7 @@ export default class Tower extends Container {
             new Archer(arrowPoints, arrowsOnGround, arrowsContainer)
         )
 
-        this.hp = towerHP
+        this.hp = gameState.towerHp
         this.hpText = new Text({text: this.hp, style: styles.loading})
         this.hpText.position.set(0, -80)
         this.addChild(this.hpText)

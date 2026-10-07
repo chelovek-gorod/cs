@@ -3,7 +3,7 @@ import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, images } from "../../../app/assets";
 import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { arrowReloadTimeout, arrows, arrowShootTimeout } from "../../state";
+import { gameState } from "../../state";
 import { createArrow } from "./Arrow";
 
 
@@ -21,7 +21,7 @@ export default class Archer extends Container {
         this.arrowPoints = arrowPoints
         this.arrowsContainer = arrowsContainer
 
-        this.arrows = arrows
+        this.arrows = gameState.arrowsCount
         this.shootTimeout = 0
         this.shootPointX = 0
         this.shootPointY = 0
@@ -55,7 +55,7 @@ export default class Archer extends Container {
         this.arrowsLabelIcon.anchor.set(0.5)
         this.arrowsLabel.addChild(this.arrowsLabelIcon)
 
-        this.arrowsLabelText = new Text({text: 'x' + arrows, style: styles.arrowsCount})
+        this.arrowsLabelText = new Text({text: 'x' + this.arrows, style: styles.arrowsCount})
         this.arrowsLabelText.position.set(-2, -10)
         this.arrowsLabel.addChild(this.arrowsLabelText)
 
@@ -76,8 +76,8 @@ export default class Archer extends Container {
         this.isReadyToShoot = false
         this.arrows--
         this.arrowsLabelText.text = 'x' + this.arrows
-        if (this.arrows > 0) this.shootTimeout += arrowShootTimeout
-        else this.reloadTimeout += arrowReloadTimeout
+        if (this.arrows > 0) this.shootTimeout += gameState.arrowShootTimeout
+        else this.reloadTimeout += gameState.arrowReloadTimeout
     }
 
     getShootPoint(data) { // {x: data.x, y: data.y, type: 'up'}
@@ -108,15 +108,14 @@ export default class Archer extends Container {
         else if (this.reloadTimeout > 0) {
             this.reloadTimeout -= deltaMs
 
-            //this.arrowsLabelLine.scale.x = Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
-            const size = 50 * Math.min(1, 1 - this.reloadTimeout / arrowReloadTimeout)
+            const size = 50 * Math.min(1, 1 - this.reloadTimeout / gameState.arrowReloadTimeout)
             this.arrowsLabelBg.clear()
             this.arrowsLabelBg.roundRect(-25, -10, size, 20, 6)
             this.arrowsLabelBg.fill(0xffffff)
             this.arrowsLabelBg.alpha = 0.5
     
             if (this.reloadTimeout <= 0) {
-                this.arrows = arrows
+                this.arrows = gameState.arrowsCount
                 this.isReadyToShoot = true
                 this.arrowsLabelText.text = 'x' + this.arrows
                 if (this.isPointerDown) this.shoot()

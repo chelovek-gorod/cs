@@ -30,7 +30,7 @@ export const images = {
     spark: 'spark.png',
     coin: 'coin.png',
     menu_bg: 'menu_bg.png',
-    round_bg: 'round_bg.png',
+    grass_bg: 'grass_bg.png',
     winter_bg: 'winter_bg.png',
     swamp_bg: 'swamp_bg.png',
     lava_bg: 'lava_bg.png',
@@ -47,6 +47,7 @@ export const images = {
     enemy_stone: 'enemy_stone.png',
 }
 export const atlases = {
+    buildings: 'buildings.json',
     chest: 'chest.json',
     archer: 'archer.json',
     wizard: 'wizard.json',

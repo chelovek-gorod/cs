@@ -13,6 +13,12 @@ const ALPHA_STEP = 0.003
 const OPEN_DELAY = 1200
 const STATE = createEnum(['SHOW','OPEN','HIDE'])
 
+const chestRewards = [10, 12, 15, 20, 25, 10, 12, 15, 20, 10, 12, 15, 10, 12, 10]
+let chestRewardIndex = Math.floor( Math.random() * chestRewards.length )
+function getChestReward() {
+    return chestRewards[ ++chestRewardIndex % chestRewards.length ]
+}
+
 class Chest extends AnimatedSprite {
     constructor() {
         super(atlases.chest.animations.open)
@@ -34,8 +40,6 @@ class Chest extends AnimatedSprite {
         this.gotoAndStop(0)
         this.alpha = 0
         tickerAdd(this)
-
-        console.log('chest added', point.x, point.y)
     }
 
     release() {
@@ -96,7 +100,7 @@ export default class ChestsContainer extends Container {
     }
 
     checkShut(x, y) {
-        if (this.children.length === 0) return false
+        if (this.children.length === 0) return 0
 
         const dx = this.chest.x - x
         const dy = this.chest.y - y
@@ -104,7 +108,7 @@ export default class ChestsContainer extends Container {
         const isOnTarget = sqDist < CHEST_HIT_SQ
 
         if (isOnTarget) this.chest.release()
-        return isOnTarget
+        return getChestReward()
     }
 
     tick(deltaMs) {

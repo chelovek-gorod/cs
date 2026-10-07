@@ -137,7 +137,7 @@ class Enemy extends Container {
         this.colliderCircle = new Graphics()
         this.addChild(this.colliderCircle)
 
-        this.hpBar = createHpBar(x, y)
+        this.hpBar = null
 
         this.reset(x, y, type, deadEnemiesContainer, enemyArrows, hpContainer)
     }
@@ -174,7 +174,7 @@ class Enemy extends Container {
         this.headSqCollider = ENEMY[type].headCollider * ENEMY[type].headCollider
         this.towerOffset = ENEMY[type].towerOffset
 
-        this.hpBar.reset(x, y)
+        this.hpBar = createHpBar(x, y)
         hpContainer.addChild(this.hpBar)
 
         this.attackTimeout = ENEMY[type].attackTimeout
@@ -291,6 +291,7 @@ class Enemy extends Container {
 
         if (this.hp === 0) {
             this.hpBar.release()
+            this.hpBar = null
 
             this.isDying = true
             this.isOnMove = false
@@ -496,6 +497,11 @@ class Enemy extends Container {
     }
 
     kill() {
+        if (this.hpBar) {
+            this.hpBar.release()
+            this.hpBar = null
+        }
+        
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
     }

@@ -5,7 +5,7 @@ import { arrowOnTarget } from "../../../app/events";
 import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
-import { arrowSpeedRate } from "../../state";
+import { gameState } from "../../state";
 
 const ARROW_POOL = createObjectPool(100)
 
@@ -46,7 +46,7 @@ class Arrow extends Sprite {
 
         this.path = 0
         this.distance = Math.hypot(x, y)
-        this.speed = Math.sqrt(this.distance) * arrowSpeedRate
+        this.speed = Math.sqrt(this.distance) * gameState.arrowFlyRate
 
         turnSpriteToTarget(this, {x, y}, 360)
         this.position.x += Math.cos(this.rotation) * START_OFFSET

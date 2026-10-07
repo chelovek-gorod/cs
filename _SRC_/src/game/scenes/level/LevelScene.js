@@ -8,7 +8,7 @@ import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import GameContainer from './GameContainer'
 import LevelUI from './LevelUI'
 import { getSafeAreaOffsets, setAfterTickerCallbacks } from '../../../app/application'
-import { addGold, round, traps } from '../../state'
+import { gameState } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import EnemySpawner from './EnemySpawner'
 import { POPUP_TYPE } from '../../popup/popupTypes'
@@ -35,8 +35,8 @@ export default class LevelScene extends Container {
         this.isArcherReadyToShoot = false
 
         this.bg = new BackgroundTiling(
-            round % 10 === 0 ? images.lava_bg :
-            round % 3 === 0 ? images.swamp_bg :
+            gameState.round % 10 === 0 ? images.lava_bg :
+            gameState.round % 3 === 0 ? images.swamp_bg :
             images.winter_bg
         )
         setCursorPointer(this.bg)
@@ -78,7 +78,7 @@ export default class LevelScene extends Container {
         setMusicList( getMusic() )
 
         requestAnimationFrame( () => {
-            if (traps > 0) showPopup(POPUP_TYPE.TRAPPING)
+            if (gameState.trapsCount > 0) showPopup(POPUP_TYPE.TRAPPING)
             else setEnemyFirstWave()
         })
 
@@ -132,7 +132,7 @@ export default class LevelScene extends Container {
     }
 
     addGoldForKill(value) {
-        addGold(value)
+        gameState.gold += value
         this.ui.setGoldText()
     }
 
@@ -167,6 +167,6 @@ export default class LevelScene extends Container {
         EventHub.off( events.pauseGameplay, this.pauseGameplay, this )
         EventHub.off( events.addGoldForKill, this.addGoldForKill, this )
 
-        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
+        EventHub.off( events.setEnemyFirstWave, this.setEnemyFirstWave, this )
     }
 }

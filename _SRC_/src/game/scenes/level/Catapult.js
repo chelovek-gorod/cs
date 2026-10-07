@@ -1,7 +1,7 @@
 import { AnimatedSprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
-import { catapultShootDistance, catapultShootTimeout } from "../../state";
+import { gameState } from "../../state";
 import { createStone } from "./Stone";
 
 
@@ -18,14 +18,14 @@ export default class Catapult extends AnimatedSprite {
         this.particles = particles
         this.enemies = enemies
 
-        this.shootTimeout = catapultShootTimeout * startShootTimeoutRate
-        this.shootSqDist = catapultShootDistance * catapultShootDistance
+        this.shootTimeout = gameState.catapultTimeout * startShootTimeoutRate
+        this.shootSqDist = gameState.catapultDistance * gameState.catapultDistance
 
         tickerAdd(this)
     }
 
     shoot() {
-        this.shootTimeout = catapultShootTimeout
+        this.shootTimeout = gameState.catapultTimeout
 
         let strongestEnemy = null
         let strongestHP = -Infinity

@@ -11,8 +11,9 @@ import { getFirstUserAction, soundPlay } from '../../../app/sound'
 import { getLanguage } from '../../localization'
 import { TEXT_GET_FIRST_CLICK } from '../../localText'
 import { gameReadySDK, isReadySDK } from '../../storage'
-import { round } from '../../state'
+import { gameState } from '../../state'
 import BackgroundImage from '../../BG/BackgroundImage'
+import { warmupAllTextures } from './warmupTextures'
 
 const defaultBGColors = [0xff0000, 0x000000]
 
@@ -178,6 +179,8 @@ export default class LoadScene extends Container {
     }
 
     loadingDone() {
+        warmupAllTextures()
+
         this.doneText = new Text({
             text: TEXT_GET_FIRST_CLICK[ this.currentLanguage ],
             style: styles.loading
@@ -260,8 +263,8 @@ export default class LoadScene extends Container {
         getFirstUserAction()
         if ('se_click' in sounds) soundPlay(sounds.se_click)
 
-        // startScene(round > 1 ? SCENE_NAME.Menu : SCENE_NAME.Level)
-        startScene(SCENE_NAME.Level)
+        // startScene(gameState.round > 1 ? SCENE_NAME.Menu : SCENE_NAME.Level)
+        startScene(SCENE_NAME.Menu)
     }
 
     tick(delta) {

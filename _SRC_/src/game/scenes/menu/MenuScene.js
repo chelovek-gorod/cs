@@ -1,72 +1,16 @@
 import { Container, Graphics, Text } from 'pixi.js'
 import { images, music } from '../../../app/assets'
-import { EventHub, events, showPopup, startScene } from '../../../app/events'
+import { EventHub, events, startScene } from '../../../app/events'
 import { getLanguage } from '../../localization'
 import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
-import BackgroundImage from '../../BG/BackgroundImage'
 import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import { getSafeAreaOffsets } from '../../../app/application'
-import { addCatapultCount, addGold, addLevel, addTraps, addWizardsCount, adGoldBonus, catapultsCount, catapultsCountMax, dragonPrice, getCatapultPrice, getWizardPrice, gold, dragons, round, addDragon, trapPrice, wizardsCount, wizardsCountMax } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import { SCENE_NAME } from '../SceneManager'
 import { styles } from '../../../app/styles'
 import MenuUI from './MenuUI'
-import { POPUP_TYPE } from '../../popup/popupTypes'
-
-class MenuButton extends Container {
-    constructor(title, subtitle, description, clickAction, isAvailable, x, y) {
-        super()
-
-        this.position.set(x, y)
-        this.alpha = isAvailable ? 1 : 0.5
-        this.isAvailable = isAvailable
-        this.clickAction = clickAction
-
-        this.bg = new Graphics()
-        this.addChild(this.bg)
-        this.bg.roundRect(-80, -40, 160, 80, 16)
-        this.bg.fill(0x6600ff)
-        this.bg.stroke({ width: 3, color: 0x000000 })
-
-        this.title = new Text({ text: title, style: styles.damage })
-        this.title.anchor.set(0.5)
-        this.title.position.set(0, -25)
-        this.addChild(this.title)
-
-        this.subtitle = new Text({ text: subtitle, style: styles.damage })
-        this.subtitle.anchor.set(0.5)
-        this.subtitle.position.set(0, 0)
-        this.addChild(this.subtitle)
-
-        this.description = new Text({ text: description, style: styles.damage })
-        this.description.anchor.set(0.5)
-        this.description.position.set(0, 25)
-        this.addChild(this.description)
-
-        setCursorPointer(this)
-        this.on('pointerup', this.getClick, this)
-    }
-
-    setActive(isAvailable) {
-        if (this.isAvailable === isAvailable) return
-
-        this.isAvailable = isAvailable
-        this.alpha = isAvailable ? 1 : 0.5
-    }
-
-    getClick() {
-        if (!this.isAvailable) return
-
-        this.clickAction()
-    }
-
-    kill() {
-        this.parent.removeChild(this)
-        removeCursorPointer(this)
-        this.off('pointerup', this.getClick, this)
-        this.destroy({children: true})
-    }
-}
+import BuildingsContainer from './BuildingsContainer'
+import BackgroundTiling from '../../BG/BackgroundTiling'
 
 export default class MenuScene extends Container {
     constructor() {
@@ -77,14 +21,26 @@ export default class MenuScene extends Container {
         this.currentLanguage = getLanguage()
         EventHub.on(events.updateLanguage, this.updateLanguage, this)
 
-        this.bg = new BackgroundImage(images.menu_bg)
+        this.bg = new BackgroundTiling(images.grass_bg)
         this.addChild(this.bg)
 
-        this.buttonsContainer = new Container()
-        this.addChild(this.buttonsContainer)
+        this.buildings = new BuildingsContainer()
+        this.addChild(this.buildings)
 
-        // Создаём кнопки
-        this.createButtons()
+        // start button
+        this.startButton = new Container()
+        const btnBg = new Graphics()
+        btnBg.roundRect(-40, -30, 80, 60, 18)
+        btnBg.fill(0x00ff00)
+        btnBg.stroke({width: 3, color: 0x000000})
+        this.startButton.addChild(btnBg)
+        const btnText = new Text({text: '>', style: styles.loading})
+        btnText.anchor.set(0.5)
+        this.startButton.addChild(btnText)
+        this.startButton.position.set(0, 0)
+        setCursorPointer(this.startButton)
+        this.startButton.on('pointerup', this.startNextRound, this)
+        this.addChild(this.startButton)
 
         this.flyTexts = new Container()
         this.addChild(this.flyTexts)
@@ -97,85 +53,17 @@ export default class MenuScene extends Container {
         setMusicList([music.bgm_menu])
     }
 
-    createButtons() {
-        // Вычисляем цены
-        this.wizardPrice = getWizardPrice()
-        this.catapultPrice = getCatapultPrice()
-
-        // Кнопка мага
-        // title, subtitle, description, clickAction, isAvailable, x, y
-        this.btnAddWizard = new MenuButton(
-            '+WIZARD', this.wizardPrice, 'add on tower',
-            this.addWizard.bind(this), (this.wizardPrice <= gold && wizardsCount < 4),
-            -90, -120
-        )
-
-        // Кнопка катапульты
-        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnAddCatapult = new MenuButton(
-            '+CATAPULT', this.catapultPrice, 'add on tower',
-            this.addCatapult.bind(this), (this.catapultPrice <= gold && catapultsCount < 4),
-            90, -120
-        )
-
-        // Кнопка уровня
-        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnAddTrap = new MenuButton(
-            '+1 TRAP', trapPrice, 'for enemies',
-            this.addTrap.bind(this), (trapPrice <= gold),
-            -90, -20
-        )
-
-        // Кнопка дракона
-        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnAddDragon = new MenuButton(
-            '+ DRAGON', dragonPrice, 'for 1 round',
-            this.addDragon.bind(this), (dragonPrice <= gold),
-            90, -20
-        )
-
-        // Кнопка золота
-        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnAddGold = new MenuButton(
-            '+ GOLD', adGoldBonus, 'for AD',
-            this.addGold.bind(this), true,
-            -90, 200
-        )
-
-        // Кнопка старта
-        // title, subtitle, description, clickAction = null, isAvailable = true, x, y
-        this.btnStartNextRound = new MenuButton(
-            'START', round, 'ROUND',
-            this.startNextRound.bind(this), true,
-            90, 200
-        )
-
-        this.buttonsContainer.addChild(
-            this.btnAddWizard, this.btnAddCatapult,
-            this.btnAddTrap, this.btnAddDragon,
-            this.btnAddGold,
-            this.btnStartNextRound
-        )
-    }
-
-    refreshButtons() {
-        // Вычисляем цены
-        this.wizardPrice = getWizardPrice()
-        this.catapultPrice = getCatapultPrice()
-
-        this.btnAddWizard.setActive(this.wizardPrice <= gold && wizardsCount < 4)
-        this.btnAddCatapult.setActive(this.catapultPrice <= gold && catapultsCount < 4)
-        this.btnAddTrap.setActive(trapPrice <= gold)
-        this.btnAddDragon.setActive( (dragonPrice <= gold) )
-
-        this.ui.setGoldText()
-    }
-
     screenResize(screenData) {
         const safeAreaOffsets = getSafeAreaOffsets()
         this.position.set(screenData.centerX, screenData.centerY)
         this.bg.screenResize(screenData)
         this.ui.screenResize(screenData, safeAreaOffsets)
+
+        this.buildings.screenResize(screenData)
+
+        const startButtonX = screenData.centerX - 50 - safeAreaOffsets.right
+        const startButtonY = screenData.centerY - 40 - safeAreaOffsets.bottom
+        this.startButton.position.set(startButtonX, startButtonY)
     }
 
     pauseGameplay() {
@@ -183,43 +71,6 @@ export default class MenuScene extends Container {
     }
     resumeGameplay() {
         if (this?.isPausePressed) this.isPausePressed = false
-    }
-
-    addWizard() {
-        if (wizardsCount === wizardsCountMax || gold < this.wizardPrice) return
-
-        addWizardsCount()
-        addGold(-this.wizardPrice)
-        this.refreshButtons()
-    }
-
-    addCatapult() {
-        if (catapultsCount === catapultsCountMax || gold < this.catapultPrice) return
-
-        addCatapultCount()
-        addGold(-this.catapultPrice)
-        this.refreshButtons()
-    }
-
-    addTrap() {
-        if (gold < trapPrice) return
-
-        addTraps(1)
-        addGold(-trapPrice)
-        this.refreshButtons()
-    }
-
-    addDragon() {
-        if (gold < dragonPrice) return
-
-        addDragon(1)
-        addGold(-dragonPrice)
-        this.refreshButtons()
-    }
-
-    addGold() {
-        addGold(adGoldBonus)
-        this.refreshButtons()
     }
 
     startNextRound() {
@@ -233,11 +84,11 @@ export default class MenuScene extends Container {
     kill() {
         this.bg.destroy()
 
-        for(let i = this.buttonsContainer.children.length - 1; i >= 0; i--) {
-            const btn = this.buttonsContainer.children[i]
-            btn.kill()
-            btn.destroy({ children: true })
-        }
+        removeCursorPointer(this.startButton)
+        this.startButton.off('pointerup', this.startNextRound, this)
+        this.removeChild(this.startButton)
+        this.startButton.destroy({ children: true })
+        this.startButton = null
 
         if (this.flyTexts) {
             this.flyTexts.destroy({ children: true })
@@ -245,6 +96,7 @@ export default class MenuScene extends Container {
         }
 
         if (this.ui) {
+            this.ui.kill()
             this.ui.destroy({ children: true })
             this.ui = null
         }

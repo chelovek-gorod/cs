@@ -1,7 +1,7 @@
 import { tickerAdd, tickerRemove } from "../../../app/application"
 import { EventHub, events } from "../../../app/events"
 import { createEnum } from "../../../utils/functions"
-import { round } from "../../state"
+import { gameState } from "../../state"
 import { createEnemy } from "./Enemy"
 import { getRoundWaves } from "./waves"
 
@@ -30,7 +30,7 @@ const STATE = createEnum([
 
 export default class EnemySpawner {
     constructor(gameContainer, ui) {
-        this.waves = getRoundWaves(round)
+        this.waves = getRoundWaves(gameState.round)
         console.log('waves ready')
 
         this.parentUi = ui
@@ -48,7 +48,7 @@ export default class EnemySpawner {
         
         this.spawnInterval = Math.max(
             WAVE_NEXT_ENEMY_TIMEOUT_MIN,
-            WAVE_NEXT_ENEMY_TIMEOUT_MAX - round
+            WAVE_NEXT_ENEMY_TIMEOUT_MAX - gameState.round
         )
         this.wavePackets = []  // размеры пакетов для пакетного спавна
         this.currentPacketIndex = 0

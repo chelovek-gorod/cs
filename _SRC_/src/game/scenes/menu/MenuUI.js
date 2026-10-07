@@ -1,20 +1,23 @@
 import { Container, Text } from "pixi.js";
+import { EventHub, events } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { gold, round } from "../../state";
+import { gameState } from "../../state";
 
 export default class MenuUI extends Container {
     constructor() {
         super()
 
-        this.roundText = new Text({text: `Round ${round - 1} CLEARED`, style: styles.loading})
+        this.roundText = new Text({text: `Round ${gameState.round - 1} CLEARED`, style: styles.loading})
         this.roundText.anchor.set(0, 0)
         this.roundText.scale.set(0.5)
         this.addChild(this.roundText)
 
-        this.goldText = new Text({text: `Gold ${gold}`, style: styles.loading})
+        this.goldText = new Text({text: `Gold ${gameState.gold}`, style: styles.loading})
         this.goldText.anchor.set(1, 0)
         this.goldText.scale.set(0.5)
         this.addChild(this.goldText)
+
+        EventHub.on( events.goldChanged, this.setGoldText, this )
     }
 
     screenResize(screenData, safeAreaOffsets) {
@@ -28,6 +31,10 @@ export default class MenuUI extends Container {
     }
 
     setGoldText() {
-        this.goldText.text = `Gold ${gold}`
+        this.goldText.text = `Gold ${gameState.gold}`
+    }
+
+    kill() {
+        EventHub.on( events.goldChanged, this.setGoldText, this )
     }
 }

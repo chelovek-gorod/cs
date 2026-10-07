@@ -2,10 +2,9 @@ import { AnimatedSprite } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
-import { moveToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
-import { catapultDamageRadius, catapultPower, trapActivationDistance, trapDamageRadius, trapPower } from "../../state";
+import { gameState, trapRadiusTrigger } from "../../state";
 
 const TRAP_POOL = createObjectPool(100)
 
@@ -28,8 +27,8 @@ class Trap extends AnimatedSprite {
         this.animationSpeed = 0.25
         this.play()
 
-        this.rangeSq = trapActivationDistance * trapActivationDistance
-        this.damageSq = trapDamageRadius * trapDamageRadius
+        this.rangeSq = trapRadiusTrigger * trapRadiusTrigger
+        this.damageSq = gameState.trapRadius * gameState.trapRadius
 
         this.reset(x, y, particles, enemies)
     }
@@ -50,11 +49,11 @@ class Trap extends AnimatedSprite {
 
     setDamage(enemies) {
         this.parent.addChild(
-            new Explosion(this.x, this.y, 'explosion_stone', catapultDamageRadius)
+            new Explosion(this.x, this.y, 'explosion_stone', gameState.trapRadius)
         )
 
         for (let i = enemies.length - 1; i >= 0; i--) {
-            enemies[i].setDamage(trapPower)
+            enemies[i].setDamage(gameState.trapPower)
         }
 
         tickerRemove(this)

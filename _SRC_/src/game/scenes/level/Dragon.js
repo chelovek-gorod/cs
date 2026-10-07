@@ -1,35 +1,34 @@
 import { AnimatedSprite, Graphics } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
-import { addDragon } from "../../state";
+import { dragonFuelMax, gameState } from "../../state";
 
-const TOWER_OFFSET = 160
-const FLY_SPEED = 0.0005
-const FLY_AWAY_SPEED = 0.09
+const TOWER_OFFSET = 180          // Радиус полета
+const FLY_SPEED = 0.0004
+const FLY_AWAY_SPEED = 0.07
 const FLY_AWAY_ALPHA_STEP = 0.0001
-const HEAD_OFFSET = 50  // вынос головы вперед от центра
-const AIM_ANGLE_OFFSET = 0.32 // угол смещение прицела ближе к оси вращения дракона
-const SPARKS_COUNT = 5
+const SPRITE_ROTATION_OFFSET = 0
+
+const SPARKS_COUNT = 36
 const FUEL = 120
-const DAMAGE = 5
-const FIRE_DURATION = 600 // длительность залпа
-const DAMAGE_TIMEOUT = 120 // длительность залпа
-const SHOOT_DISTANCE = 60
-const SHOOT_RADIUS = 36
-const SCAN_TIMEOUT = 120 // задержка до следующей проверки врагов в зоне AIM
-const SCAN_RADIUS = 36  // радиус зоны сканирования (меньше основной)
-const SCAN_OFFSET_X = 18
-const SCAN_OFFSET_Y = -18
-const ATTACK_AREA_ANGLE_OFFSET = -0.2 // подгони под визуал струи
-const PARTICLE_FLY_TIME = 90 // время полета частиц от рта до зоны атаки
+const FIRE_DURATION = 1500
+const DAMAGE_TIMEOUT = 500
+
+const SCAN_TIMEOUT = 120
+const SCAN_RADIUS = 80
+const SCAN_OFFSET_FORWARD = 120 // Небольшой сдвиг вдоль тела дракона
+const SCAN_OFFSET_SIDE = 30     // Дополнительный сдвиг В СТОРОНУ БАШНИ от зоны атаки
+const FIRE_SIDE_OFFSET = 0.4    // Смещение струи К БАШНЕ
+const FIRE_SPREAD = 0.5         // Насколько широко распыляется огонь (в радианах)
 
 export default class Dragon extends AnimatedSprite {
     constructor(enemies, emitFire) {
         super(atlases.dragon.animations.fly)
 
-        this.anchor.set(0.5)
+        this.anchor.set(0.8, 0.5)
         this.position.set(0, -TOWER_OFFSET)
-        this.rotation = 0
+        this.rotation = SPRITE_ROTATION_OFFSET
+        this.flyAngle = 0
 
         this.animationSpeed = 0.5
         this.play()
@@ -37,22 +36,14 @@ export default class Dragon extends AnimatedSprite {
         this.enemies = enemies
         this.emitFire = emitFire
 
-        this.isOnTarget = false
         this.isOnAttack = false
         this.fuel = FUEL
         this.scanTimeout = SCAN_TIMEOUT
         this.damageTimeout = DAMAGE_TIMEOUT
         this.fireTimeout = 0
-        this.particleTimeout = 0
         this.isParticleFrame = false
 
-        this.scanLocalPoint = {x: HEAD_OFFSET + SHOOT_DISTANCE + SCAN_OFFSET_X, y: SCAN_OFFSET_Y}
-        this.attackLocalPoint = {
-            x: HEAD_OFFSET + SHOOT_DISTANCE * Math.cos(ATTACK_AREA_ANGLE_OFFSET),
-            y: SHOOT_DISTANCE * Math.sin(ATTACK_AREA_ANGLE_OFFSET)
-        }
-        // this.attackLocalPoint = {x: HEAD_OFFSET + SHOOT_DISTANCE, y: 0 }
-        this.headLocalPoint = {x: HEAD_OFFSET, y: 0}
+        this.scanLocalPoint = { x: SCAN_OFFSET_FORWARD, y: SCAN_OFFSET_SIDE }
 
         this.circles = new Graphics()
         this.addChild(this.circles)
@@ -62,20 +53,42 @@ export default class Dragon extends AnimatedSprite {
     }
 
     updateCircles(isOnAttack = false) {
-        return
+        // return
         this.circles.clear()
 
-        // Жёлтый круг — зона атаки
-        const attackCircleX = HEAD_OFFSET + SHOOT_DISTANCE
-        const attackCircleY = 0
-        this.circles.circle(attackCircleX, attackCircleY, SHOOT_RADIUS)
+        this.circles.circle(this.scanLocalPoint.x, this.scanLocalPoint.y, SCAN_RADIUS)
         this.circles.stroke({ width: 2, color: isOnAttack ? 0xff0000 : 0xffff00 })
+
+        // Рисуем конус атаки (треугольник от головы до краев круга)
+        const H = { x: 0, y: 0 } // Голова
+        const C = this.scanLocalPoint // Центр круга
+        const R = SCAN_RADIUS
         
-        // Красный круг — зона сканирования (смещён вперёд от жёлтого)
-        const scanCircleX = attackCircleX + SCAN_OFFSET_X
-        const scanCircleY = SCAN_OFFSET_Y
-        this.circles.circle(scanCircleX, scanCircleY, SCAN_RADIUS)
-        this.circles.stroke({ width: 2, color: 0xff0000 })
+        // Вектор от головы к центру круга
+        const Vx = C.x - H.x
+        const Vy = C.y - H.y
+        const L = Math.sqrt(Vx * Vx + Vy * Vy)
+        
+        // Нормализованный вектор
+        const Nx = Vx / L
+        const Ny = Vy / L
+        
+        // Перпендикулярный вектор (для ширины конуса)
+        const Px = -Ny
+        const Py = Nx
+        
+        // Две точки на окружности круга (основание треугольника)
+        const leftX = C.x + Px * R
+        const leftY = C.y + Py * R
+        const rightX = C.x - Px * R
+        const rightY = C.y - Py * R
+        
+        // Рисуем треугольник
+        this.circles.moveTo(H.x, H.y)
+        this.circles.lineTo(leftX, leftY)
+        this.circles.lineTo(rightX, rightY)
+        this.circles.closePath()
+        this.circles.stroke({ width: 2, color: 0xff00ff }) // Зеленый конус
     }
 
     scanEnemies() {
@@ -91,12 +104,11 @@ export default class Dragon extends AnimatedSprite {
             const dx = enemy.x - localScan.x
             const dy = enemy.y - localScan.y
             if (dx * dx + dy * dy <= radiusSq) {
-                // ВРАГ ОБНАРУЖЕН
-
-                // проверяем, не запущена ли атака
-                if (!this.isOnAttack && !this.isOnTarget) {
-                    this.isOnTarget = true
-                    this.particleTimeout = PARTICLE_FLY_TIME
+                // ВРАГ ОБНАРУЖЕН - сразу начинаем атаку
+                if (!this.isOnAttack) {
+                    this.isOnAttack = true
+                    this.damageTimeout = DAMAGE_TIMEOUT
+                    this.updateCircles(true)
                 }
                 
                 this.fireTimeout = FIRE_DURATION
@@ -108,30 +120,75 @@ export default class Dragon extends AnimatedSprite {
         this.isParticleFrame = !this.isParticleFrame
         if (!this.isParticleFrame) return
 
-        const headGlobal = this.parent.toLocal(this.headLocalPoint, this)
-        const dirX = Math.cos(this.rotation + AIM_ANGLE_OFFSET)
-        const dirY = Math.sin(this.rotation + AIM_ANGLE_OFFSET)
+        const headPos = this.parent.toLocal({x: 0, y: 0}, this)
+        
+        // Направление = угол полета + сдвиг к башне
+        const aimAngle = this.flyAngle + FIRE_SIDE_OFFSET
+        
+        const dirX = Math.cos(aimAngle)
+        const dirY = Math.sin(aimAngle)
 
-        this.emitFire(headGlobal.x, headGlobal.y, dirX, dirY, SPARKS_COUNT)
+        // Передаем направление и ШИРИНУ разброса (FIRE_SPREAD) в систему огня
+        this.emitFire(headPos.x, headPos.y, dirX, dirY, SPARKS_COUNT, FIRE_SPREAD)
     }
 
     addDamage() {
-        const localAttack = this.parent.toLocal(this.attackLocalPoint, this)
-        const radiusSq = SHOOT_RADIUS * SHOOT_RADIUS
-    
+        this.damageTimeout = DAMAGE_TIMEOUT
+
+        const H = {x: 0, y: 0}
+        const C = this.scanLocalPoint
+        const R = SCAN_RADIUS
+
+        // Один раз переводим локальные точки в систему координат врагов
+        const globalH = this.enemies.toLocal(H, this)
+        const globalC = this.enemies.toLocal(C, this)
+
+        // Вектор от головы к центру круга
+        const Vx = globalC.x - globalH.x
+        const Vy = globalC.y - globalH.y
+        const L_sq = Vx * Vx + Vy * Vy
+
         for (let i = 0; i < this.enemies.children.length; i++) {
             const enemy = this.enemies.children[i]
             if (enemy.hp <= 0) continue
-    
-            const dx = enemy.x - localAttack.x
-            const dy = enemy.y - localAttack.y
-            if (dx * dx + dy * dy <= radiusSq) {
-                enemy.setDamage(DAMAGE)
+
+            // Враги уже в системе координат this.enemies
+            const ex = enemy.x
+            const ey = enemy.y
+
+            // Вектор от головы к врагу
+            const Wx = ex - globalH.x
+            const Wy = ey - globalH.y
+
+            // Проекция врага на ось "голова -> центр круга" (от 0 до 1)
+            let t = (Wx * Vx + Wy * Vy) / L_sq
+
+            if (t < 0) t = 0
+            if (t > 1) t = 1
+
+            // Ближайшая точка на оси конуса
+            const closestX = globalH.x + t * Vx
+            const closestY = globalH.y + t * Vy
+
+            // Расстояние от врага до оси
+            const dx = ex - closestX
+            const dy = ey - closestY
+            const distSq = dx * dx + dy * dy
+
+            // Допустимый радиус
+            const allowedRadius = t * R
+            const allowedRadiusSq = allowedRadius * allowedRadius
+
+            if (distSq <= allowedRadiusSq) {
+                enemy.setDamage(gameState.dragonPower)
             }
         }
 
         this.fuel--
-        if (this.fuel <= 0) addDragon(-1)
+        if (this.fuel <= 0) {
+            gameState.dragonsCount -= 1
+            gameState.dragonFuel = dragonFuelMax
+        }
     }
 
     tick(deltaMs) {
@@ -149,10 +206,11 @@ export default class Dragon extends AnimatedSprite {
         }
 
         // полет
-        this.rotation += FLY_SPEED * deltaMs
+        this.flyAngle += FLY_SPEED * deltaMs
+        this.rotation = this.flyAngle + SPRITE_ROTATION_OFFSET
         this.position.set(
-            Math.sin(this.rotation) * TOWER_OFFSET,
-            -Math.cos(this.rotation) * TOWER_OFFSET
+            Math.sin(this.flyAngle) * TOWER_OFFSET,
+            -Math.cos(this.flyAngle) * TOWER_OFFSET
         )
 
         // скан
@@ -169,20 +227,13 @@ export default class Dragon extends AnimatedSprite {
             else this.addFire()
         }
 
-        // начало атаки
-        if (this.isOnTarget) {
-            this.particleTimeout -= deltaMs
-            if (this.particleTimeout <= 0) {
-                this.isOnTarget = false
-                this.isOnAttack = true
-                this.updateCircles(true)
-            }
-        }
-
         // атака
         if (this.isOnAttack) {
             this.damageTimeout -= deltaMs
-            if (this.damageTimeout <= 0) this.addDamage()
+            if (this.damageTimeout <= 0) {
+                this.addDamage()
+                this.damageTimeout = DAMAGE_TIMEOUT // Сбрасываем таймер для следующего тика урона
+            }
         }
     }
 

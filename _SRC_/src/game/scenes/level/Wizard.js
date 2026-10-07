@@ -3,8 +3,7 @@ import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
 import { drawLightning } from "../../../utils/lightning";
-import { getWizardPowerStep, getWizardMaxDistance, wizardPower, 
-    wizardTargetsCount, wizardShootDistance, wizardShootTimeout } from "../../state";
+import { gameState, wizardTargetRadiusRate } from "../../state";
 
 const LIGHTNING_FORWARD_OFFSET = 40
 const LIGHTNING_SIDE_OFFSET = 8
@@ -21,9 +20,9 @@ export default class Wizard extends AnimatedSprite {
         this.lightnings = lightnings
         this.enemies = enemies
 
-        this.shootTimeout = wizardShootTimeout * startShootTimeoutRate
+        this.shootTimeout = gameState.wizardTimeout * startShootTimeoutRate
         this.shootCount = 0
-        this.shootSqDist = wizardShootDistance * wizardShootDistance
+        this.shootSqDist = gameState.wizardDistance * gameState.wizardDistance
         this.shootPoint = {x: 0, y: 0}
         this.startPoint = {x: 0, y: 0}
         this.targetPoint = null
@@ -34,7 +33,8 @@ export default class Wizard extends AnimatedSprite {
     }
 
     shoot() {
-        this.shootTimeout = wizardShootTimeout
+        this.shootTimeout = gameState.wizardTimeout
+        const wizardPower = gameState.wizardPower
     
         // --- Найти первую цель (ближайшую) ---
         let nearestEnemy = null
@@ -67,13 +67,13 @@ export default class Wizard extends AnimatedSprite {
         // --- Построить цепочку целей ---
         this.chainTargets = [nearestEnemy]
         const usedSet = new Set([nearestEnemy])
-        const maxJumpDist = getWizardMaxDistance()
+        const maxJumpDist = Math.ceil(gameState.wizardDistance * wizardTargetRadiusRate)
         const maxJumpSq = maxJumpDist * maxJumpDist
     
         let currentTarget = nearestEnemy
-        const step = getWizardPowerStep()
+        const step = Math.max(1, Math.ceil(wizardPower / gameState.wizardTargets))
     
-        for (let i = 1; i < wizardTargetsCount; i++) {
+        for (let i = 1; i < gameState.wizardTargets; i++) {
             let nextEnemy = null
             let nextDist = Infinity
     

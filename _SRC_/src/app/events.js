@@ -26,6 +26,8 @@ export const events = createEnum([
 
     'setTrapsOnMap',
     'setEnemyFirstWave',
+
+    'goldChanged',
 ])
 
 export function screenResize( data ) {
@@ -82,4 +84,8 @@ export function setTrapsOnMap() {
 }
 export function setEnemyFirstWave() {
     EventHub.emit( events.setEnemyFirstWave )
+}
+
+export function goldChanged() {
+    EventHub.emit( events.goldChanged )
 }

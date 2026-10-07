@@ -79,7 +79,14 @@ export function createObjectPool(maxFreeSize = 100) {
             free.length = 0
         }
 
-        return { get, add, put, clear }
+        function fill(factoryFn, count) {
+            for (let i = 0; i < count; i++) {
+                const obj = factoryFn()
+                if (obj) free.push(obj)
+            }
+        }
+
+        return { fill, get, add, put, clear }
     })()
 
     return registerPool(pool)
@@ -151,7 +158,14 @@ export function createParticlePool(maxFreeSize = 1000) {
             free.length = 0
         }
 
-        return { get, add, put, clear }
+        function fill(factoryFn, count) {
+            for (let i = 0; i < count; i++) {
+                const obj = factoryFn()
+                if (obj) free.push(obj)
+            }
+        }
+
+        return { fill, get, add, put, clear }
     })()
 
     return registerPool(pool)

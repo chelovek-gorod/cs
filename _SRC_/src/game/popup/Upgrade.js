@@ -3,40 +3,19 @@ import { styles } from "../../app/styles"
 import { createEnum, setCursorPointer } from "../../utils/functions"
 import { EventHub, events, startScene } from "../../app/events"
 import { lastSceneName, SCENE_NAME } from "../scenes/SceneManager"
-import { addArrow, addArrowPower, addArrowReloadTimeout, addArrowShootTimeout, addArrowSpeedRate,
-    addCatapultDamageRadius, addCatapultPower, addCatapultShootDistance, addCatapultShootTimeout,
-    addLevel,
-    addTowerHP, addWizardPower, addWizardShootDistance, addWizardShootTimeout, addWizardTargetsCount,
-    arrowPowerStep, arrowReloadTimeout, arrowReloadTimeoutMax, arrows, arrowShootTimeout,
-    arrowShootTimeoutMax, arrowsMax, arrowSpeedRate, arrowSpeedRateMax, arrowsStep, catapultDamageRadius,
-    catapultDamageRadiusMax, catapultDamageRadiusStep, catapultPowerStep, catapultsCount,
-    catapultShootDistance, catapultShootDistanceMax, catapultShootDistanceStep, catapultShootTimeout,
-    catapultShootTimeoutMax, towerHP, towerHPMax, towerHPStep, wizardPowerStep, wizardsCount,
-    wizardShootDistance, wizardShootDistanceMax, wizardShootDistanceStep, wizardShootTimeout,
-    wizardShootTimeoutMax, wizardTargetsCount, wizardTargetsCountMax } from "../state"
+import { gameState, arrowsStep, arrowsMax, arrowPowerStep, arrowShootTimeoutStep,
+    arrowShootTimeoutMax, arrowReloadTimeoutStep, arrowReloadTimeoutMax,
+    arrowFlyRateStep, arrowFlyRateMax, berserkShootStep, berserkPowerRateStep } from "../state"
 
-
-export const UPGRADE_TYPE = createEnum([
-    'TOWER_HP',
-
-    'ARROWS',
-    'ARROW_POWER',
-    'ARROW_SHOOT_SPEED',
-    'ARROW_FLY_SPEED',
-    'ARROW_RELOAD_SPEED',
-
-    'CATAPULT_POWER',
-    'CATAPULT_RADIUS', // catapultDamageRadius
-    'CATAPULT_RELOAD', // catapultShootTimeout
-    'CATAPULT_DISTANCE', // catapultShootDistance
-
-    'WIZARD_POWER',
-    'WIZARD_TARGETS', // wizardTargetsCount
-    'WIZARD_RELOAD', // wizardShootTimeout
-    'WIZARD_DISTANCE' // wizardShootDistance
+const UPGRADE_TYPE = createEnum([
+    'arrowsCount',
+    'arrowPower',
+    'arrowFlyRate',
+    'arrowShootTimeout',
+    'arrowReloadTimeout',
+    'berserkPowerRate',
+    'berserkShoots'
 ])
-
-const UPGRADE_NAMES = Object.keys(UPGRADE_TYPE)
 
 export default class Upgrade extends Container {
     constructor(popup) {
@@ -45,7 +24,7 @@ export default class Upgrade extends Container {
 
         // Заголовок
         this.title = new Text({
-            text: 'UPGRADE',
+            text: 'UPGRADE ARCHER',
             style: styles.popupTitle
         })
         this.title.anchor.set(0.5)
@@ -53,15 +32,15 @@ export default class Upgrade extends Container {
         this.addChild(this.title)
 
         this.isActive = false
-        this.buttons = []
+        const buttons = []
         const xPositions = [-240, 0, 240]
         for (let i = 0; i < 3; i++) {
             const btn = this.createButton(xPositions[i], 0)
-            this.buttons.push(btn)
+            buttons.push(btn)
             this.addChild(btn)
         }
 
-        this.setUpgrades()
+        this.setUpgrades(buttons)
     }
 
     createButton(x, y) {
@@ -76,19 +55,25 @@ export default class Upgrade extends Container {
 
         const titleText = new Text({ text: '???', style: styles.damage })
         titleText.anchor.set(0.5)
-        titleText.position.set(0, -20)
+        titleText.position.set(0, -36)
         btn.addChild(titleText)
 
         const upgradeText = new Text({ text: '+?', style: styles.damage })
         upgradeText.anchor.set(0.5)
-        upgradeText.position.set(0, 20)
+        upgradeText.position.set(0, 0)
         btn.addChild(upgradeText)
+
+        const resultText = new Text({ text: 'A->B', style: styles.damage })
+        resultText.anchor.set(0.5)
+        resultText.position.set(0, 36)
+        btn.addChild(resultText)
 
         setCursorPointer(btn)
         btn.on('pointerdown', () => this.onButtonClick(btn))
 
         btn.titleText = titleText
         btn.upgradeText = upgradeText
+        btn.resultText = resultText
         btn.bg = bg
 
         return btn
@@ -98,97 +83,45 @@ export default class Upgrade extends Container {
         this.isActive = isActive
     }
 
-    setUpgrades() {
+    setUpgrades(buttons) {
         const selected = []
-        const available = [...UPGRADE_NAMES]
+        const available = Object.keys(UPGRADE_TYPE).sort(() => Math.random() - 0.5)
         while (selected.length < 3 && available.length > 0) {
             const index = Math.floor(Math.random() * available.length)
             const upgrade = available[index]
 
             switch (upgrade) {
-                // tower
-                case UPGRADE_TYPE.TOWER_HP:
-                    if (towerHP < towerHPMax) {
+                case UPGRADE_TYPE.arrowFlyRate:
+                    if (gameState.arrowFlyRate < arrowFlyRateMax) {
                         selected.push(upgrade)
                     }
                     break
-
-                // archer
-                case UPGRADE_TYPE.ARROWS:
-                    if (arrows < arrowsMax) {
+                case UPGRADE_TYPE.arrowReloadTimeout:
+                    if (gameState.arrowReloadTimeout > arrowReloadTimeoutMax) {
                         selected.push(upgrade)
                     }
                     break
-                case UPGRADE_TYPE.ARROW_POWER:
+                case UPGRADE_TYPE.arrowShootTimeout:
+                    if (gameState.arrowShootTimeout > arrowShootTimeoutMax) {
+                        selected.push(upgrade)
+                    }
+                    break
+                case UPGRADE_TYPE.arrowsCount:
+                    if (gameState.arrowsCount < arrowsMax) {
+                        selected.push(upgrade)
+                    }
+                    break
+                default:
                     selected.push(upgrade)
-                    break
-                case UPGRADE_TYPE.ARROW_SHOOT_SPEED:
-                    if (arrowShootTimeout > arrowShootTimeoutMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.ARROW_FLY_SPEED:
-                    if (arrowSpeedRate < arrowSpeedRateMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.ARROW_RELOAD_SPEED:
-                    if (arrowReloadTimeout > arrowReloadTimeoutMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-
-                // catapult
-                case UPGRADE_TYPE.CATAPULT_POWER:
-                    if (catapultsCount > 0) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.CATAPULT_RADIUS:
-                    if (catapultsCount > 0 && catapultDamageRadius < catapultDamageRadiusMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.CATAPULT_RELOAD:
-                    if (catapultsCount > 0 && catapultShootTimeout > catapultShootTimeoutMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.CATAPULT_DISTANCE:
-                    if (catapultsCount > 0 && catapultShootDistance < catapultShootDistanceMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-
-                // wizard
-                case UPGRADE_TYPE.WIZARD_POWER:
-                    if (wizardsCount > 0) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.WIZARD_TARGETS:
-                    if (wizardsCount > 0 && wizardTargetsCount < wizardTargetsCountMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.WIZARD_RELOAD:
-                    if (wizardsCount > 0 && wizardShootTimeout > wizardShootTimeoutMax) {
-                        selected.push(upgrade)
-                    }
-                    break
-                case UPGRADE_TYPE.WIZARD_DISTANCE:
-                    if (wizardsCount > 0 && wizardShootDistance < wizardShootDistanceMax) {
-                        selected.push(upgrade)
-                    }
                     break
             }
             
             available.splice(index, 1)
         }
 
-        for (let i = 0; i < this.buttons.length; i++) {
+        for (let i = 0; i < buttons.length; i++) {
             const type = selected[i]
-            const btn = this.buttons[i]
+            const btn = buttons[i]
 
             if (!type) {
                 this.removeChild(bth)
@@ -196,31 +129,61 @@ export default class Upgrade extends Container {
                 continue
             }
 
-            btn.titleText.text = type
-
+            let title = ''
             let desc = ''
+            let res = ''
+            let result = 0
             switch (type) {
-                case UPGRADE_TYPE.TOWER_HP: desc = `+${towerHPStep} HP`; break
+                case UPGRADE_TYPE.arrowsCount:
+                    title = 'ADD ARROWS'
+                    result = gameState.arrowsCount + arrowsStep
+                    desc = `+${arrowsStep}`
+                    res = `${gameState.arrowsCount} -> ${result}`
+                break
+                case UPGRADE_TYPE.arrowPower:
+                    title = 'ADD POWER'
+                    result = gameState.arrowPower + arrowPowerStep
+                    desc = `+${arrowPowerStep}`
+                    res = `${gameState.arrowPower} -> ${result}`
+                break
+                case UPGRADE_TYPE.arrowShootTimeout:
+                    title = 'SHOOT SPEED'
+                    const SPS_now = 1000 / gameState.arrowShootTimeout
+                    const SPS_up = 1000 / arrowShootTimeoutStep
+                    result = (SPS_now + SPS_up).toFixed(2)
+                    desc = `+ ${SPS_up.toFixed(2)} shoots per sec.`
+                    res = `${SPS_now.toFixed(2)} -> ${result}`
+                break
+                case UPGRADE_TYPE.arrowReloadTimeout:
+                    title = 'RELOAD'
+                    result = ((gameState.arrowReloadTimeout - arrowReloadTimeoutStep) * 0.001).toFixed(3)
+                    desc = `-${(arrowReloadTimeoutStep * 0.001).toFixed(3)} sec.`
+                    res = `${(gameState.arrowReloadTimeout * 0.001).toFixed(3)} -> ${result}`
+                break
+                case UPGRADE_TYPE.arrowFlyRate:
+                    title = 'FLY SPEED RATE'
+                    result = 1 + (gameState.arrowFlyRate + arrowFlyRateStep) * 10
+                    desc = `+${arrowFlyRateStep * 10}`
+                    res = `${(1 + gameState.arrowFlyRate * 10).toFixed(2)} -> ${result.toFixed(2)}`
+                break
 
-                case UPGRADE_TYPE.ARROWS: desc = `+${arrowsStep} Arrow`; break
-                case UPGRADE_TYPE.ARROW_POWER: desc = `Power +${arrowPowerStep}`; break
-                case UPGRADE_TYPE.ARROW_FLY_SPEED: desc = 'Arrow Speed +10%'; break
-                case UPGRADE_TYPE.ARROW_SHOOT_SPEED: desc = 'Shoot Speed +10%'; break
-                case UPGRADE_TYPE.ARROW_RELOAD_SPEED: desc = 'Reload Speed +10%'; break
-
-                case UPGRADE_TYPE.CATAPULT_POWER: desc = `Power +${catapultPowerStep}`; break
-                case UPGRADE_TYPE.CATAPULT_RADIUS: desc = `Damage radius + ${catapultDamageRadiusStep}`; break
-                case UPGRADE_TYPE.CATAPULT_RELOAD: desc = 'Shoot Speed +10%'; break
-                case UPGRADE_TYPE.CATAPULT_DISTANCE: desc = `Shoot distance + ${catapultShootDistanceStep}`; break
-
-                case UPGRADE_TYPE.WIZARD_POWER: desc = `Power +${wizardPowerStep}`; break
-                case UPGRADE_TYPE.WIZARD_TARGETS: desc = '+1 target'; break
-                case UPGRADE_TYPE.WIZARD_RELOAD: desc = 'Shoot Speed +10%'; break
-                case UPGRADE_TYPE.WIZARD_DISTANCE: desc = `Shoot distance + ${wizardShootDistanceStep}`; break
-
-                default: desc = '+?'
+                case UPGRADE_TYPE.berserkShoots:
+                    title = 'RAGE SHOOTS'
+                    result = gameState.berserkShoots + berserkShootStep
+                    desc = `+${berserkShootStep}`
+                    res = `${gameState.berserkShoots.toFixed(2)} -> ${result.toFixed(2)}`
+                break
+                case UPGRADE_TYPE.berserkPowerRate:
+                    title = 'RAGE POWER RATE'
+                    result = gameState.berserkPowerRate + berserkPowerRateStep
+                    desc = `+${berserkPowerRateStep}`;
+                    res = `${gameState.berserkPowerRate.toFixed(2)} -> ${result.toFixed(2)}`
+                break
             }
+            btn.titleText.text = title
             btn.upgradeText.text = desc
+            btn.resultText.text = res
+
             btn.upgradeType = type
         }
     }
@@ -231,26 +194,30 @@ export default class Upgrade extends Container {
         this.isActive = false
         const type = btn.upgradeType
         switch (type) {
-            case UPGRADE_TYPE.TOWER_HP: addTowerHP(); break
+            case UPGRADE_TYPE.arrowsCount:
+                gameState.arrowsCount += arrowsStep;
+            break
+            case UPGRADE_TYPE.arrowPower:
+                gameState.arrowPower += arrowPowerStep;
+            break
+            case UPGRADE_TYPE.arrowShootTimeout:
+                gameState.arrowShootTimeout -= arrowShootTimeoutStep;
+            break
+            case UPGRADE_TYPE.arrowReloadTimeout:
+                gameState.arrowReloadTimeout -= arrowReloadTimeoutStep;
+            break
+            case UPGRADE_TYPE.arrowFlyRate:
+                gameState.arrowFlyRate += arrowFlyRateStep;
+            break
 
-            case UPGRADE_TYPE.ARROWS: addArrow(); break
-            case UPGRADE_TYPE.ARROW_POWER: addArrowPower(); break
-            case UPGRADE_TYPE.ARROW_FLY_SPEED: addArrowSpeedRate(); break
-            case UPGRADE_TYPE.ARROW_SHOOT_SPEED: addArrowShootTimeout(); break
-            case UPGRADE_TYPE.ARROW_RELOAD_SPEED: addArrowReloadTimeout(); break
-
-            case UPGRADE_TYPE.CATAPULT_POWER: addCatapultPower(); break
-            case UPGRADE_TYPE.CATAPULT_RADIUS: addCatapultDamageRadius(); break
-            case UPGRADE_TYPE.CATAPULT_RELOAD: addCatapultShootTimeout(); break
-            case UPGRADE_TYPE.CATAPULT_DISTANCE: addCatapultShootDistance(); break
-
-            case UPGRADE_TYPE.WIZARD_POWER: addWizardPower(); break
-            case UPGRADE_TYPE.WIZARD_TARGETS: addWizardTargetsCount(); break
-            case UPGRADE_TYPE.WIZARD_RELOAD: addWizardShootTimeout(); break
-            case UPGRADE_TYPE.WIZARD_DISTANCE: addWizardShootDistance(); break
+            case UPGRADE_TYPE.berserkShoots:
+                gameState.berserkShoots += berserkShootStep;
+            break
+            case UPGRADE_TYPE.berserkPowerRate:
+                gameState.berserkPowerRate += berserkPowerRateStep;
+            break
         }
 
-        addLevel()
         EventHub.emit(events.closePopup)
 
         if (lastSceneName === SCENE_NAME.Level) startScene(SCENE_NAME.Menu)

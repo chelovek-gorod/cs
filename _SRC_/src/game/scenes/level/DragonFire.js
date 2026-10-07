@@ -9,11 +9,11 @@ const PARTICLE_SCALE_SMALL = 0.2
 const COLORS = [0xff0000, 0xffff00, 0xff6600, 0xffff00, 0xffcc00, 0xdddddd]
 const LIFE_MIN = 600   // мс
 const LIFE_MAX = 900  // мс
+const LIFE_CURVE = 3.6 // Коэффициент скругления. 1 = острый треугольник, 2-3 = плавная капля, 4+ = резкий "хвост" по центру
 const ALPHA_START = 0.7
 const ALPHA_DECAY = 0.0036                    // медленное угасание
 const SPEED = 0.18                            // выше скорость
 const SPEED_VARIANCE = 0.06
-const SPREAD_ANGLE = 0.27                     // уже конус (~7°)
 const SPAWN_RADIUS = 3                        // небольшой разброс в точке рождения
 const MAX_PARTICLES = 500
 
@@ -37,6 +37,17 @@ export default class DragonFire extends Container {
         // Активные частицы
         this.activeParticles = []
         this.isTickerAdded = false
+
+        this.particlePool.fill(() => {
+            const p = new Particle({
+                texture: images.particle, x: 0, y: 0,
+                anchorX: 0.5, anchorY: 0.5,
+                scaleX: PARTICLE_SCALE_BIG, scaleY: PARTICLE_SCALE_BIG,
+                rotation: 0, alpha: 0
+            })
+            p.data = {}
+            return p
+        }, MAX_PARTICLES)
     }
 
     /**
@@ -47,8 +58,9 @@ export default class DragonFire extends Container {
      * @param {number} dirY - единичный вектор направления (Y)
      * @param {number} count - количество частиц за вызов
      */
-    emit(x, y, dirX, dirY, count) {
-        const bigCount = Math.ceil(count / 3)        // больших в 2 раза меньше
+    // Добавили параметр spread = 0.6 (значение по умолчанию, если вдруг не передадут)
+    emit(x, y, dirX, dirY, count, spread = 0.6) {
+        const bigCount = Math.ceil(count / 3)
         const smallCount = count - bigCount
         const colors = COLORS
     
@@ -68,29 +80,34 @@ export default class DragonFire extends Container {
                 this.particlePool.add(particle)
             }
     
-            // цвет
             particle.tint = colors[Math.floor(Math.random() * colors.length)]
             particle.scaleX = scale
             particle.scaleY = scale
     
-            // случайное смещение в радиусе
             const angleOffset = Math.random() * Math.PI * 2
             const dist = Math.random() * SPAWN_RADIUS
             const startX = x + Math.cos(angleOffset) * dist
             const startY = y + Math.sin(angleOffset) * dist
     
-            // направление с разбросом
             const baseAngle = Math.atan2(dirY, dirX)
-            const spread = (Math.random() - 0.5) * 2 * SPREAD_ANGLE
-            const finalAngle = baseAngle + spread
+            const angleSpread = (Math.random() - 0.5) * 2 * spread
+            const finalAngle = baseAngle + angleSpread
             const speed = SPEED + Math.random() * SPEED_VARIANCE
-    
+
+            // Вычисляем, насколько частица близка к краю разброса (0 = центр, 1 = самый край)
+            const distFromCenter = Math.abs(angleSpread) / spread
+            
+            // Применяем кривую: чем ближе к центру, тем дольше живет частица (скругление кончика)
+            const lifeFactor = 1 - Math.pow(distFromCenter, LIFE_CURVE)
+
             particle.x = startX
             particle.y = startY
             particle.alpha = ALPHA_START
             particle.data.vx = Math.cos(finalAngle) * speed
             particle.data.vy = Math.sin(finalAngle) * speed
-            particle.data.life = LIFE_MIN + Math.random() * (LIFE_MAX - LIFE_MIN)
+            
+            // Новая формула жизни: базовая + бонус за близость к центру
+            particle.data.life = LIFE_MIN + (LIFE_MAX - LIFE_MIN) * lifeFactor
     
             this.particleContainer.addParticle(particle)
             this.activeParticles.push(particle)
@@ -135,21 +152,21 @@ export default class DragonFire extends Container {
     kill() {
         tickerRemove(this)
 
-        // Возвращаем все активные частицы в пул
+        // 1. Возвращаем все активные частицы в пул
         for (const p of this.activeParticles) {
-            if (p.parent) p.parent.removeParticle(p)
-            this.particlePool.put(p)
+            // removeParticle не нужен, если мы сейчас уничтожим весь контейнер,
+            // но для чистоты пула оставляем:
+            this.particlePool.put(p) 
         }
         this.activeParticles.length = 0
 
-        // Удаляем particleContainer из родителя, если он есть
-        if (this.particleContainer.parent) {
-            this.particleContainer.parent.removeChild(this.particleContainer)
+        // 2. Просто удаляем себя из родителя. 
+        // super.destroy({ children: true }) сам разберется со всеми вложенными объектами!
+        if (this.parent) {
+            this.parent.removeChild(this)
         }
-        this.particleContainer.destroy({ children: true })
-
-        // Уничтожаем сам DragonIce
-        if (this.parent) this.parent.removeChild(this)
+        
+        // 3. Финальное уничтожение себя и всего, что внутри (включая particleContainer)
         super.destroy({ children: true })
     }
 }

@@ -5,7 +5,7 @@ import { styles } from "../../../app/styles"
 import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
-import { addGold, addRound, addTraps, arrowPower, goldForSavingHp, dragons, addDragon, traps } from "../../state"
+import { gameState, goldForSavingHp } from "../../state"
 import { SCENE_NAME } from "../SceneManager"
 import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
@@ -56,7 +56,7 @@ export default class GameContainer extends Container {
 
         this.enemyArrows = new Container()
 
-        this.arrowStartPower = arrowPower
+        this.arrowStartPower = gameState.arrowPower
         this.arrowCurrentPower = this.arrowStartPower
         this.arrowComboRate = 1.2
         this.arrowComboCount = 0
@@ -70,9 +70,9 @@ export default class GameContainer extends Container {
         this.addChild(this.stones)
 
         this.dragon = null
-        if (dragons) {
+        if (gameState.dragonsCount > 0) {
             this.dragonFire = new DragonFire()
-            this.addChild(this.dragonFire.particleContainer)
+            this.addChild(this.dragonFire)
             this.dragon = new Dragon( this.enemies, this.dragonFire.emit.bind(this.dragonFire) )
             this.addChild(this.dragon)
         }
@@ -116,7 +116,7 @@ export default class GameContainer extends Container {
         circle.stroke({width: 2, color: 0x000000})
         this.trapsButton.addChild(circle)
 
-        this.trapsButton.text = new Text({text: `traps: ${traps}`, style: styles.loading})
+        this.trapsButton.text = new Text({text: `traps: ${gameState.trapsCount}`, style: styles.loading})
         this.trapsButton.text.anchor.set(0.5)
         this.trapsButton.text.scale.set(0.5)
         this.trapsButton.text.position.set(0.5, 20)
@@ -148,9 +148,9 @@ export default class GameContainer extends Container {
     }
     addTrap(x, y) {
         this.traps.addChild( createTrap(x, y, null, this.enemies) )
-        addTraps(-1)
-        this.trapsButton.text.text = `traps: ${traps}`
-        if (traps > 0) return
+        gameState.trapsCount -= 1
+        this.trapsButton.text.text = `traps: ${gameState.trapsCount}`
+        if (gameState.trapsCount > 0) return
         else setEnemyFirstWave()
     }
 
@@ -207,12 +207,13 @@ export default class GameContainer extends Container {
             this.arrowLastTarget = null
             this.arrowCurrentPower = this.arrowStartPower
 
-            const textPoint = this.parent.toLocal({x: data.x, y: data.y}, this)
-            if (this.chests.checkShut(data.x, data.y)) {
+            const chestReward = this.chests.checkShut(data.x, data.y)
+            if (chestReward > 0) {
+                const textPoint = this.parent.toLocal({x: data.x, y: data.y}, this)
                 this.parent.flyTexts.addChild(
-                    new FlyText('+12 Gold', textPoint.x, textPoint.y)
+                    new FlyText(`+${chestReward} Gold`, textPoint.x, textPoint.y)
                 )
-                addGold(12)
+                gameState.gold += chestReward
             } else {
                 this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
             }
@@ -223,7 +224,7 @@ export default class GameContainer extends Container {
         if (this.tower.hp > 9) {
             const extraGold = Math.floor(this.tower.hp * goldForSavingHp)
             this.parent.flyTexts.addChild(new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0))
-            addGold(extraGold)
+            gameState.gold += extraGold
         }
 
         this.resultPopupTimer = RESULT_POPUP_TIMEOUT
@@ -241,8 +242,8 @@ export default class GameContainer extends Container {
 
         tickerRemove(this)
         showPopup(POPUP_TYPE.UPGRADE)
-        addRound()
-        addTraps( this.traps.children.length )
+        gameState.round += 1
+        gameState.trapsCount += this.traps.children.length
     }
 
     kill() {
@@ -255,8 +256,8 @@ export default class GameContainer extends Container {
         if (this.trapsButton) this.removeTrapsButton()
 
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
-        EventHub.on(events.setTrapsOnMap, this.setTrapsOnMap, this)
-        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
+        EventHub.off(events.setTrapsOnMap, this.setTrapsOnMap, this)
+        EventHub.off(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
 
         kill(this.deadEnemies)
         kill(this.traps)
@@ -265,5 +266,12 @@ export default class GameContainer extends Container {
         kill(this.arrowPoints)
         kill(this.arrows)
         kill(this.enemyArrows)
+
+        kill(this.tower)
+        kill(this.chests)
+        kill(this.lightnings)
+        kill(this.stones)
+        kill(this.enemiesHp)
+        kill(this.testGraphics)
     }
 }

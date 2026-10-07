@@ -5,7 +5,7 @@ import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
-import { catapultDamageRadius, catapultPower } from "../../state";
+import { gameState } from "../../state";
 
 const STONE_POOL = createObjectPool(100)
 
@@ -62,10 +62,10 @@ class Stone extends Container {
     }
 
     setDamage() {
-        this.parent.addChild( new Explosion(this.x, this.y, 'explosion_stone', catapultDamageRadius) )
+        this.parent.addChild( new Explosion(this.x, this.y, 'explosion_stone', gameState.catapultRadius) )
         
         const enemies = this.enemies.children
-        const dmgSqRadius = catapultDamageRadius * catapultDamageRadius
+        const dmgSqRadius = gameState.catapultRadius * gameState.catapultRadius
 
         for (let i = enemies.length - 1; i >= 0; i--) {
             const enemy = enemies[i]
@@ -73,7 +73,7 @@ class Stone extends Container {
             const dy = enemy.y - this.y
             const sqDist = dx * dx + dy * dy
             const inRadius = dmgSqRadius + enemy.bodySqCollider > sqDist
-            if (inRadius && enemy.hp > 0) enemy.setDamage(catapultPower)
+            if (inRadius && enemy.hp > 0) enemy.setDamage(gameState.catapultPower)
         }
 
         tickerRemove(this)
