@@ -11,6 +11,7 @@ import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
 import Dragon from "./Dragon"
 import DragonFire from "./DragonFire"
+import EnemyBlood from "./EnemyBlood"
 import Tower from "./Tower"
 import { createTrap } from "./Trap"
 
@@ -21,6 +22,9 @@ const RESULT_POPUP_TIMEOUT = 1800
 export default class GameContainer extends Container {
     constructor() {
         super()
+
+        this.blood = new EnemyBlood()
+        this.addChild(this.blood.stainContainer)
 
         this.deadEnemies = new Container()
         this.addChild(this.deadEnemies)
@@ -40,18 +44,20 @@ export default class GameContainer extends Container {
 
         this.arrows = new Container()
         this.stones = new Container()
-        this.particles = null
 
         this.lightnings = new Graphics()
 
         this.enemies = new Container()
         this.addChild(this.enemies)
 
+        this.addChild(this.blood.flyContainer)
+        requestAnimationFrame(() => this.blood.warmup())
+
         this.enemiesHp = new Container()
 
         this.tower = new Tower(
-            this.arrowPoints, this.arrowsOnGround, this.arrows,
-            this.stones, this.lightnings, this.enemies, this.particles
+            this.arrowPoints, this.arrows,
+            this.stones, this.lightnings, this.enemies
         )
 
         this.enemyArrows = new Container()
@@ -75,6 +81,7 @@ export default class GameContainer extends Container {
             this.addChild(this.dragonFire)
             this.dragon = new Dragon( this.enemies, this.dragonFire.emit.bind(this.dragonFire) )
             this.addChild(this.dragon)
+            requestAnimationFrame( () => this.dragonFire.warmup(this) )
         }
         
         this.addChild(this.enemiesHp)
@@ -173,27 +180,30 @@ export default class GameContainer extends Container {
         }
 
         if (nearestIndex > -1) {
-            const x = enemies[nearestIndex].x
-            const y = enemies[nearestIndex].y
+            const enemy = enemies[nearestIndex]
+            const x = enemy.x
+            const y = enemy.y
 
-            if (this.arrowLastTarget === enemies[nearestIndex]) {
+            if (this.arrowLastTarget === enemy) {
                 this.arrowComboCount++
                 this.arrowCurrentPower = Math.floor(this.arrowCurrentPower * this.arrowComboRate)
             } else {
                 this.arrowComboCount = 0
-                this.arrowLastTarget = enemies[nearestIndex]
+                this.arrowLastTarget = enemy
                 this.arrowCurrentPower = this.arrowStartPower
             }
 
             let power = this.arrowCurrentPower
             const textPoint = this.parent.toLocal({ x, y }, this)
 
-            if (nearestSqDist < enemies[nearestIndex].headSqCollider) {
+            if (nearestSqDist < enemy.headSqCollider) {
                 power *= this.arrowHeadShootRate
                 this.parent.flyTexts.addChild(
                     new FlyText('HEAD SHOOT', textPoint.x, textPoint.y - 18)
                 )
             }
+
+            if (data.isRage === true) power *= gameState.berserkPowerRate
 
             const text = this.arrowComboCount > 0
                 ? `-${power} Combo X${this.arrowComboCount}`
@@ -201,7 +211,18 @@ export default class GameContainer extends Container {
             this.parent.flyTexts.addChild(
                 new FlyText(text, textPoint.x, textPoint.y)
             )
-            enemies[nearestIndex].setDamage(power)
+
+            enemy.setDamage(power)
+
+            EventHub.emit(events.enemyHit, {
+                x: enemy.x,
+                y: enemy.y,
+                damage: power,
+                bloodType: enemy.bloodType,
+                isKill: enemy.hp === 0,
+            })
+
+            if (data.isRage !== true) EventHub.emit(events.addRage, power)
         } else {
             this.arrowComboCount = 0
             this.arrowLastTarget = null
@@ -258,6 +279,11 @@ export default class GameContainer extends Container {
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
         EventHub.off(events.setTrapsOnMap, this.setTrapsOnMap, this)
         EventHub.off(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
+
+        if (this.blood) {
+            this.blood.kill()
+            this.blood = null
+        }
 
         kill(this.deadEnemies)
         kill(this.traps)

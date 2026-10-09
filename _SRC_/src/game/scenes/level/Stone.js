@@ -6,15 +6,16 @@ import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
 import { gameState } from "../../state";
+import { EventHub, events } from '../../../app/events'
 
 const STONE_POOL = createObjectPool(100)
 
-export function createStone(x, y, targetX, targetY, particles, enemies) {
+export function createStone(x, y, targetX, targetY, enemies) {
     let stone = STONE_POOL.get()
     if (stone) {
-        stone.reset(x, y, targetX, targetY, particles, enemies)
+        stone.reset(x, y, targetX, targetY, enemies)
     } else {
-        stone = new Stone(x, y, targetX, targetY, particles, enemies)
+        stone = new Stone(x, y, targetX, targetY, enemies)
         STONE_POOL.add(stone)
     }
     return stone
@@ -28,7 +29,7 @@ const MID_SCALE = MAX_SCALE - MIN_SCALE
 const START_OFFSET = -24
 
 class Stone extends Container {
-    constructor(x, y, targetX, targetY, particles, enemies) {
+    constructor(x, y, targetX, targetY, enemies) {
         super()
 
         this.image = new Sprite(images.stone)
@@ -38,14 +39,13 @@ class Stone extends Container {
         this.speed = 0.24
         this.turnSpeed = 0.006
 
-        this.reset(x, y, targetX, targetY, particles, enemies)
+        this.reset(x, y, targetX, targetY, enemies)
     }
   
-    reset(x, y, targetX, targetY, particles, enemies) {
+    reset(x, y, targetX, targetY, enemies) {
         this.position.set(x, y)
         this.target = {x: targetX, y: targetY}
 
-        this.particles = particles
         this.enemies = enemies
 
         this.path = 0
@@ -73,7 +73,16 @@ class Stone extends Container {
             const dy = enemy.y - this.y
             const sqDist = dx * dx + dy * dy
             const inRadius = dmgSqRadius + enemy.bodySqCollider > sqDist
-            if (inRadius && enemy.hp > 0) enemy.setDamage(gameState.catapultPower)
+            if (inRadius && enemy.hp > 0) {
+                enemy.setDamage(gameState.catapultPower)
+                EventHub.emit(events.enemyHit, {
+                    x: enemy.x,
+                    y: enemy.y,
+                    damage: gameState.catapultPower,
+                    bloodType: enemy.bloodType,
+                    isKill: enemy.hp === 0
+                })
+            }
         }
 
         tickerRemove(this)

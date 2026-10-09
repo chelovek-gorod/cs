@@ -1,7 +1,8 @@
 import { Container, Text } from "pixi.js"
 import { styles } from "../../app/styles"
 import { closePopup, goldChanged } from "../../app/events"
-import { gameState, mineMaxGoldMax, mineMaxGoldStep, mineTimeoutMax, mineTimeoutStep } from "../state"
+import { gameState, mineMaxGoldMax, mineMaxGoldStep, mineTimeoutMax, mineTimeoutStep,
+    getMineAccumulated, collectMineGold } from "../state"
 import PopupButton from "./PopupButton"
 
 export default class BuildMine extends Container {
@@ -61,6 +62,16 @@ export default class BuildMine extends Container {
         )
         this.addChild(this.btnUpMaxGold)
 
+        this.btnGetGold = new PopupButton(
+            "GET GOLD",
+            '' + getMineAccumulated() + '$',
+            '',
+            this.getGold.bind(this),
+            () => getMineAccumulated() > 0,
+            0, 0
+        )
+        this.addChild(this.btnGetGold)
+
         this.btnClose = new PopupButton(
             "", "CLOSE", "",
             this.close.bind(this),
@@ -73,11 +84,26 @@ export default class BuildMine extends Container {
 
     setActive(isActive) {
         this.isActive = isActive
+
+        if (isActive) {
+            this.refreshGetGold()
+            this.mineInterval = setInterval(() => this.refreshGetGold(), 100)
+        } else if (this.mineInterval) {
+            clearInterval(this.mineInterval)
+            this.mineInterval = null
+        }
     }
 
     checkButtons() {
         this.btnUpTimeout.updateAvailable()
         this.btnUpMaxGold.updateAvailable()
+        this.btnGetGold.updateAvailable()
+    }
+
+    refreshGetGold() {
+        const value = getMineAccumulated()
+        this.btnGetGold.setSubtitle('' + value + '$')
+        this.btnGetGold.updateAvailable()
     }
 
     upTimeout() {
@@ -127,7 +153,21 @@ export default class BuildMine extends Container {
         this.checkButtons()
     }
 
+    getGold() {
+        const value = collectMineGold()
+        if (value <= 0) return
+    
+        gameState.gold += value
+        goldChanged()
+        this.refreshGetGold()
+        this.checkButtons()
+    }
+
     close() {
+        if (this.mineInterval) {
+            clearInterval(this.mineInterval)
+            this.mineInterval = null
+        }
         closePopup()
     }
 }

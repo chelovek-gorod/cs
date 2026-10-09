@@ -9,12 +9,12 @@ import { gameState } from "../../state";
 
 const ARROW_POOL = createObjectPool(100)
 
-export function createArrow(x, y) {
+export function createArrow(x, y, isRage = false) {
     let arrow = ARROW_POOL.get()
     if (arrow) {
-        arrow.reset(x, y)
+        arrow.reset(x, y, isRage)
     } else {
-        arrow = new Arrow(x, y)
+        arrow = new Arrow(x, y, isRage)
         ARROW_POOL.add(arrow)
     }
     return arrow
@@ -31,18 +31,20 @@ const MAX_SCALE_X = MAX_SCALE_Y
 const START_OFFSET = 20
 
 class Arrow extends Sprite {
-    constructor(x, y) {
+    constructor(x, y, isRage) {
         super(images.archer_arrow)
         this.anchor.set(1, 0.5)
-        this.reset(x, y)
+        this.reset(x, y, isRage)
 
         this.arrowPoint = new Sprite(images.arrow_point)
         this.arrowPoint.anchor.set(0.5)
     }
   
-    reset(x, y) {
+    reset(x, y, isRage) {
         this.position.set(0, 0)
         this.target = {x, y}
+
+        this.isRage = isRage
 
         this.path = 0
         this.distance = Math.hypot(x, y)
@@ -67,7 +69,10 @@ class Arrow extends Sprite {
         this.scale.set(scaleX, scaleY)
 
         if( moveToTarget(this, this.target, this.speed * deltaMs) ) {
-            arrowOnTarget({x: this.target.x, y: this.target.y, direction: this.rotation})
+            arrowOnTarget({
+                x: this.target.x, y: this.target.y,
+                direction: this.rotation, isRage: this.isRage
+            })
             tickerRemove(this)
             this.parent.removeChild(this)
             this.arrowPoint.parent.removeChild(this.arrowPoint)

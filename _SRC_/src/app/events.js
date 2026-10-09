@@ -28,6 +28,9 @@ export const events = createEnum([
     'setEnemyFirstWave',
 
     'goldChanged',
+
+    'enemyHit',
+    'addRage',
 ])
 
 export function screenResize( data ) {
@@ -88,4 +91,12 @@ export function setEnemyFirstWave() {
 
 export function goldChanged() {
     EventHub.emit( events.goldChanged )
+}
+
+export function enemyHit( data ) {
+    EventHub.emit( events.enemyHit, data )
+}
+
+export function addRage( value ) {
+    EventHub.emit( events.enemyHit, value )
 }

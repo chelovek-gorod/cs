@@ -11,10 +11,7 @@ const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y:
 const CATAPULT_POINTS = [ {x: 36, y: 36}, {x: -36, y: -36}, {x: -36, y: 36}, {x: 36, y: -36} ]
 
 export default class Tower extends Container {
-    constructor(
-        arrowPoints, arrowsOnGround, arrowsContainer,
-        catapultStones, lightnings, enemies, particles
-    ) {
+    constructor(arrowPoints, arrowsContainer, catapultStones, lightnings, enemies) {
         super()
 
         this.isAlive = true
@@ -29,7 +26,7 @@ export default class Tower extends Container {
             const x = CATAPULT_POINTS[i].x
             const y = CATAPULT_POINTS[i].y
             this.addChild(
-                new Catapult(x, y, catapultStones, enemies, str, particles)
+                new Catapult(x, y, catapultStones, enemies, str)
             )
         }
 
@@ -42,7 +39,7 @@ export default class Tower extends Container {
         }
  
         this.addChild(
-            new Archer(arrowPoints, arrowsOnGround, arrowsContainer)
+            new Archer(arrowPoints, arrowsContainer, enemies)
         )
 
         this.hp = gameState.towerHp

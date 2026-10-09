@@ -8,6 +8,7 @@ import Explosion from "../../effects/Explosion"
 import { createHpBar } from "./EnemiesHpBar"
 import { createEnemyArrow } from "./EnemyArrow"
 import { createEnemyStone } from "./EnemyStone"
+import { BLOOD_GREEN, BLOOD_BLACK } from './EnemyBlood'
 
 const ENEMY_POOL = createObjectPool(100)
 
@@ -33,6 +34,7 @@ const LIGHTNING_FRAMES = 12
 const ENEMY = {
     [TYPES.NORMAL]: {
         atlas: 'enemy_normal',
+        bloodType: BLOOD_GREEN,
         hp: 40,
         speed: 0.03,
         damage: 4,
@@ -45,6 +47,7 @@ const ENEMY = {
     },
     [TYPES.FAST]: {
         atlas: 'enemy_runner',
+        bloodType: BLOOD_GREEN,
         hp: 20,
         speed: 0.08,
         damage: 3,
@@ -57,6 +60,7 @@ const ENEMY = {
     },
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
+        bloodType: BLOOD_GREEN,
         hp: 50,
         speed: 0.04,
         damage: 2,
@@ -69,6 +73,7 @@ const ENEMY = {
     },
     [TYPES.TANK]: {
         atlas: 'enemy_tank',
+        bloodType: BLOOD_BLACK,
         hp: 200,
         speed: 0.02,
         damage: 10,
@@ -81,6 +86,7 @@ const ENEMY = {
     },
     [TYPES.RIDER]: {
         atlas: 'enemy_rider',
+        bloodType: BLOOD_GREEN,
         hp: 60,
         speed: 0.05,
         damage: 6,
@@ -93,6 +99,7 @@ const ENEMY = {
     },
     [TYPES.BOMB]: {
         atlas: 'enemy_bomber',
+        bloodType: BLOOD_GREEN,
         hp: 30,
         speed: 0.07,
         damage: 25,
@@ -105,6 +112,7 @@ const ENEMY = {
     },
     [TYPES.BOSS]: {
         atlas: 'enemy_boss',
+        bloodType: BLOOD_GREEN,
         hp: 500,
         speed: 0.06,
         damage: 5,
@@ -146,6 +154,8 @@ class Enemy extends Container {
         this.type = type
         this.position.set(x, y)
         this.alpha = 0
+        
+        this.bloodType = ENEMY[type].bloodType
 
         // test collider
         this.colliderCircle.clear()

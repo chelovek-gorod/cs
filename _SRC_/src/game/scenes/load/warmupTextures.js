@@ -16,7 +16,7 @@ export function warmupAllTextures() {
     for (const key in assets.images) {
         const tex = assets.images[key]
         // Проверяем, что это уже загруженная текстура, а не строка пути
-        if (tex && typeof tex !== 'string' && tex.baseTexture) {
+        if (tex && typeof tex !== 'string' && tex.source) {
             const sprite = new Sprite({ texture: tex, x: -9999, y: -9999 })
             tempContainer.addChild(sprite)
         }
@@ -29,7 +29,7 @@ export function warmupAllTextures() {
         if (spritesheet && spritesheet.textures) {
             for (const texKey in spritesheet.textures) {
                 const tex = spritesheet.textures[texKey]
-                if (tex && tex.baseTexture) {
+                if (tex && tex.source) {
                     const sprite = new Sprite({ texture: tex, x: -9999, y: -9999 })
                     tempContainer.addChild(sprite)
                 }

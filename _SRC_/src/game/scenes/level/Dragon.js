@@ -5,21 +5,17 @@ import { dragonFuelMax, gameState } from "../../state";
 
 const TOWER_OFFSET = 180          // Радиус полета
 const FLY_SPEED = 0.0004
-const FLY_AWAY_SPEED = 0.07
-const FLY_AWAY_ALPHA_STEP = 0.0001
-const SPRITE_ROTATION_OFFSET = 0
+const FLY_AWAY_SPEED = 0.08
+const FLY_AWAY_ALPHA_STEP = 0.00009
 
-const SPARKS_COUNT = 36
-const FUEL = 120
-const FIRE_DURATION = 1500
-const DAMAGE_TIMEOUT = 500
+const SPARKS_COUNT = 96
+const FIRE_DURATION = 1200
+const DAMAGE_TIMEOUT = 120
 
 const SCAN_TIMEOUT = 120
 const SCAN_RADIUS = 80
 const SCAN_OFFSET_FORWARD = 120 // Небольшой сдвиг вдоль тела дракона
 const SCAN_OFFSET_SIDE = 30     // Дополнительный сдвиг В СТОРОНУ БАШНИ от зоны атаки
-const FIRE_SIDE_OFFSET = 0.4    // Смещение струи К БАШНЕ
-const FIRE_SPREAD = 0.5         // Насколько широко распыляется огонь (в радианах)
 
 export default class Dragon extends AnimatedSprite {
     constructor(enemies, emitFire) {
@@ -27,8 +23,7 @@ export default class Dragon extends AnimatedSprite {
 
         this.anchor.set(0.8, 0.5)
         this.position.set(0, -TOWER_OFFSET)
-        this.rotation = SPRITE_ROTATION_OFFSET
-        this.flyAngle = 0
+        this.rotation = 0
 
         this.animationSpeed = 0.5
         this.play()
@@ -37,11 +32,11 @@ export default class Dragon extends AnimatedSprite {
         this.emitFire = emitFire
 
         this.isOnAttack = false
-        this.fuel = FUEL
+        this.fuel = gameState.dragonFuel
         this.scanTimeout = SCAN_TIMEOUT
         this.damageTimeout = DAMAGE_TIMEOUT
         this.fireTimeout = 0
-        this.isParticleFrame = false
+        //this.isParticleFrame = false
 
         this.scanLocalPoint = { x: SCAN_OFFSET_FORWARD, y: SCAN_OFFSET_SIDE }
 
@@ -53,7 +48,7 @@ export default class Dragon extends AnimatedSprite {
     }
 
     updateCircles(isOnAttack = false) {
-        // return
+        return
         this.circles.clear()
 
         this.circles.circle(this.scanLocalPoint.x, this.scanLocalPoint.y, SCAN_RADIUS)
@@ -117,19 +112,19 @@ export default class Dragon extends AnimatedSprite {
     }
 
     addFire() {
-        this.isParticleFrame = !this.isParticleFrame
-        if (!this.isParticleFrame) return
-
-        const headPos = this.parent.toLocal({x: 0, y: 0}, this)
-        
-        // Направление = угол полета + сдвиг к башне
-        const aimAngle = this.flyAngle + FIRE_SIDE_OFFSET
-        
-        const dirX = Math.cos(aimAngle)
-        const dirY = Math.sin(aimAngle)
-
-        // Передаем направление и ШИРИНУ разброса (FIRE_SPREAD) в систему огня
-        this.emitFire(headPos.x, headPos.y, dirX, dirY, SPARKS_COUNT, FIRE_SPREAD)
+        //this.isParticleFrame = !this.isParticleFrame
+        //if (!this.isParticleFrame) return
+    
+        // apex (голова дракона) и центр scan-круга — в системе родителя
+        const apex   = this.parent.toLocal({ x: 0, y: 0 }, this)
+        const center = this.parent.toLocal(this.scanLocalPoint, this)
+    
+        this.emitFire(
+            apex.x, apex.y,
+            center.x, center.y,
+            SCAN_RADIUS,
+            SPARKS_COUNT
+        )
     }
 
     addDamage() {
@@ -206,11 +201,10 @@ export default class Dragon extends AnimatedSprite {
         }
 
         // полет
-        this.flyAngle += FLY_SPEED * deltaMs
-        this.rotation = this.flyAngle + SPRITE_ROTATION_OFFSET
+        this.rotation += FLY_SPEED * deltaMs
         this.position.set(
-            Math.sin(this.flyAngle) * TOWER_OFFSET,
-            -Math.cos(this.flyAngle) * TOWER_OFFSET
+            Math.sin(this.rotation) * TOWER_OFFSET,
+            -Math.cos(this.rotation) * TOWER_OFFSET
         )
 
         // скан

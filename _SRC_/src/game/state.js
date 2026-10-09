@@ -8,7 +8,7 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 1100,
+        gold: 0,
         round: 1,
         
         towerHp: 100,
@@ -47,8 +47,8 @@ function initState() {
 
         dragonsCount: 0,
         dragonPrice: 50,
-        dragonFuel: 0,
-        dragonPower: 12,
+        dragonFuel: 120,
+        dragonPower: 5,
         dragonPowerPrice: 20,
 
         wizardsCount: 0,
@@ -74,6 +74,8 @@ function initState() {
         catapultRadiusPrice: 40,
     }
 }
+
+let mineLastCollectedAt = Date.now()
 
 export let gameState = initState()
 
@@ -109,8 +111,8 @@ export const trapRadiusTrigger = gameState.trapRadius * 0.5
 
 export const dragonPrice = 50
 export const dragonFuelMax = 120
-export const dragonPowerStep = 6
-export const dragonPowerMax = 36
+export const dragonPowerStep = 3
+export const dragonPowerMax = 20
 
 export const arrowsStep = 2
 export const arrowsMax = 20
@@ -150,6 +152,18 @@ export function getHelperPrice(currentPrice) {
 }
 export function getWizardTargetMaxDistance() {
     return Math.ceil(wizardShootDistance * wizardTargetRadiusRate)
+}
+
+export function getMineAccumulated() {
+    const elapsed = Date.now() - mineLastCollectedAt
+    const value = Math.floor(elapsed / gameState.mineTimeout * gameState.mineMaxGold)
+    return Math.min(value, gameState.mineMaxGold)
+}
+
+export function collectMineGold() {
+    const value = getMineAccumulated()
+    mineLastCollectedAt = Date.now()
+    return value
 }
 
 //
