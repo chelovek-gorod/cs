@@ -107,10 +107,11 @@ export const trapPrice = 25
 export const trapsAdd = 6
 export const trapPowerStep = 25
 export const trapPowerMax = 200
-export const trapRadiusTrigger = gameState.trapRadius * 0.5
+export const trapRadiusStep = 25
+export const trapRadiusMax = 200
 
-export const dragonPrice = 50
-export const dragonFuelMax = 120
+export const dragonPrice = 100
+export const dragonFuelMax = 144
 export const dragonPowerStep = 3
 export const dragonPowerMax = 20
 

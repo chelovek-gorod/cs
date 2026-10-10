@@ -33,7 +33,7 @@ export default class BuildMine extends Container {
         sText = `${restMinutesNow}min. ${restSecondsNow}sec. -> ${restMinutesThen}min. ${restSecondsThen}sec.`
         dText = gameState.mineTimeoutPrice + '$'
         if (gameState.mineTimeout === mineTimeoutMax) {
-            sText = 'v'
+            sText = `${restMinutesNow}min. ${restSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout = new PopupButton(

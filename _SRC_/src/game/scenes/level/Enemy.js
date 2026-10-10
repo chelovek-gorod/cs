@@ -1,6 +1,6 @@
 import { Container, AnimatedSprite, Graphics } from "pixi.js"
 import { tickerAdd, tickerRemove } from "../../../app/application"
-import { atlases } from "../../../app/assets"
+import { atlases, sounds } from "../../../app/assets"
 import { addGoldForKill, setDamage } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
 import { createObjectPool } from "../../../utils/pool"
@@ -9,6 +9,7 @@ import { createHpBar } from "./EnemiesHpBar"
 import { createEnemyArrow } from "./EnemyArrow"
 import { createEnemyStone } from "./EnemyStone"
 import { BLOOD_GREEN, BLOOD_BLACK } from './EnemyBlood'
+import { soundPlay } from "../../../app/sound"
 
 const ENEMY_POOL = createObjectPool(100)
 
@@ -35,6 +36,7 @@ const ENEMY = {
     [TYPES.NORMAL]: {
         atlas: 'enemy_normal',
         bloodType: BLOOD_GREEN,
+        screamRate: 1.6,
         hp: 40,
         speed: 0.03,
         damage: 4,
@@ -48,6 +50,7 @@ const ENEMY = {
     [TYPES.FAST]: {
         atlas: 'enemy_runner',
         bloodType: BLOOD_GREEN,
+        screamRate: 1.8,
         hp: 20,
         speed: 0.08,
         damage: 3,
@@ -61,6 +64,7 @@ const ENEMY = {
     [TYPES.SHOOTER]: {
         atlas: 'enemy_shooter',
         bloodType: BLOOD_GREEN,
+        screamRate: 1.2,
         hp: 50,
         speed: 0.04,
         damage: 2,
@@ -74,6 +78,7 @@ const ENEMY = {
     [TYPES.TANK]: {
         atlas: 'enemy_tank',
         bloodType: BLOOD_BLACK,
+        screamRate: null,
         hp: 200,
         speed: 0.02,
         damage: 10,
@@ -86,6 +91,7 @@ const ENEMY = {
     },
     [TYPES.RIDER]: {
         atlas: 'enemy_rider',
+        screamRate: 1,
         bloodType: BLOOD_GREEN,
         hp: 60,
         speed: 0.05,
@@ -100,6 +106,7 @@ const ENEMY = {
     [TYPES.BOMB]: {
         atlas: 'enemy_bomber',
         bloodType: BLOOD_GREEN,
+        screamRate: 1.4,
         hp: 30,
         speed: 0.07,
         damage: 25,
@@ -113,6 +120,7 @@ const ENEMY = {
     [TYPES.BOSS]: {
         atlas: 'enemy_boss',
         bloodType: BLOOD_GREEN,
+        screamRate: 0.9,
         hp: 500,
         speed: 0.06,
         damage: 5,
@@ -154,8 +162,10 @@ class Enemy extends Container {
         this.type = type
         this.position.set(x, y)
         this.alpha = 0
+        this.tint = null
         
         this.bloodType = ENEMY[type].bloodType
+        this.screamRate = ENEMY[type].screamRate
 
         // test collider
         this.colliderCircle.clear()
@@ -300,6 +310,10 @@ class Enemy extends Container {
         this.iceTimeout = 0
 
         if (this.hp === 0) {
+            if (this.screamRate !== null) {
+                soundPlay(sounds.se_scream_die.rate(this.screamRate))
+            }
+            
             this.hpBar.release()
             this.hpBar = null
 
@@ -321,6 +335,11 @@ class Enemy extends Container {
 
             this.setState(ENEMY_STATE.DIE)
         } else {
+            if (this.screamRate !== null) {
+                const rate = this.screamRate - 0.1 + Math.random() * 0.2
+                soundPlay(sounds.se_scream_hit.rate(rate))
+            }
+
             this.isOnHit = true
             this.setState(ENEMY_STATE.HIT)
 

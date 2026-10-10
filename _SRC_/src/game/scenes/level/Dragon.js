@@ -16,6 +16,7 @@ const SCAN_TIMEOUT = 120
 const SCAN_RADIUS = 80
 const SCAN_OFFSET_FORWARD = 120 // Небольшой сдвиг вдоль тела дракона
 const SCAN_OFFSET_SIDE = 30     // Дополнительный сдвиг В СТОРОНУ БАШНИ от зоны атаки
+const DAMAGE_OFFSET = 0.8       // Сдвиг центра круга атаки для совпадения с визуалом
 
 export default class Dragon extends AnimatedSprite {
     constructor(enemies, emitFire) {
@@ -38,7 +39,14 @@ export default class Dragon extends AnimatedSprite {
         this.fireTimeout = 0
         //this.isParticleFrame = false
 
-        this.scanLocalPoint = { x: SCAN_OFFSET_FORWARD, y: SCAN_OFFSET_SIDE }
+        this.scanLocalPoint = {
+            x: SCAN_OFFSET_FORWARD,
+            y: SCAN_OFFSET_SIDE
+        }
+        this.damageLocalPoint = {
+            x: SCAN_OFFSET_FORWARD * DAMAGE_OFFSET,
+            y: SCAN_OFFSET_SIDE    * DAMAGE_OFFSET,
+        }
 
         this.circles = new Graphics()
         this.addChild(this.circles)
@@ -129,61 +137,61 @@ export default class Dragon extends AnimatedSprite {
 
     addDamage() {
         this.damageTimeout = DAMAGE_TIMEOUT
-
-        const H = {x: 0, y: 0}
-        const C = this.scanLocalPoint
+    
+        const H = { x: 0, y: 0 }
+        const C = this.damageLocalPoint
         const R = SCAN_RADIUS
-
+    
         // Один раз переводим локальные точки в систему координат врагов
         const globalH = this.enemies.toLocal(H, this)
         const globalC = this.enemies.toLocal(C, this)
-
+    
         // Вектор от головы к центру круга
         const Vx = globalC.x - globalH.x
         const Vy = globalC.y - globalH.y
         const L_sq = Vx * Vx + Vy * Vy
-
+    
         for (let i = 0; i < this.enemies.children.length; i++) {
             const enemy = this.enemies.children[i]
             if (enemy.hp <= 0) continue
-
-            // Враги уже в системе координат this.enemies
+    
             const ex = enemy.x
             const ey = enemy.y
-
+    
             // Вектор от головы к врагу
             const Wx = ex - globalH.x
             const Wy = ey - globalH.y
-
-            // Проекция врага на ось "голова -> центр круга" (от 0 до 1)
+    
+            // Проекция врага на ось "голова -> центр круга" (0..1)
             let t = (Wx * Vx + Wy * Vy) / L_sq
-
             if (t < 0) t = 0
             if (t > 1) t = 1
-
+    
             // Ближайшая точка на оси конуса
             const closestX = globalH.x + t * Vx
             const closestY = globalH.y + t * Vy
-
-            // Расстояние от врага до оси
+    
+            // Квадрат расстояния от центра врага до оси
             const dx = ex - closestX
             const dy = ey - closestY
             const distSq = dx * dx + dy * dy
-
-            // Допустимый радиус
+    
+            // Квадрат допустимого радиуса в этой точке + квадрат коллайдера врага
             const allowedRadius = t * R
-            const allowedRadiusSq = allowedRadius * allowedRadius
-
-            if (distSq <= allowedRadiusSq) {
+            const reachSq = allowedRadius * allowedRadius + enemy.bodySqCollider
+    
+            if (distSq <= reachSq) {
                 enemy.setDamage(gameState.dragonPower)
+                if (enemy.hp === 0) enemy.tint = 0x222222
             }
         }
-
+    
         this.fuel--
         if (this.fuel <= 0) {
             gameState.dragonsCount -= 1
             gameState.dragonFuel = dragonFuelMax
         }
+        console.log("fuel:",this.fuel)
     }
 
     tick(deltaMs) {

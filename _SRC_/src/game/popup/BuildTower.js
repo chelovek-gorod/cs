@@ -22,7 +22,7 @@ export default class BuildTower extends Container {
 
         let sText, dText
         sText = `${gameState.towerRepairsCount} -> ${gameState.towerRepairsCount + 1}`
-        dText = dText = towerRepairPrice + '$'
+        dText = towerRepairPrice + '$'
         this.btnAddRepair = new PopupButton(
             "ADD REPAIR",
             sText,
@@ -33,20 +33,12 @@ export default class BuildTower extends Container {
         )
         this.addChild(this.btnAddRepair)
 
-        sText = `${gameState.towerFogCount} -> ${gameState.towerFogCount + 1}`
-        dText = dText = towerFogPrice + '$'
-        this.btnAddFog = new PopupButton(
-            "ADD TOXIC FOG",
-            sText,
-            dText,
-            this.addFog.bind(this),
-            () => gameState.gold >= towerFogPrice,
-            240, 0
-        )
-        this.addChild(this.btnAddFog)
-
         sText = `${gameState.towerRepairHp} -> ${gameState.towerRepairHp + towerRepairStep}`
-        dText = dText = gameState.towerRepairUpgradePrice + '$'
+        dText = gameState.towerRepairUpgradePrice + '$'
+        if (gameState.towerRepairHp === towerRepairMax) {
+            sText = `${gameState.towerRepairHp}`
+            dText = 'Maximum'
+        }
         this.btnUpRepair = new PopupButton(
             "UPGRADE REPAIR",
             sText,
@@ -57,8 +49,40 @@ export default class BuildTower extends Container {
         )
         this.addChild(this.btnUpRepair)
 
+        sText = `${gameState.towerHp} -> ${gameState.towerHp + towerHPStep}`
+        dText = gameState.towerHpPrice + '$'
+        if (gameState.towerHp === towerHPMax) {
+            sText = `${gameState.towerHp} HP`
+            dText = 'Maximum'
+        }
+        this.btnUpHp = new PopupButton(
+            "UPGRADE TOWER HP",
+            sText,
+            dText,
+            this.upHp.bind(this),
+            () => gameState.gold >= gameState.towerHpPrice && gameState.towerHp < towerHPMax,
+            -240, 240
+        )
+        this.addChild(this.btnUpHp)
+
+        sText = `${gameState.towerFogCount} -> ${gameState.towerFogCount + 1}`
+        dText = towerFogPrice + '$'
+        this.btnAddFog = new PopupButton(
+            "ADD TOXIC FOG",
+            sText,
+            dText,
+            this.addFog.bind(this),
+            () => gameState.gold >= towerFogPrice,
+            240, 0
+        )
+        this.addChild(this.btnAddFog)
+
         sText = `${gameState.towerFogPower} -> ${gameState.towerFogPower + towerFogPowerStep}`
-        dText = dText = gameState.towerFogUpgradePrice + '$'
+        dText = gameState.towerFogUpgradePrice + '$'
+        if (gameState.towerFogPower === towerFogPowerMax) {
+            sText = gameState.towerFogPower
+            dText = 'Maximum'
+        }
         this.btnUpFog = new PopupButton(
             "UPGRADE FOG POWER",
             sText,
@@ -68,18 +92,6 @@ export default class BuildTower extends Container {
             240, 120
         )
         this.addChild(this.btnUpFog)
-
-        sText = `${gameState.towerHp} -> ${gameState.towerHp + towerHPStep}`
-        dText = dText = gameState.towerHpPrice + '$'
-        this.btnUpHp = new PopupButton(
-            "UPGRADE TOWER HP",
-            sText,
-            dText,
-            this.upHp.bind(this),
-            () => gameState.gold >= gameState.towerHpPrice && gameState.towerHp < towerHPMax,
-            -240, 120
-        )
-        this.addChild(this.btnUpHp)
 
         this.btnClose = new PopupButton(
             "", "CLOSE", "",
@@ -97,10 +109,10 @@ export default class BuildTower extends Container {
 
     checkButtons() {
         this.btnAddRepair.updateAvailable()
-        this.btnAddFog.updateAvailable()
         this.btnUpRepair.updateAvailable()
-        this.btnUpFog.updateAvailable()
         this.btnUpHp.updateAvailable()
+        this.btnAddFog.updateAvailable()
+        this.btnUpFog.updateAvailable()
     }
 
     addRepair() {
@@ -108,6 +120,45 @@ export default class BuildTower extends Container {
         gameState.towerRepairsCount += 1
         let sText = `${gameState.towerRepairsCount} -> ${gameState.towerRepairsCount + 1}`
         this.btnAddRepair.setSubtitle(sText)
+
+        goldChanged()
+
+        this.checkButtons()
+    }
+
+    upRepair() {
+        gameState.gold -= gameState.towerRepairUpgradePrice
+        gameState.towerRepairHp = Math.min(towerRepairMax, gameState.towerRepairHp + towerRepairStep)
+        gameState.towerRepairUpgradePrice *= 2
+
+        let sText, dText
+        sText = `${gameState.towerRepairHp} -> ${gameState.towerRepairHp + towerRepairStep}`
+        dText = gameState.towerRepairUpgradePrice + '$'
+        if (gameState.towerRepairHp === towerRepairMax) {
+            sText = gameState.towerRepairHp
+            dText = 'Maximum'
+        }
+        this.btnUpRepair.setSubtitle(sText)
+        this.btnUpRepair.setDescription(dText)
+
+        goldChanged()
+
+        this.checkButtons()
+    }
+
+    upHp() {
+        gameState.gold -= gameState.towerHpPrice
+        gameState.towerHp = Math.min(towerHPMax, gameState.towerHp + towerHPStep)
+        gameState.towerHpPrice *= 2
+        let sText, dText
+        sText = `${gameState.towerHp} -> ${gameState.towerHp + towerHPStep}`
+        dText = gameState.towerHpPrice + '$'
+        if (gameState.towerHp === towerHPMax) {
+            sText = gameState.towerHp
+            dText = 'Maximum'
+        }
+        this.btnUpHp.setSubtitle(sText)
+        this.btnUpHp.setDescription(dText)
 
         goldChanged()
 
@@ -125,59 +176,20 @@ export default class BuildTower extends Container {
         this.checkButtons()
     }
 
-    upRepair() {
-        gameState.gold -= gameState.towerRepairUpgradePrice
-        gameState.towerRepairHp = Math.max(towerRepairMax, gameState.towerRepairHp + towerRepairStep)
-        gameState.towerRepairUpgradePrice *= 2
-
-        let sText, dText
-        sText = `${gameState.towerRepairHp} -> ${gameState.towerRepairHp + towerRepairStep}`
-        dText = gameState.towerRepairUpgradePrice + '$'
-        if (gameState.towerRepairHp === towerRepairMax) {
-            sText = 'v'
-            dText = 'Maximum'
-        }
-        this.btnUpRepair.setSubtitle(sText)
-        this.btnUpRepair.setDescription(dText)
-
-        goldChanged()
-
-        this.checkButtons()
-    }
-
     upFog() {
         gameState.gold -= gameState.towerFogUpgradePrice
-        gameState.towerFogPower = Math.max(towerFogPowerMax, gameState.towerFogPower + towerFogPowerStep)
+        gameState.towerFogPower = Math.min(towerFogPowerMax, gameState.towerFogPower + towerFogPowerStep)
         gameState.towerFogUpgradePrice *= 2
 
         let sText, dText
         sText = `${gameState.towerFogPower} -> ${gameState.towerFogPower + towerFogPowerStep}`
         dText = gameState.towerFogUpgradePrice + '$'
         if (gameState.towerFogPower === towerFogPowerMax) {
-            sText = 'v'
+            sText = gameState.towerFogPower
             dText = 'Maximum'
         }
         this.btnUpFog.setSubtitle(sText)
         this.btnUpFog.setDescription(dText)
-
-        goldChanged()
-
-        this.checkButtons()
-    }
-
-    upHp() {
-        gameState.gold -= gameState.towerHpPrice
-        gameState.towerHp = Math.min(towerHPMax, gameState.towerHp + towerHPStep)
-        gameState.towerHpPrice *= 2
-        let sText, dText
-        sText = `${gameState.towerHp} -> ${gameState.towerHp + towerHPStep}`
-        dText = gameState.towerHpPrice + '$'
-        if (gameState.towerHp === towerHPMax) {
-            sText = 'v'
-            dText = 'Maximum'
-        }
-        this.btnUpHp.setSubtitle(sText)
-        this.btnUpHp.setDescription(dText)
 
         goldChanged()
 

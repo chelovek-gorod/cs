@@ -68,6 +68,8 @@ export const sounds = {
     se_arrow: 'se_arrow_shoot.mp3',
     se_wizard_shoot: 'se_wizard_shoot.mp3',
     se_catapult_shoot: 'se_catapult_shoot.mp3',
+    se_scream_hit: 'se_scream_hit.mp3',
+    se_scream_die: 'se_scream_die.mp3',
 }
 export const music = {
     bgm_menu: 'bgm_menu.mp3',

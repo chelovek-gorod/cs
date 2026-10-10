@@ -34,7 +34,7 @@ export default class BuildDragon extends Container {
         sText = `${gameState.dragonPower} -> ${gameState.dragonPower + dragonPowerStep}`
         dText = gameState.dragonPowerPrice + '$'
         if (gameState.dragonPower === dragonPowerMax) {
-            sText = 'v'
+            sText = gameState.dragonPower
             dText = 'Maximum'
         }
         this.btnUpPower = new PopupButton(
@@ -42,7 +42,7 @@ export default class BuildDragon extends Container {
             sText,
             dText,
             this.upPower.bind(this),
-            () => gameState.gold >= gameState.dragonPowerPrice && gameState.mineMaxGold < mineMaxGoldMax,
+            () => gameState.gold >= gameState.dragonPowerPrice && gameState.dragonPower < dragonPowerMax,
             240, 0
         )
         this.addChild(this.btnUpPower)
@@ -84,7 +84,7 @@ export default class BuildDragon extends Container {
         sText = `${gameState.dragonPower} -> ${gameState.dragonPower + dragonPowerStep}`
         dText = gameState.dragonPowerPrice + '$'
         if (gameState.dragonPower === dragonPowerMax) {
-            sText = 'v'
+            sText = gameState.dragonPower
             dText = 'Maximum'
         }
         this.btnUpPower.setSubtitle(sText)

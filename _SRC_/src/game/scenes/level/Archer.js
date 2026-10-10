@@ -38,6 +38,7 @@ export default class Archer extends Container {
         this.rage = 0
         this.isBerserk = false
         this.berserkShoots = 0
+        this.berserkClickPoint = null
 
         this.arrowsLabel = new Container()
         this.arrowsLabel.position.set(0, 30)
@@ -131,7 +132,10 @@ export default class Archer extends Container {
     }
 
     getShootPoint(data) { // {x: data.x, y: data.y, type: 'up'}
-        if (this.isBerserk) return
+        if (this.isBerserk) {
+            if (data.type === 'down') this.berserkClickPoint = {x: data.x, y: data.y}
+            return
+        }
 
         this.shootPointX = data.x
         this.shootPointY = data.y
@@ -180,15 +184,24 @@ export default class Archer extends Container {
         if (this.shootTimeout > 0) {
             this.shootTimeout -= deltaMs
             if (this.shootTimeout <= 0) this.isReadyToShoot = true
+            return
+        }
+    
+        if (!this.isReadyToShoot) return
+    
+        if (this.berserkClickPoint) {
+            this.shootPointX = this.berserkClickPoint.x
+            this.shootPointY = this.berserkClickPoint.y
+            this.berserkClickPoint = null
         } else {
             const target = this.getNearestEnemy()
             if (!target) return
-            
             this.shootPointX = target.x
             this.shootPointY = target.y
-            this.archer.rotation = Math.atan2(target.y, target.x)
-            this.shoot()
         }
+    
+        this.archer.rotation = Math.atan2(this.shootPointY, this.shootPointX)
+        this.shoot()
     }
 
     kill() {

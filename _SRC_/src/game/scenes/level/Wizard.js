@@ -9,7 +9,7 @@ const LIGHTNING_FORWARD_OFFSET = 40
 const LIGHTNING_SIDE_OFFSET = 8
 
 export default class Wizard extends AnimatedSprite {
-    constructor(x, y, lightnings, enemies, startShootTimeoutRate) {
+    constructor(x, y, lightnings, smoke, enemies, startShootTimeoutRate) {
         super(atlases.wizard.animations.shoot)
         
         this.anchor.set(0.5)
@@ -18,6 +18,7 @@ export default class Wizard extends AnimatedSprite {
         this.position.set(x, y)
 
         this.lightnings = lightnings
+        this.smoke = smoke
         this.enemies = enemies
 
         this.shootTimeout = gameState.wizardTimeout * startShootTimeoutRate
@@ -102,11 +103,20 @@ export default class Wizard extends AnimatedSprite {
         // --- Нанести урон и сохранить уроны ---
         this.chainDamages = []
         for (let i = 0; i < this.chainTargets.length; i++) {
+            const target = this.chainTargets[i]
             const damage = i === 0 
                 ? wizardPower 
                 : Math.max(1, wizardPower - i * step)
             this.chainDamages.push(damage)
-            this.chainTargets[i].onLightning(damage)
+            target.onLightning(damage)
+
+            this.smoke.spawn(target.x, target.y, {
+                tint: 0x222222,
+                count: 16,
+                spread: 24,
+                lifeMin: 800,
+                lifeMax: 1600,
+            })
         }
     
         // --- Отрисовать все сегменты молнии ---

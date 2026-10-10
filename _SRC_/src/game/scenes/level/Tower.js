@@ -11,7 +11,7 @@ const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y:
 const CATAPULT_POINTS = [ {x: 36, y: 36}, {x: -36, y: -36}, {x: -36, y: 36}, {x: 36, y: -36} ]
 
 export default class Tower extends Container {
-    constructor(arrowPoints, arrowsContainer, catapultStones, lightnings, enemies) {
+    constructor(arrowPoints, arrowsContainer, smoke, catapultStones, lightnings, enemies) {
         super()
 
         this.isAlive = true
@@ -26,7 +26,7 @@ export default class Tower extends Container {
             const x = CATAPULT_POINTS[i].x
             const y = CATAPULT_POINTS[i].y
             this.addChild(
-                new Catapult(x, y, catapultStones, enemies, str)
+                new Catapult(x, y, smoke, catapultStones, enemies, str)
             )
         }
 
@@ -34,7 +34,7 @@ export default class Tower extends Container {
             // startShootTimeoutRate
             const str = 0.25 * (i + 1)
             this.addChild(
-                new Wizard(WIZARD_POINTS[i].x, WIZARD_POINTS[i].y, lightnings, enemies, str)
+                new Wizard(WIZARD_POINTS[i].x, WIZARD_POINTS[i].y, lightnings, smoke, enemies, str)
             )
         }
  

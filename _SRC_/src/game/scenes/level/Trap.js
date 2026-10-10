@@ -4,7 +4,7 @@ import { atlases, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
 import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
-import { gameState, trapRadiusTrigger } from "../../state";
+import { gameState } from "../../state";
 
 const TRAP_POOL = createObjectPool(100)
 
@@ -27,6 +27,7 @@ class Trap extends AnimatedSprite {
         this.animationSpeed = 0.25
         this.play()
 
+        const trapRadiusTrigger = gameState.trapRadius * 0.5
         this.rangeSq = trapRadiusTrigger * trapRadiusTrigger
         this.damageSq = gameState.trapRadius * gameState.trapRadius
 

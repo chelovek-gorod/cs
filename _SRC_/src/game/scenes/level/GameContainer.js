@@ -12,6 +12,7 @@ import ChestsContainer from "./Chest"
 import Dragon from "./Dragon"
 import DragonFire from "./DragonFire"
 import EnemyBlood from "./EnemyBlood"
+import EnemySmoke from "./EnemySmoke"
 import Tower from "./Tower"
 import { createTrap } from "./Trap"
 
@@ -55,8 +56,11 @@ export default class GameContainer extends Container {
 
         this.enemiesHp = new Container()
 
+        this.smoke = new EnemySmoke()
+        requestAnimationFrame( () => this.smoke.warmup() )
+
         this.tower = new Tower(
-            this.arrowPoints, this.arrows,
+            this.arrowPoints, this.arrows, this.smoke,
             this.stones, this.lightnings, this.enemies
         )
 
@@ -71,6 +75,7 @@ export default class GameContainer extends Container {
         this.addChild(this.tower)
 
         this.addChild(this.lightnings)
+        this.addChild(this.smoke)
         this.addChild(this.enemyArrows)
         this.addChild(this.arrows)
         this.addChild(this.stones)
@@ -283,6 +288,11 @@ export default class GameContainer extends Container {
         if (this.blood) {
             this.blood.kill()
             this.blood = null
+        }
+
+        if (this.smoke) {
+            this.smoke.kill()
+            this.smoke = null
         }
 
         kill(this.deadEnemies)

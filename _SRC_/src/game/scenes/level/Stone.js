@@ -10,12 +10,12 @@ import { EventHub, events } from '../../../app/events'
 
 const STONE_POOL = createObjectPool(100)
 
-export function createStone(x, y, targetX, targetY, enemies) {
+export function createStone(x, y, targetX, targetY, enemies, smoke) {
     let stone = STONE_POOL.get()
     if (stone) {
-        stone.reset(x, y, targetX, targetY, enemies)
+        stone.reset(x, y, targetX, targetY, enemies, smoke)
     } else {
-        stone = new Stone(x, y, targetX, targetY, enemies)
+        stone = new Stone(x, y, targetX, targetY, enemies, smoke)
         STONE_POOL.add(stone)
     }
     return stone
@@ -29,7 +29,7 @@ const MID_SCALE = MAX_SCALE - MIN_SCALE
 const START_OFFSET = -24
 
 class Stone extends Container {
-    constructor(x, y, targetX, targetY, enemies) {
+    constructor(x, y, targetX, targetY, enemies, smoke) {
         super()
 
         this.image = new Sprite(images.stone)
@@ -39,14 +39,16 @@ class Stone extends Container {
         this.speed = 0.24
         this.turnSpeed = 0.006
 
-        this.reset(x, y, targetX, targetY, enemies)
+        this.reset(x, y, targetX, targetY, enemies, smoke)
     }
   
-    reset(x, y, targetX, targetY, enemies) {
+    reset(x, y, targetX, targetY, enemies, smoke) {
         this.position.set(x, y)
         this.target = {x: targetX, y: targetY}
 
         this.enemies = enemies
+        this.smoke = smoke
+        this.isSmokeFrame = false
 
         this.path = 0
         const dx = x - targetX
@@ -103,6 +105,17 @@ class Stone extends Container {
 
         if( moveToTarget(this, this.target, this.speed * deltaMs) ) {
             this.setDamage()
+        }
+
+        this.isSmokeFrame = !this.isSmokeFrame
+        if (this.isSmokeFrame) {
+            this.smoke.spawn(this.x, this.y, {
+                tint: 0x888888,
+                count: 8,
+                spread: 18,
+                lifeMin: 800,
+                lifeMax: 1600,
+            })
         }
     }
 
