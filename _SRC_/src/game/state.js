@@ -8,7 +8,7 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 0,
+        gold: 10000,
         round: 1,
         
         towerHp: 100,
@@ -79,8 +79,8 @@ let mineLastCollectedAt = Date.now()
 
 export let gameState = initState()
 
-export const goldForSavingHp = 0.2
-export const adGoldBonus = 25
+export const goldForSavingHp = 0.05
+export const adGoldBonus = 12
 
 export const towerHPStep = 20
 export const towerHPMax = 200
@@ -128,7 +128,7 @@ export const arrowFlyRateMax = 0.10
 export const berserkShootStep = 1
 export const berserkPowerRateStep = 0.1
 
-export const catapultsCountMax = 4
+export const catapultsCountMax = 3
 export const catapultBasePrice = 75
 export const catapultPowerStep = 2
 export const catapultDamageRadiusStep = 14
@@ -138,7 +138,7 @@ export const catapultShootTimeoutMax = 3000
 export const catapultShootDistanceStep = 60
 export const catapultShootDistanceMax = 600
 
-export const wizardsCountMax = 4
+export const wizardsCountMax = 3
 export const wizardBasePrice = 50
 export const wizardPowerStep = 1
 export const wizardTargetsCountMax = 6 // main + 5 additional targets
@@ -157,7 +157,7 @@ export function getWizardTargetMaxDistance() {
 
 export function getMineAccumulated() {
     const elapsed = Date.now() - mineLastCollectedAt
-    const value = Math.floor(elapsed / gameState.mineTimeout * gameState.mineMaxGold)
+    const value = Math.floor(elapsed / gameState.mineTimeout)
     return Math.min(value, gameState.mineMaxGold)
 }
 

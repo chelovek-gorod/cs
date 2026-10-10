@@ -22,11 +22,11 @@ export default class BuildMine extends Container {
         this.isActive = false
 
         const timeSecondsNow = gameState.mineTimeout * 0.001
-        const restSecondsNow = timeSecondsNow % 60
+        const restSecondsNow = Math.round(timeSecondsNow) % 60
         const restMinutesNow = Math.floor((timeSecondsNow - restSecondsNow) / 60)
 
         const timeSecondsThen = (gameState.mineTimeout - mineTimeoutStep) * 0.001
-        const restSecondsThen = timeSecondsThen % 60
+        const restSecondsThen = Math.round(timeSecondsThen) % 60
         const restMinutesThen = Math.floor((timeSecondsThen - restSecondsThen) / 60)
         
         let sText, dText
@@ -112,11 +112,11 @@ export default class BuildMine extends Container {
         gameState.mineTimeoutPrice *= 2
 
         const timeSecondsNow = gameState.mineTimeout * 0.001
-        const restSecondsNow = timeSecondsNow % 60
+        const restSecondsNow = Math.round(timeSecondsNow) % 60
         const restMinutesNow = Math.floor((timeSecondsNow - restSecondsNow) / 60)
 
         const timeSecondsThen = (gameState.mineTimeout - mineTimeoutStep) * 0.001
-        const restSecondsThen = timeSecondsThen % 60
+        const restSecondsThen = Math.round(timeSecondsThen) % 60
         const restMinutesThen = Math.floor((timeSecondsThen - restSecondsThen) / 60)
 
         let sText, dText

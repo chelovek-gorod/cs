@@ -3,17 +3,17 @@ import { kill, tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
 import { createEnum, getRandomPointInRing } from "../../../utils/functions";
 
-const CHECK_CHEST_TIMEOUT = 12000
+const CHECK_CHEST_TIMEOUT = 18000
 const MIN_OFFSET = 200
 const MAX_OFFSET = 300
 
 const CHEST_HIT_SQ = 60 * 60
 
 const ALPHA_STEP = 0.003
-const OPEN_DELAY = 1200
+const OPEN_DELAY = 900
 const STATE = createEnum(['SHOW','OPEN','HIDE'])
 
-const chestRewards = [10, 12, 15, 20, 25, 10, 12, 15, 20, 10, 12, 15, 10, 12, 10]
+const chestRewards = [5, 7, 10, 7, 5, 5]
 let chestRewardIndex = Math.floor( Math.random() * chestRewards.length )
 function getChestReward() {
     return chestRewards[ ++chestRewardIndex % chestRewards.length ]

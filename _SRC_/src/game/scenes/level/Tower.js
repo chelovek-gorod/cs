@@ -7,8 +7,11 @@ import Archer from "./Archer";
 import Catapult from "./Catapult";
 import Wizard from "./Wizard";
 
-const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y: 66} ]
-const CATAPULT_POINTS = [ {x: 36, y: 36}, {x: -36, y: -36}, {x: -36, y: 36}, {x: 36, y: -36} ]
+const WIZARD_POINTS = [ {x: -60, y: 0}, {x: 30, y: -48}, {x: 30, y: 48} ]
+const CATAPULT_POINTS = [ {x: 60, y: 0}, {x: -30, y: -48}, {x: -30, y: 48} ]
+
+//const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y: 66} ]
+//const CATAPULT_POINTS = [ {x: 36, y: 36}, {x: -36, y: -36}, {x: -36, y: 36}, {x: 36, y: -36} ]
 
 export default class Tower extends Container {
     constructor(arrowPoints, arrowsContainer, smoke, catapultStones, lightnings, enemies) {

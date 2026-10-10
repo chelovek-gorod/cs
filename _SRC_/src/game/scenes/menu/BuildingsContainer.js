@@ -16,7 +16,7 @@ export default class BuildingsContainer extends Container {
         this.mineButton = new Graphics()
         this.mineButton.circle(-120, -160, 100)
         this.mineButton.fill(0xffffff)
-        this.mineButton.alpha = 0.5
+        this.mineButton.alpha = 0.01
         setCursorPointer(this.mineButton)
         this.mineButton.on("pointerup", this.clickMine, this)
         this.addChild(this.mine, this.mineButton)
@@ -27,7 +27,7 @@ export default class BuildingsContainer extends Container {
         this.dragonButton = new Graphics()
         this.dragonButton.circle(120, -150, 100)
         this.dragonButton.fill(0xffffff)
-        this.dragonButton.alpha = 0.5
+        this.dragonButton.alpha = 0.01
         setCursorPointer(this.dragonButton)
         this.dragonButton.on("pointerup", this.clickDragon, this)
         this.addChild(this.dragon, this.dragonButton)
@@ -38,7 +38,7 @@ export default class BuildingsContainer extends Container {
         this.magicButton = new Graphics()
         this.magicButton.circle(-240, 10, 100)
         this.magicButton.fill(0xffffff)
-        this.magicButton.alpha = 0.5
+        this.magicButton.alpha = 0.01
         setCursorPointer(this.magicButton)
         this.magicButton.on("pointerup", this.clickMagic, this)
         this.addChild(this.magic, this.magicButton)
@@ -49,7 +49,7 @@ export default class BuildingsContainer extends Container {
         this.towerButton = new Graphics()
         this.towerButton.circle(0, 40, 100)
         this.towerButton.fill(0xffffff)
-        this.towerButton.alpha = 0.5
+        this.towerButton.alpha = 0.01
         setCursorPointer(this.towerButton)
         this.towerButton.on("pointerup", this.clickTower, this)
         this.addChild(this.tower, this.towerButton)
@@ -60,7 +60,7 @@ export default class BuildingsContainer extends Container {
         this.catapultButton = new Graphics()
         this.catapultButton.circle(220, 40, 80)
         this.catapultButton.fill(0xffffff)
-        this.catapultButton.alpha = 0.5
+        this.catapultButton.alpha = 0.01
         setCursorPointer(this.catapultButton)
         this.catapultButton.on("pointerup", this.clickCatapult, this)
         this.addChild(this.catapult, this.catapultButton)
@@ -71,7 +71,7 @@ export default class BuildingsContainer extends Container {
         this.iceButton = new Graphics()
         this.iceButton.circle(-130, 200, 100)
         this.iceButton.fill(0xffffff)
-        this.iceButton.alpha = 0.5
+        this.iceButton.alpha = 0.01
         setCursorPointer(this.iceButton)
         this.iceButton.on("pointerup", this.clickIce, this)
         this.addChild(this.ice, this.iceButton)
@@ -82,7 +82,7 @@ export default class BuildingsContainer extends Container {
         this.fireButton = new Graphics()
         this.fireButton.circle(120, 220, 80)
         this.fireButton.fill(0xffffff)
-        this.fireButton.alpha = 0.5
+        this.fireButton.alpha = 0.01
         setCursorPointer(this.fireButton)
         this.fireButton.on("pointerup", this.clickFire, this)
         this.addChild(this.fire, this.fireButton)

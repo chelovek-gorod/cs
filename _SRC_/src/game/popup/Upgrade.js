@@ -148,22 +148,37 @@ export default class Upgrade extends Container {
                 break
                 case UPGRADE_TYPE.arrowShootTimeout:
                     title = 'SHOOT SPEED'
-                    const SPS_now = 1000 / gameState.arrowShootTimeout
-                    const SPS_up = 1000 / arrowShootTimeoutStep
-                    result = (SPS_now + SPS_up).toFixed(2)
-                    desc = `+ ${SPS_up.toFixed(2)} shoots per sec.`
-                    res = `${SPS_now.toFixed(2)} -> ${result}`
+
+                    const timeoutNow  = gameState.arrowShootTimeout
+                    const timeoutNext = Math.max(arrowShootTimeoutMax, timeoutNow - arrowShootTimeoutStep)
+
+                    const SPS_now  = 1000 / timeoutNow
+                    const SPS_next = 1000 / timeoutNext
+                    const delta    = SPS_next - SPS_now
+
+                    result = `${SPS_now.toFixed(2)} -> ${SPS_next.toFixed(2)}`
+                    desc   = `+ ${delta.toFixed(2)} shoots per sec.`
+                    res    = result
                 break
                 case UPGRADE_TYPE.arrowReloadTimeout:
                     title = 'RELOAD'
-                    result = ((gameState.arrowReloadTimeout - arrowReloadTimeoutStep) * 0.001).toFixed(3)
-                    desc = `-${(arrowReloadTimeoutStep * 0.001).toFixed(3)} sec.`
-                    res = `${(gameState.arrowReloadTimeout * 0.001).toFixed(3)} -> ${result}`
+
+                    const timeNow  = gameState.arrowReloadTimeout
+                    const timeNext = Math.max(arrowReloadTimeoutMax, timeNow - arrowReloadTimeoutStep)
+
+                    if (timeNow === arrowReloadTimeoutMax) {
+                        result = `${(timeNow * 0.001).toFixed(2)} sec.`
+                        desc = 'Maximum'
+                    } else {
+                        result = `${(timeNow * 0.001).toFixed(2)} -> ${(timeNext * 0.001).toFixed(2)}`
+                        desc = `- ${(arrowReloadTimeoutStep * 0.001).toFixed(2)} sec.`
+                    }
+                    res = result
                 break
                 case UPGRADE_TYPE.arrowFlyRate:
                     title = 'FLY SPEED RATE'
                     result = 1 + (gameState.arrowFlyRate + arrowFlyRateStep) * 10
-                    desc = `+${arrowFlyRateStep * 10}`
+                    desc = `+${(arrowFlyRateStep * 10).toFixed(2)}`
                     res = `${(1 + gameState.arrowFlyRate * 10).toFixed(2)} -> ${result.toFixed(2)}`
                 break
 
@@ -171,13 +186,13 @@ export default class Upgrade extends Container {
                     title = 'RAGE SHOOTS'
                     result = gameState.berserkShoots + berserkShootStep
                     desc = `+${berserkShootStep}`
-                    res = `${gameState.berserkShoots.toFixed(2)} -> ${result.toFixed(2)}`
+                    res = `${gameState.berserkShoots} -> ${result}`
                 break
                 case UPGRADE_TYPE.berserkPowerRate:
                     title = 'RAGE POWER RATE'
                     result = gameState.berserkPowerRate + berserkPowerRateStep
                     desc = `+${berserkPowerRateStep}`;
-                    res = `${gameState.berserkPowerRate.toFixed(2)} -> ${result.toFixed(2)}`
+                    res = `${gameState.berserkPowerRate.toFixed(1)} -> ${result.toFixed(1)}`
                 break
             }
             btn.titleText.text = title

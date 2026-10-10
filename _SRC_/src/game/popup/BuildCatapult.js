@@ -23,6 +23,10 @@ export default class BuildCatapult extends Container {
         let sText, dText
         sText = `${gameState.catapultsCount} -> ${gameState.catapultsCount + 1}`
         dText = dText = gameState.catapultPrice + '$'
+        if (gameState.catapultsCount === catapultsCountMax) {
+            sText = gameState.catapultsCount
+            dText = 'Maximum'
+        }
         this.btnAddCatapult = new PopupButton(
             "ADD CATAPULT",
             sText,
@@ -46,15 +50,15 @@ export default class BuildCatapult extends Container {
         this.addChild(this.btnUpPower)
 
         const timeSecondsNow = gameState.catapultTimeout * 0.001
-        const textSecondsNow = timeSecondsNow.toFixed(3)
+        const textSecondsNow = timeSecondsNow.toFixed(1)
 
         const timeSecondsThen = (gameState.catapultTimeout - catapultShootTimeoutStep) * 0.001
-        const textSecondsThen = timeSecondsThen.toFixed(3)
+        const textSecondsThen = timeSecondsThen.toFixed(1)
         
         sText = `${textSecondsNow}sec. -> ${textSecondsThen}sec.`
         dText = gameState.catapultTimeoutPrice + '$'
         if (gameState.catapultTimeout === catapultShootTimeoutMax) {
-            sText = 'v'
+            sText = `${textSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout = new PopupButton(
@@ -70,7 +74,7 @@ export default class BuildCatapult extends Container {
         sText = `${gameState.catapultDistance} -> ${gameState.catapultDistance + catapultShootDistanceStep}`
         dText = gameState.catapultDistancePrice + '$'
         if (gameState.catapultDistance === catapultShootDistanceMax) {
-            sText = 'v'
+            sText = gameState.catapultDistance
             dText = 'Maximum'
         }
         this.btnUpDistance = new PopupButton(
@@ -86,7 +90,7 @@ export default class BuildCatapult extends Container {
         sText = `${gameState.catapultRadius} -> ${gameState.catapultRadius + catapultDamageRadiusStep}`
         dText = gameState.catapultRadiusPrice + '$'
         if (gameState.catapultRadius === catapultDamageRadiusMax) {
-            sText = 'v'
+            sText = gameState.catapultRadius
             dText = 'Maximum'
         }
         this.btnUpRadius = new PopupButton(
@@ -129,7 +133,7 @@ export default class BuildCatapult extends Container {
         sText = `${gameState.catapultsCount} -> ${gameState.catapultsCount + 1}`
         dText = gameState.catapultPrice + '$'
         if (gameState.catapultsCount === catapultsCountMax) {
-            sText = 'v'
+            sText = gameState.catapultsCount
             dText = 'Maximum'
         }
         this.btnAddCatapult.setSubtitle(sText)
@@ -158,18 +162,16 @@ export default class BuildCatapult extends Container {
         gameState.catapultTimeoutPrice *= 2
 
         const timeSecondsNow = gameState.catapultTimeout * 0.001
-        const restSecondsNow = timeSecondsNow % 60
-        const restMinutesNow = Math.floor((timeSecondsNow - restSecondsNow) / 60)
+        const textSecondsNow = timeSecondsNow.toFixed(1)
 
         const timeSecondsThen = (gameState.catapultTimeout - catapultShootTimeoutStep) * 0.001
-        const restSecondsThen = timeSecondsThen % 60
-        const restMinutesThen = Math.floor((timeSecondsThen - restSecondsThen) / 60)
-
+        const textSecondsThen = timeSecondsThen.toFixed(1)
+        
         let sText, dText
-        sText = `${restMinutesNow}min. ${restSecondsNow}sec. -> ${restMinutesThen}min. ${restSecondsThen}sec.`
+        sText = `${textSecondsNow}sec. -> ${textSecondsThen}sec.`
         dText = gameState.catapultTimeoutPrice + '$'
         if (gameState.catapultTimeout === catapultShootTimeoutMax) {
-            sText = 'v'
+            sText = `${textSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout.setSubtitle(sText)
@@ -188,7 +190,7 @@ export default class BuildCatapult extends Container {
         sText = `${gameState.catapultDistance} -> ${gameState.catapultDistance + catapultShootDistanceStep}`
         dText = gameState.catapultDistancePrice + '$'
         if (gameState.catapultDistance === catapultShootDistanceMax) {
-            sText = 'v'
+            sText = gameState.catapultDistance
             dText = 'Maximum'
         }
         this.btnUpDistance.setSubtitle(sText)
@@ -207,7 +209,7 @@ export default class BuildCatapult extends Container {
         sText = `${gameState.catapultRadius} -> ${gameState.catapultRadius + catapultDamageRadiusStep}`
         dText = gameState.catapultRadiusPrice + '$'
         if (gameState.catapultRadius === catapultDamageRadiusMax) {
-            sText = 'v'
+            sText = gameState.catapultRadius
             dText = 'Maximum'
         }
         this.btnUpRadius.setSubtitle(sText)

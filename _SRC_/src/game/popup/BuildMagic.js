@@ -23,6 +23,10 @@ export default class BuildMagic extends Container {
         let sText, dText
         sText = `${gameState.wizardsCount} -> ${gameState.wizardsCount + 1}`
         dText = dText = gameState.wizardPrice + '$'
+        if (gameState.wizardsCount === wizardsCountMax) {
+            sText = gameState.wizardsCount
+            dText = 'Maximum'
+        }
         this.btnAddWizard = new PopupButton(
             "ADD WIZARD",
             sText,
@@ -46,15 +50,15 @@ export default class BuildMagic extends Container {
         this.addChild(this.btnUpPower)
 
         const timeSecondsNow = gameState.wizardTimeout * 0.001
-        const textSecondsNow = timeSecondsNow.toFixed(3)
+        const textSecondsNow = timeSecondsNow.toFixed(1)
 
         const timeSecondsThen = (gameState.wizardTimeout - wizardShootTimeoutStep) * 0.001
-        const textSecondsThen = timeSecondsThen.toFixed(3)
+        const textSecondsThen = timeSecondsThen.toFixed(1)
         
         sText = `${textSecondsNow}sec. -> ${textSecondsThen}sec.`
         dText = gameState.wizardTimeoutPrice + '$'
         if (gameState.wizardTimeout === wizardShootTimeoutMax) {
-            sText = 'v'
+            sText = `${textSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout = new PopupButton(
@@ -70,7 +74,7 @@ export default class BuildMagic extends Container {
         sText = `${gameState.wizardDistance} -> ${gameState.wizardDistance + wizardShootDistanceStep}`
         dText = gameState.wizardDistancePrice + '$'
         if (gameState.wizardDistance === wizardShootDistanceMax) {
-            sText = 'v'
+            sText = gameState.wizardDistance
             dText = 'Maximum'
         }
         this.btnUpDistance = new PopupButton(
@@ -86,7 +90,7 @@ export default class BuildMagic extends Container {
         sText = `${gameState.wizardTargets} -> ${gameState.wizardTargets + 1}`
         dText = gameState.wizardTargetPrice + '$'
         if (gameState.wizardTargets === wizardTargetsCountMax) {
-            sText = 'v'
+            sText = gameState.wizardTargets
             dText = 'Maximum'
         }
         this.btnAddTargets = new PopupButton(
@@ -129,7 +133,7 @@ export default class BuildMagic extends Container {
         sText = `${gameState.wizardsCount} -> ${gameState.wizardsCount + 1}`
         dText = gameState.wizardPrice + '$'
         if (gameState.wizardsCount === wizardsCountMax) {
-            sText = 'v'
+            sText = gameState.wizardsCount
             dText = 'Maximum'
         }
         this.btnAddWizard.setSubtitle(sText)
@@ -158,18 +162,16 @@ export default class BuildMagic extends Container {
         gameState.wizardTimeoutPrice *= 2
 
         const timeSecondsNow = gameState.wizardTimeout * 0.001
-        const restSecondsNow = timeSecondsNow % 60
-        const restMinutesNow = Math.floor((timeSecondsNow - restSecondsNow) / 60)
+        const textSecondsNow = timeSecondsNow.toFixed(1)
 
         const timeSecondsThen = (gameState.wizardTimeout - wizardShootTimeoutStep) * 0.001
-        const restSecondsThen = timeSecondsThen % 60
-        const restMinutesThen = Math.floor((timeSecondsThen - restSecondsThen) / 60)
-
+        const textSecondsThen = timeSecondsThen.toFixed(1)
+        
         let sText, dText
-        sText = `${restMinutesNow}min. ${restSecondsNow}sec. -> ${restMinutesThen}min. ${restSecondsThen}sec.`
+        sText = `${textSecondsNow}sec. -> ${textSecondsThen}sec.`
         dText = gameState.wizardTimeoutPrice + '$'
         if (gameState.wizardTimeout === wizardShootTimeoutMax) {
-            sText = 'v'
+            sText = `${textSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout.setSubtitle(sText)
@@ -188,7 +190,7 @@ export default class BuildMagic extends Container {
         sText = `${gameState.wizardDistance} -> ${gameState.wizardDistance + wizardShootDistanceStep}`
         dText = gameState.wizardDistancePrice + '$'
         if (gameState.wizardDistance === wizardShootDistanceMax) {
-            sText = 'v'
+            sText = gameState.wizardDistance
             dText = 'Maximum'
         }
         this.btnUpDistance.setSubtitle(sText)
@@ -207,7 +209,7 @@ export default class BuildMagic extends Container {
         sText = `${gameState.wizardTargets} -> ${gameState.wizardTargets + 1}`
         dText = gameState.wizardTargetPrice + '$'
         if (gameState.wizardTargets === wizardTargetsCountMax) {
-            sText = 'v'
+            sText = gameState.wizardTargets
             dText = 'Maximum'
         }
         this.btnAddTargets.setSubtitle(sText)
