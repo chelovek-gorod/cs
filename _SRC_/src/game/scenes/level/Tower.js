@@ -9,15 +9,18 @@ import Wizard from "./Wizard";
 
 const WIZARD_POINTS = [ {x: -60, y: 0}, {x: 30, y: -48}, {x: 30, y: 48} ]
 const CATAPULT_POINTS = [ {x: 60, y: 0}, {x: -30, y: -48}, {x: -30, y: 48} ]
+const TOWER_STONES_OFFSET = 96
 
 //const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y: 66} ]
 //const CATAPULT_POINTS = [ {x: 36, y: 36}, {x: -36, y: -36}, {x: -36, y: 36}, {x: 36, y: -36} ]
 
 export default class Tower extends Container {
-    constructor(arrowPoints, arrowsContainer, smoke, catapultStones, lightnings, enemies) {
+    constructor(arrowPoints, arrowsContainer, smoke, catapultStones, lightnings, enemies, towerStones) {
         super()
 
         this.isAlive = true
+
+        this.towerStones = towerStones
 
         this.image = new Sprite(images.tower)
         this.image.anchor.set(0.5)
@@ -53,11 +56,18 @@ export default class Tower extends Container {
         EventHub.on(events.setDamage, this.getDamage, this)
     }
 
-    getDamage(value) {
+    // data = {value:this.damage, x: this.x, y: this.y}
+    getDamage(data) {
         if (!this.isAlive) return
 
-        this.hp = Math.max(0, this.hp - value)
+        this.hp = Math.max(0, this.hp - data.value)
         this.hpText.text = this.hp
+
+        const angle = Math.atan2(data.y - this.y, data.x - this.x)
+        const spawnX = this.x + Math.cos(angle) * TOWER_STONES_OFFSET
+        const spawnY = this.y + Math.sin(angle) * TOWER_STONES_OFFSET
+        this.towerStones.spawn(spawnX, spawnY, angle, data.value)
+
         if (this.hp === 0) {
             this.isAlive = false
             this.parent.handleRoundLose()

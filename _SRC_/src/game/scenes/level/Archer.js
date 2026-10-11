@@ -37,7 +37,6 @@ export default class Archer extends Container {
 
         this.rage = 0
         this.isBerserk = false
-        this.berserkShoots = 0
         this.berserkClickPoint = null
 
         this.arrowsLabel = new Container()
@@ -82,9 +81,23 @@ export default class Archer extends Container {
         if (this.rage >= RAGE_MAX) {
             this.isBerserk = true
             this.rage = 0
-            this.berserkShoots = gameState.berserkShoots
             this.isPointerDown = false
             this.archer.tint = BERSERK_BG_TINT
+
+            // Счётчик стрел = число выстрелов берсерка
+            this.arrows = gameState.berserkShoots
+            this.arrowsLabelText.text = 'x' + this.arrows
+
+            // Сбросить все таймеры
+            this.reloadTimeout = 0
+            this.shootTimeout = 0
+            this.isReadyToShoot = true
+
+            // Сбросить визуал полоски перезарядки
+            this.arrowsLabelBg.clear()
+            this.arrowsLabelBg.roundRect(-25, -10, 50, 20, 6)
+            this.arrowsLabelBg.fill(0xffffff)
+            this.arrowsLabelBg.alpha = 0.5
         }
     }
 
@@ -116,12 +129,16 @@ export default class Archer extends Container {
         this.isReadyToShoot = false
     
         if (this.isBerserk) {
-            this.berserkShoots--
-            if (this.berserkShoots <= 0) {
+            this.arrows--
+            this.arrowsLabelText.text = 'x' + this.arrows
+
+            if (this.arrows <= 0) {
                 this.isBerserk = false
-                this.berserkShoots = 0
                 this.archer.tint = null
+                // Берсерк закончился — всегда перезарядка
+                this.reloadTimeout = gameState.arrowReloadTimeout
             }
+
             this.shootTimeout += gameState.arrowShootTimeout * BERSERK_SHOOT_RATE
         } else {
             this.arrows--

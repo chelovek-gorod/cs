@@ -438,7 +438,7 @@ class Enemy extends Container {
                 const shieldBuild = this.type === TYPES.TANK ? createEnemyStone : createEnemyArrow
                 this.enemyArrows.addChild( shieldBuild(this.x, this.y, this.damage) )
             } else {
-                setDamage(this.damage)
+                setDamage({value:this.damage, x: this.x, y: this.y})
             }
             this.isAttacking = false
             this.attackTimeout = ENEMY[this.type].attackTimeout
@@ -463,7 +463,7 @@ class Enemy extends Container {
             this.parent.removeChild(this)
         }
 
-        if (isTowerDamage) setDamage(this.damage)
+        if (isTowerDamage) setDamage({value:this.damage, x: this.x, y: this.y})
 
         tickerRemove(this)
         ENEMY_POOL.put(this)

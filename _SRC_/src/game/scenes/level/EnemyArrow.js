@@ -30,6 +30,7 @@ class EnemyArrow extends Sprite {
     }
   
     reset(x, y, power) {
+        this.start = {x, y}
         this.position.set(x, y)
         this.target = {x: 0, y: 0}
         this.power = power
@@ -52,7 +53,7 @@ class EnemyArrow extends Sprite {
             tickerRemove(this)
             this.parent.removeChild(this)
             ENEMY_ARROW_POOL.put(this)
-            setDamage(this.power)
+            setDamage({value: this.power, x: this.start.x, y: this.start.y})
         }
     }
 

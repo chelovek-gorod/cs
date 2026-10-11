@@ -70,8 +70,8 @@ export function addGoldForKill( value ) {
     EventHub.emit( events.addGoldForKill, value )
 }
 
-export function setDamage( value ) {
-    EventHub.emit( events.setDamage, value )
+export function setDamage( data ) {
+    EventHub.emit( events.setDamage, data )
 }
 
 export function setShootPoint( data ) {

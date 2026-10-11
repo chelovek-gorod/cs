@@ -8,7 +8,7 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 10000,
+        gold: 0,
         round: 1,
         
         towerHp: 100,

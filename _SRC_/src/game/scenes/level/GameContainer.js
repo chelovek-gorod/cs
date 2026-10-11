@@ -11,9 +11,10 @@ import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
 import Dragon from "./Dragon"
 import DragonFire from "./DragonFire"
-import EnemyBlood from "./EnemyBlood"
+import EnemyBlood, { BLOOD_GOLD } from "./EnemyBlood"
 import EnemySmoke from "./EnemySmoke"
 import Tower from "./Tower"
+import TowerStones from "./TowerStones"
 import { createTrap } from "./Trap"
 
 const SIZE = 800
@@ -48,6 +49,10 @@ export default class GameContainer extends Container {
 
         this.lightnings = new Graphics()
 
+        this.towerStones = new TowerStones()
+        this.addChild(this.towerStones)
+        requestAnimationFrame(() => this.towerStones.warmup())
+
         this.enemies = new Container()
         this.addChild(this.enemies)
 
@@ -61,7 +66,8 @@ export default class GameContainer extends Container {
 
         this.tower = new Tower(
             this.arrowPoints, this.arrows, this.smoke,
-            this.stones, this.lightnings, this.enemies
+            this.stones, this.lightnings, this.enemies,
+            this.towerStones
         )
 
         this.enemyArrows = new Container()
@@ -81,13 +87,12 @@ export default class GameContainer extends Container {
         this.addChild(this.stones)
 
         this.dragon = null
-        if (gameState.dragonsCount > 0) {
-            this.dragonFire = new DragonFire()
-            this.addChild(this.dragonFire)
-            this.dragon = new Dragon( this.enemies, this.dragonFire.emit.bind(this.dragonFire) )
-            this.addChild(this.dragon)
-            requestAnimationFrame( () => this.dragonFire.warmup(this) )
-        }
+        this.dragonFire = new DragonFire()
+        this.addChild(this.dragonFire)
+        requestAnimationFrame(() => this.dragonFire.warmup())
+
+        // TODO: заменить на клик по иконке. Для теста — автоспавн через 12 сек.
+        this.dragonSpawnTimeout = setTimeout(() => this.addDragon(), 3000)
         
         this.addChild(this.enemiesHp)
 
@@ -166,6 +171,22 @@ export default class GameContainer extends Container {
         else setEnemyFirstWave()
     }
 
+    addDragon() {
+        if (this.dragon) return
+        if (gameState.dragonsCount <= 0) return
+    
+        this.dragon = new Dragon(
+            this.enemies,
+            this.dragonFire.emit.bind(this.dragonFire),
+            this.onDragonFuelEmpty.bind(this)
+        )
+        this.addChild(this.dragon)
+    }
+    
+    onDragonFuelEmpty() {
+        this.dragon = null
+    }
+
     arrowOnTarget(data) {
         let nearestIndex = -1
         let nearestSqDist = Infinity
@@ -240,6 +261,13 @@ export default class GameContainer extends Container {
                     new FlyText(`+${chestReward} Gold`, textPoint.x, textPoint.y)
                 )
                 gameState.gold += chestReward
+                EventHub.emit(events.enemyHit, {
+                    x: data.x,
+                    y: data.y,
+                    damage: chestReward * 3,
+                    bloodType: BLOOD_GOLD,
+                    isKill: false,
+                })
             } else {
                 this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
             }
@@ -274,9 +302,18 @@ export default class GameContainer extends Container {
 
     kill() {
         tickerRemove(this)
+        
+        if (this.dragonSpawnTimeout) {
+            clearTimeout(this.dragonSpawnTimeout)
+            this.dragonSpawnTimeout = null
+        }
         if (this.dragon) {
             this.dragon.kill()
+            this.dragon = null
+        }
+        if (this.dragonFire) {
             this.dragonFire.kill()
+            this.dragonFire = null
         }
         
         if (this.trapsButton) this.removeTrapsButton()
@@ -293,6 +330,11 @@ export default class GameContainer extends Container {
         if (this.smoke) {
             this.smoke.kill()
             this.smoke = null
+        }
+
+        if (this.towerStones) {
+            this.towerStones.kill()
+            this.towerStones = null
         }
 
         kill(this.deadEnemies)

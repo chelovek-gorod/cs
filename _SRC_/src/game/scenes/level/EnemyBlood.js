@@ -11,9 +11,12 @@ const TAU = Math.PI * 2
 // ================================================================
 export const BLOOD_GREEN = 0
 export const BLOOD_BLACK = 1
+export const BLOOD_GOLD  = 2
 
 const GREEN_COLS = [0xaaff77, 0x66ff22, 0x00dd00, 0x0a8822, 0x04440a]
 const BLACK_COLS = [0x666666, 0x444444, 0x222222, 0x111111, 0x050505]
+const GOLD_COLS = [0xffe888, 0xffcc33, 0xffaa00, 0xcc8800, 0x664400]
+const GOLD_SCALE_RATE = 2
 
 // Индекс "тёмного" цвета для пятна (нижние 2 оттенка из палитры)
 const DARK_IDX_MIN = 3
@@ -163,7 +166,9 @@ export default class EnemyBlood {
         if (count < BLOOD_COUNT_MIN) count = BLOOD_COUNT_MIN
         if (count > BLOOD_COUNT_MAX) count = BLOOD_COUNT_MAX
 
-        const cols = bloodType === BLOOD_BLACK ? BLACK_COLS : GREEN_COLS
+        const cols = bloodType === BLOOD_BLACK ? BLACK_COLS
+           : bloodType === BLOOD_GOLD  ? GOLD_COLS
+           : GREEN_COLS
         const colsLen = cols.length
 
         for (let i = 0; i < count; i++) {
@@ -182,8 +187,8 @@ export default class EnemyBlood {
             // базовый размер + пропорция овала
             const baseSize = SIZE_FLY_MIN + (SIZE_FLY_MAX - SIZE_FLY_MIN) * Math.sqrt(Math.random())
             const aspect   = FLY_ASPECT_MIN + (FLY_ASPECT_MAX - FLY_ASPECT_MIN) * Math.random()
-            const sizeX = baseSize * aspect
-            const sizeY = baseSize / aspect
+            const sizeX = bloodType === BLOOD_GOLD ? baseSize * GOLD_SCALE_RATE : baseSize * aspect
+            const sizeY = bloodType === BLOOD_GOLD ? baseSize * GOLD_SCALE_RATE : baseSize / aspect
 
             const rotation = Math.random() * TAU
 
@@ -225,8 +230,14 @@ export default class EnemyBlood {
             d.invFlight  = 1 / flightTime
 
             // Пятно — эллипс, случайный поворот, тёмный цвет
-            const stainBaseX = baseSize * STAIN_SCALE_MUL * (STAIN_ASPECT_X_MIN + (STAIN_ASPECT_X_MAX - STAIN_ASPECT_X_MIN) * Math.random())
-            const stainBaseY = baseSize * STAIN_SCALE_MUL * (STAIN_ASPECT_Y_MIN + (STAIN_ASPECT_Y_MAX - STAIN_ASPECT_Y_MIN) * Math.random())
+            let stainBaseX, stainBaseY
+            if (bloodType === BLOOD_GOLD) {
+                stainBaseX = baseSize * GOLD_SCALE_RATE * STAIN_SCALE_MUL
+                stainBaseY = baseSize * GOLD_SCALE_RATE * STAIN_SCALE_MUL
+            } else {
+                stainBaseX = baseSize * STAIN_SCALE_MUL * (STAIN_ASPECT_X_MIN + (STAIN_ASPECT_X_MAX - STAIN_ASPECT_X_MIN) * Math.random())
+                stainBaseY = baseSize * STAIN_SCALE_MUL * (STAIN_ASPECT_Y_MIN + (STAIN_ASPECT_Y_MAX - STAIN_ASPECT_Y_MIN) * Math.random())
+            }
             d.stainScaleX = stainBaseX
             d.stainScaleY = stainBaseY
             d.stainRotation = Math.random() * TAU

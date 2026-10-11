@@ -14,8 +14,8 @@ const PRIORITY_ORDER = [TYPES.BOSS, TYPES.TANK, TYPES.BOMB, TYPES.RIDER, TYPES.S
 
 // --- ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ ---
 const MIN_ENEMIES_PER_ROUND = 5
-const ENEMIES_PER_ROUND_FORMULA_BASE = 3 // раунд 7 -> total = 3 + 7
-const DIFFICULTY_MULTIPLIER = 1.2 // усложнение от роста раунда -> раунд 7 -> total = (3 + 7) * 1.2
+const ENEMIES_PER_ROUND_FORMULA_BASE = 4 // раунд 7 -> total = 3 + 7
+const DIFFICULTY_MULTIPLIER = 1.3 // усложнение от роста раунда -> раунд 7 -> total = (3 + 7) * 1.2
 const EASY_ROUND_MODULO = 3 // раунды кратные 3 -> легче
 const EASY_NORMAL_MULTIPLIER = 0.7 // в них 70% врагов
 
