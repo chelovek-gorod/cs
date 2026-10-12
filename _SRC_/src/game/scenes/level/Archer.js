@@ -6,7 +6,7 @@ import { styles } from "../../../app/styles";
 import { gameState } from "../../state";
 import { createArrow } from "./Arrow";
 
-const RAGE_MAX = 120
+const RAGE_MAX = 240
 const BERSERK_BG_TINT = 0xff4400
 const BERSERK_SHOOT_RATE = 0.667
 const BERSERK_MAX_DISTANCE = 360

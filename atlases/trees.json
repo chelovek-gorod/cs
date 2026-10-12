@@ -1,0 +1,231 @@
+{
+  "frames": {
+    "lava_1": {
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 224,
+        "h": 208
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 14,
+        "y": 27,
+        "w": 224,
+        "h": 208
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "winter_3": {
+      "frame": {
+        "x": 4,
+        "y": 220,
+        "w": 215,
+        "h": 204
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 13,
+        "y": 25,
+        "w": 215,
+        "h": 204
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "lava_3": {
+      "frame": {
+        "x": 4,
+        "y": 432,
+        "w": 216,
+        "h": 193
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 4,
+        "y": 33,
+        "w": 216,
+        "h": 193
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "winter_2": {
+      "frame": {
+        "x": 227,
+        "y": 220,
+        "w": 212,
+        "h": 188
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 27,
+        "y": 25,
+        "w": 212,
+        "h": 188
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "marsh_2": {
+      "frame": {
+        "x": 236,
+        "y": 4,
+        "w": 183,
+        "h": 188
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 27,
+        "y": 31,
+        "w": 183,
+        "h": 188
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "marsh_3": {
+      "frame": {
+        "x": 427,
+        "y": 4,
+        "w": 208,
+        "h": 182
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 19,
+        "y": 37,
+        "w": 208,
+        "h": 182
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "marsh_1": {
+      "frame": {
+        "x": 447,
+        "y": 194,
+        "w": 217,
+        "h": 168
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 21,
+        "y": 42,
+        "w": 217,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "winter_1": {
+      "frame": {
+        "x": 447,
+        "y": 370,
+        "w": 214,
+        "h": 173
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 19,
+        "y": 33,
+        "w": 214,
+        "h": 173
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "lava_2": {
+      "frame": {
+        "x": 228,
+        "y": 416,
+        "w": 184,
+        "h": 164
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 30,
+        "y": 39,
+        "w": 184,
+        "h": 164
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "trees.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 668,
+      "h": 629
+    },
+    "scale": 1
+  }
+}
