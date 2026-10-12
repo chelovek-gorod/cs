@@ -28,10 +28,10 @@ function initState() {
         berserkPowerRate: 1.2,
         berserkShoots: 12,
 
-        mineTimeout: 5 * 60 * 1000, // 5 minutes
+        mineTimeout: 2.25 * 60 * 1000, // 2 minutes 15 seconds
         mineTimeoutPrice: 100,
         mineMaxGold: 100,
-        mineMaxGoldPrice: 80,
+        mineMaxGoldPrice: 50,
 
         iceCount: 0,
         iceDuration: 5000,
@@ -91,8 +91,8 @@ export const towerRepairStep = 5
 export const towerRepairMax = 50
 export const towerRepairPrice = 75
 
-export const mineTimeoutStep = 30 * 1000 // 30 seconds
-export const mineTimeoutMax = 2.5 * 60 * 1000 // 2.5 minutes
+export const mineTimeoutStep = 15 * 1000 // 15 seconds
+export const mineTimeoutMax = 1 * 60 * 1000 // 1 minutes
 export const mineMaxGoldStep = 50
 export const mineMaxGoldMax = 300
 
