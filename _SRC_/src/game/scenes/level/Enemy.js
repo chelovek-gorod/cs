@@ -29,7 +29,7 @@ export const ENEMY_STATE = createEnum(['WALK', 'ATTACK', 'HIT', 'ICE', 'LIGHTNIN
 
 const ALPHA_STEP = 0.001
 const DEAD_ALPHA_STEP = 0.002
-const TOWER_OFFSET = 96
+const TOWER_OFFSET = 80
 const LIGHTNING_FRAMES = 12
 
 const ENEMY = {

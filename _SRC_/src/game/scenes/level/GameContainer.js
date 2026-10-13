@@ -1,6 +1,8 @@
 import { Container, Graphics, Text } from "pixi.js"
 import { kill, tickerAdd, tickerRemove } from "../../../app/application"
-import { EventHub, events, setEnemyFirstWave, showPopup, startScene } from "../../../app/events"
+import { sounds } from "../../../app/assets"
+import { addGoldForKill, EventHub, events, setEnemyFirstWave, showPopup, startScene } from "../../../app/events"
+import { soundPlay } from "../../../app/sound"
 import { styles } from "../../../app/styles"
 import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
 import FlyText from "../../effects/FlyText"
@@ -16,8 +18,9 @@ import EnemySmoke from "./EnemySmoke"
 import Tower from "./Tower"
 import TowerStones from "./TowerStones"
 import { createTrap } from "./Trap"
+import Trees from "./Trees"
 
-const SIZE = 800
+const SIZE = 720
 const MAX_SCALE = 1.3
 const RESULT_POPUP_TIMEOUT = 1800
 
@@ -58,6 +61,9 @@ export default class GameContainer extends Container {
 
         this.addChild(this.blood.flyContainer)
         requestAnimationFrame(() => this.blood.warmup())
+
+        this.trees = new Trees()
+        this.addChild(this.trees)
 
         this.enemiesHp = new Container()
 
@@ -117,6 +123,8 @@ export default class GameContainer extends Container {
         }
 
         this.scale.set(scale)
+
+        this.trees.screenResize(screenData)
 
         this.testGraphics.clear()
         this.testGraphics.rect(-SIZE * 0.5, -SIZE * 0.5, SIZE, SIZE)
@@ -231,6 +239,7 @@ export default class GameContainer extends Container {
 
             if (data.isRage === true) power *= gameState.berserkPowerRate
 
+            power = Math.round(power)
             const text = this.arrowComboCount > 0
                 ? `-${power} Combo X${this.arrowComboCount}`
                 : `-${power}`
@@ -260,7 +269,7 @@ export default class GameContainer extends Container {
                 this.parent.flyTexts.addChild(
                     new FlyText(`+${chestReward} Gold`, textPoint.x, textPoint.y)
                 )
-                gameState.gold += chestReward
+                addGoldForKill(chestReward)
                 EventHub.emit(events.enemyHit, {
                     x: data.x,
                     y: data.y,
@@ -268,6 +277,7 @@ export default class GameContainer extends Container {
                     bloodType: BLOOD_GOLD,
                     isKill: false,
                 })
+                soundPlay(sounds.se_coins)
             } else {
                 this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
             }
@@ -302,6 +312,11 @@ export default class GameContainer extends Container {
 
     kill() {
         tickerRemove(this)
+
+        if (this.trees) {
+            this.trees.kill()
+            this.trees = null
+        }
         
         if (this.dragonSpawnTimeout) {
             clearTimeout(this.dragonSpawnTimeout)

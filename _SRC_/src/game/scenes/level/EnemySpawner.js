@@ -5,8 +5,8 @@ import { gameState } from "../../state"
 import { createEnemy } from "./Enemy"
 import { getRoundWaves } from "./waves"
 
-const SIZE = 800
-const MAX_ENEMY_HALF_SIZE = 64
+const SIZE = 720
+const MAX_ENEMY_HALF_SIZE = 90
 const ENEMIES_SPAWN_RADIUS = SIZE * 0.5 + MAX_ENEMY_HALF_SIZE
 
 // --- ТАЙМИНГИ (экспортируем для GameContainer) ---

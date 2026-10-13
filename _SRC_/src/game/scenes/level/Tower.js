@@ -8,7 +8,7 @@ import Catapult from "./Catapult";
 import Wizard from "./Wizard";
 
 const WIZARD_POINTS = [ {x: -60, y: 0}, {x: 30, y: -48}, {x: 30, y: 48} ]
-const CATAPULT_POINTS = [ {x: 60, y: 0}, {x: -30, y: -48}, {x: -30, y: 48} ]
+const CATAPULT_POINTS = [ {x: 60, y: 0}, {x: -30, y: 48}, {x: -30, y: -48} ]
 const TOWER_STONES_OFFSET = 96
 
 //const WIZARD_POINTS = [ {x: -66, y: 0}, {x: 66, y: 0}, {x: 0, y: -66}, {x: 0, y: 66} ]

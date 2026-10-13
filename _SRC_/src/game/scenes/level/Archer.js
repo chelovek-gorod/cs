@@ -131,16 +131,18 @@ export default class Archer extends Container {
         if (this.isBerserk) {
             this.arrows--
             this.arrowsLabelText.text = 'x' + this.arrows
-
-            if (this.arrows <= 0) {
+        
+            if (this.arrows > 0) {
+                this.shootTimeout += gameState.arrowShootTimeout * BERSERK_SHOOT_RATE
+            } else {
                 this.isBerserk = false
                 this.archer.tint = null
-                // Берсерк закончился — всегда перезарядка
+                this.shootTimeout = 0
                 this.reloadTimeout = gameState.arrowReloadTimeout
             }
-
-            this.shootTimeout += gameState.arrowShootTimeout * BERSERK_SHOOT_RATE
         } else {
+            if (this.arrows <= 0) return
+            
             this.arrows--
             this.arrowsLabelText.text = 'x' + this.arrows
             if (this.arrows > 0) this.shootTimeout += gameState.arrowShootTimeout

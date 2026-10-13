@@ -48,7 +48,7 @@
         "y": 0.5
       }
     },
-    "lava_3": {
+    "lava_2": {
       "frame": {
         "x": 4,
         "y": 432,
@@ -192,7 +192,7 @@
         "y": 0.5
       }
     },
-    "lava_2": {
+    "lava_3": {
       "frame": {
         "x": 228,
         "y": 416,
@@ -218,8 +218,6 @@
     }
   },
   "meta": {
-    "app": "http://free-tex-packer.com",
-    "version": "0.6.7",
     "image": "trees.png",
     "format": "RGBA8888",
     "size": {
