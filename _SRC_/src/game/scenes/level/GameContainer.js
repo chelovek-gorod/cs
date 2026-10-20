@@ -1,7 +1,7 @@
 import { Container, Graphics, Text } from "pixi.js"
 import { kill, tickerAdd, tickerRemove } from "../../../app/application"
 import { sounds } from "../../../app/assets"
-import { addGoldForKill, EventHub, events, setEnemyFirstWave, showPopup, startScene } from "../../../app/events"
+import { addGoldForKill, EventHub, events, setEnemyFirstWave, showPopup, startScene, dragonIsEmpty } from "../../../app/events"
 import { soundPlay } from "../../../app/sound"
 import { styles } from "../../../app/styles"
 import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
@@ -13,8 +13,9 @@ import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
 import Dragon from "./Dragon"
 import DragonFire from "./DragonFire"
-import EnemyBlood, { BLOOD_GOLD } from "./EnemyBlood"
+import EnemyBlood from "./EnemyBlood"
 import EnemySmoke from "./EnemySmoke"
+import Explosion from "./Explosion"
 import Tower from "./Tower"
 import TowerStones from "./TowerStones"
 import { createTrap } from "./Trap"
@@ -86,6 +87,9 @@ export default class GameContainer extends Container {
         this.arrowLastTarget = null
         this.addChild(this.tower)
 
+        this.explosions = new Container()
+        this.addChild(this.explosions)
+
         this.addChild(this.lightnings)
         this.addChild(this.smoke)
         this.addChild(this.enemyArrows)
@@ -98,7 +102,7 @@ export default class GameContainer extends Container {
         requestAnimationFrame(() => this.dragonFire.warmup())
 
         // TODO: заменить на клик по иконке. Для теста — автоспавн через 12 сек.
-        this.dragonSpawnTimeout = setTimeout(() => this.addDragon(), 3000)
+        
         
         this.addChild(this.enemiesHp)
 
@@ -106,7 +110,9 @@ export default class GameContainer extends Container {
 
         EventHub.on(events.arrowOnTarget, this.arrowOnTarget, this)
         EventHub.on(events.setTrapsOnMap, this.setTrapsOnMap, this)
+        EventHub.on(events.addDragon, this.addDragon, this)
         EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
+        EventHub.on(events.addExplosion, this.addExplosion, this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
@@ -180,9 +186,10 @@ export default class GameContainer extends Container {
     }
 
     addDragon() {
-        if (this.dragon) return
-        if (gameState.dragonsCount <= 0) return
-    
+        if (this.dragon || gameState.dragonsCount < 1) return
+
+        gameState.dragonsCount--
+
         this.dragon = new Dragon(
             this.enemies,
             this.dragonFire.emit.bind(this.dragonFire),
@@ -193,6 +200,20 @@ export default class GameContainer extends Container {
     
     onDragonFuelEmpty() {
         this.dragon = null
+        dragonIsEmpty()
+    }
+
+    addExplosion(data) {
+        const explosion = new Explosion(
+            data.atlasName,
+            data.x,
+            data.y,
+            data.radius,
+            data.frameDamage,
+            data.damage,
+            this.enemies
+        )
+        this.explosions.addChild(explosion)
     }
 
     arrowOnTarget(data) {
@@ -249,15 +270,11 @@ export default class GameContainer extends Container {
 
             enemy.setDamage(power)
 
-            EventHub.emit(events.enemyHit, {
-                x: enemy.x,
-                y: enemy.y,
-                damage: power,
-                bloodType: enemy.bloodType,
-                isKill: enemy.hp === 0,
-            })
-
             if (data.isRage !== true) EventHub.emit(events.addRage, power)
+
+            if (data.isIce === true && enemy.hp > 0) {
+                enemy.onIce(gameState.iceDuration)
+            }
         } else {
             this.arrowComboCount = 0
             this.arrowLastTarget = null
@@ -270,13 +287,6 @@ export default class GameContainer extends Container {
                     new FlyText(`+${chestReward} Gold`, textPoint.x, textPoint.y)
                 )
                 addGoldForKill(chestReward)
-                EventHub.emit(events.enemyHit, {
-                    x: data.x,
-                    y: data.y,
-                    damage: chestReward * 3,
-                    bloodType: BLOOD_GOLD,
-                    isKill: false,
-                })
                 soundPlay(sounds.se_coins)
             } else {
                 this.arrowsOnGround.addChild(createArrowOnGround(data.x, data.y, data.direction))
@@ -291,11 +301,14 @@ export default class GameContainer extends Container {
             gameState.gold += extraGold
         }
 
+        if (this.dragon) gameState.dragonsCount += 1
+
         this.resultPopupTimer = RESULT_POPUP_TIMEOUT
         tickerAdd(this)
     }
 
     handleRoundLose() {
+        if (this.dragon) gameState.dragonsCount += 1
         this.parent.enemiesSpawner.kill()
         startScene(SCENE_NAME.Menu)
     }
@@ -335,7 +348,9 @@ export default class GameContainer extends Container {
 
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
         EventHub.off(events.setTrapsOnMap, this.setTrapsOnMap, this)
+        EventHub.off(events.addDragon, this.addDragon, this)
         EventHub.off(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
+        EventHub.off(events.addExplosion, this.addExplosion, this)
 
         if (this.blood) {
             this.blood.kill()
@@ -366,5 +381,6 @@ export default class GameContainer extends Container {
         kill(this.stones)
         kill(this.enemiesHp)
         kill(this.testGraphics)
+        kill(this.explosions)
     }
 }

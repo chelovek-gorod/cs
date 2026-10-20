@@ -1,6 +1,6 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { images } from "../../../app/assets";
-import { EventHub, events } from "../../../app/events";
+import { EventHub, events, updateTowerHp } from "../../../app/events";
 import { styles } from "../../../app/styles";
 import { gameState } from "../../state";
 import Archer from "./Archer";
@@ -49,11 +49,8 @@ export default class Tower extends Container {
         )
 
         this.hp = gameState.towerHp
-        this.hpText = new Text({text: this.hp, style: styles.loading})
-        this.hpText.position.set(0, -80)
-        this.addChild(this.hpText)
-
         EventHub.on(events.setDamage, this.getDamage, this)
+        EventHub.on(events.repairTower, this.repairTower, this)
     }
 
     // data = {value:this.damage, x: this.x, y: this.y}
@@ -61,7 +58,7 @@ export default class Tower extends Container {
         if (!this.isAlive) return
 
         this.hp = Math.max(0, this.hp - data.value)
-        this.hpText.text = this.hp
+        updateTowerHp(this.hp)
 
         const angle = Math.atan2(data.y - this.y, data.x - this.x)
         const spawnX = this.x + Math.cos(angle) * TOWER_STONES_OFFSET
@@ -72,6 +69,13 @@ export default class Tower extends Container {
             this.isAlive = false
             this.parent.handleRoundLose()
         }
+    }
+
+    repairTower() {
+        if (!this.isAlive) return
+
+        this.hp = Math.min(gameState.towerHp, this.hp + gameState.towerRepairHp)
+        updateTowerHp(this.hp)
     }
 
     kill() {

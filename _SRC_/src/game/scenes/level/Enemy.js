@@ -1,14 +1,13 @@
 import { Container, AnimatedSprite, Graphics } from "pixi.js"
 import { tickerAdd, tickerRemove } from "../../../app/application"
 import { atlases, sounds } from "../../../app/assets"
-import { addGoldForKill, setDamage } from "../../../app/events"
+import { addGoldForKill, setDamage, addExplosion, enemyHit } from "../../../app/events"
 import { createEnum, getDistance } from "../../../utils/functions"
 import { createObjectPool } from "../../../utils/pool"
-import Explosion from "../../effects/Explosion"
 import { createHpBar } from "./EnemiesHpBar"
 import { createEnemyArrow } from "./EnemyArrow"
 import { createEnemyStone } from "./EnemyStone"
-import { BLOOD_GREEN, BLOOD_BLACK } from './EnemyBlood'
+import { BLOOD_GREEN, BLOOD_BLACK, BLOOD_ICE } from './EnemyBlood'
 import { soundPlay } from "../../../app/sound"
 
 const ENEMY_POOL = createObjectPool(100)
@@ -31,6 +30,8 @@ const ALPHA_STEP = 0.001
 const DEAD_ALPHA_STEP = 0.002
 const TOWER_OFFSET = 80
 const LIGHTNING_FRAMES = 12
+
+const BOMB_SPLASH_DAMAGE = 25
 
 const ENEMY = {
     [TYPES.NORMAL]: {
@@ -291,6 +292,7 @@ class Enemy extends Container {
 
         this.isIce = true
         this.iceTimeout = time
+        this.isOnHit = false
         this.setState(ENEMY_STATE.ICE)
     }
 
@@ -300,19 +302,32 @@ class Enemy extends Container {
         this.setState(ENEMY_STATE.LIGHTNING)
     }
 
-    setDamage(power) {
+    setDamage(power, isRadial = false) {
         if (this.hp === 0) return
+    
+        const wasIce = this.isIce
 
         this.hp = Math.max(0, this.hp - power)
         this.hpBar.setLineScale(this.hp / this.maxHp)
+    
+        const bloodType = (wasIce && this.hp > 0) ? BLOOD_ICE : this.bloodType
 
-        this.isIce = false
-        this.iceTimeout = 0
+        enemyHit({
+            x: this.x,
+            y: this.y,
+            damage: power,
+            bloodType,
+            isKill: this.hp === 0,
+            fromAngle: isRadial ? null : Math.atan2(this.y, this.x),
+        })
 
         if (this.hp === 0) {
             if (this.screamRate !== null) {
                 soundPlay(sounds.se_scream_die.rate(this.screamRate))
             }
+
+            this.isIce = false
+            this.iceTimeout = 0
             
             this.hpBar.release()
             this.hpBar = null
@@ -335,6 +350,8 @@ class Enemy extends Container {
 
             this.setState(ENEMY_STATE.DIE)
         } else {
+            if (this.isIce) return
+
             if (this.screamRate !== null) {
                 const rate = this.screamRate - 0.1 + Math.random() * 0.2
                 soundPlay(sounds.se_scream_hit.rate(rate))
@@ -456,15 +473,19 @@ class Enemy extends Container {
     }
 
     addExplosion(isTowerDamage = true) {
-        if (this.parent) {
-            this.parent.parent.addChild(
-                new Explosion(this.x, this.y, 'explosion_bomb', 128)
-            )
-            this.parent.removeChild(this)
-        }
-
-        if (isTowerDamage) setDamage({value:this.damage, x: this.x, y: this.y})
-
+        const isBomb = this.type === TYPES.BOMB
+    
+        addExplosion({
+            atlasName: 'explosion_bomb',
+            x: this.x,
+            y: this.y,
+            radius: 128,
+            frameDamage: 4,
+            damage: isBomb ? BOMB_SPLASH_DAMAGE : 0,
+        })
+    
+        if (isTowerDamage) setDamage({ value: this.damage, x: this.x, y: this.y })
+    
         tickerRemove(this)
         ENEMY_POOL.put(this)
         addGoldForKill(this.reward)

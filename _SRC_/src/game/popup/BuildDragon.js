@@ -1,7 +1,7 @@
 import { Container, Text } from "pixi.js"
 import { styles } from "../../app/styles"
 import { closePopup, goldChanged } from "../../app/events"
-import { dragonPowerMax, dragonPowerStep, gameState, mineMaxGoldMax } from "../state"
+import { dragonFuelMax, dragonFuelStep, dragonPowerMax, dragonPowerStep, gameState, mineMaxGoldMax } from "../state"
 import PopupButton from "./PopupButton"
 
 export default class BuildDragon extends Container {
@@ -47,6 +47,23 @@ export default class BuildDragon extends Container {
         )
         this.addChild(this.btnUpPower)
 
+        let fuelNow = Math.round(gameState.dragonFuel / dragonFuelStep)
+        sText = `${fuelNow} -> ${fuelNow + 1}`
+        dText = gameState.dragonFuelPrice + '$'
+        if (gameState.dragonFuel === dragonFuelMax) {
+            sText = fuelNow
+            dText = 'Maximum'
+        }
+        this.btnUpFuel = new PopupButton(
+            "UP DRAGON SHOOTS",
+            sText,
+            dText,
+            this.upFuel.bind(this),
+            () => gameState.gold >= gameState.dragonFuelPrice && gameState.dragonFuel < dragonFuelMax,
+            0, 0
+        )
+        this.addChild(this.btnUpFuel)
+
         this.btnClose = new PopupButton(
             "", "CLOSE", "",
             this.close.bind(this),
@@ -64,6 +81,7 @@ export default class BuildDragon extends Container {
     checkButtons() {
         this.btnAddDragon.updateAvailable()
         this.btnUpPower.updateAvailable()
+        this.btnUpFuel.updateAvailable()
     }
 
     addDragon() {
@@ -89,6 +107,26 @@ export default class BuildDragon extends Container {
         }
         this.btnUpPower.setSubtitle(sText)
         this.btnUpPower.setDescription(dText)
+
+        goldChanged()
+
+        this.checkButtons()
+    }
+
+    upFuel() {
+        gameState.gold -= gameState.dragonFuelPrice
+        gameState.dragonFuel = Math.min(dragonFuelMax, gameState.dragonFuel + dragonFuelStep)
+        gameState.dragonFuelPrice *= 2
+        let sText, dText, fuelNow
+        fuelNow = Math.round(gameState.dragonFuel / dragonFuelStep)
+        sText = `${fuelNow} -> ${fuelNow + 1}`
+        dText = gameState.dragonFuelPrice + '$'
+        if (gameState.dragonFuel === dragonFuelMax) {
+            sText = fuelNow
+            dText = 'Maximum'
+        }
+        this.btnUpFuel.setSubtitle(sText)
+        this.btnUpFuel.setDescription(dText)
 
         goldChanged()
 

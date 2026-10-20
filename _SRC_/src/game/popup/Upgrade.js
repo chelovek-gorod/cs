@@ -5,7 +5,7 @@ import { EventHub, events, startScene } from "../../app/events"
 import { lastSceneName, SCENE_NAME } from "../scenes/SceneManager"
 import { gameState, arrowsStep, arrowsMax, arrowPowerStep, arrowShootTimeoutStep,
     arrowShootTimeoutMax, arrowReloadTimeoutStep, arrowReloadTimeoutMax,
-    arrowFlyRateStep, arrowFlyRateMax, berserkShootStep, berserkPowerRateStep } from "../state"
+    arrowFlyRateStep, arrowFlyRateMax, berserkPowerRateStep, berserkStartRageStep } from "../state"
 
 const UPGRADE_TYPE = createEnum([
     'arrowsCount',
@@ -14,7 +14,7 @@ const UPGRADE_TYPE = createEnum([
     'arrowShootTimeout',
     'arrowReloadTimeout',
     'berserkPowerRate',
-    'berserkShoots'
+    'berserkStartRage'
 ])
 
 export default class Upgrade extends Container {
@@ -182,11 +182,11 @@ export default class Upgrade extends Container {
                     res = `${(1 + gameState.arrowFlyRate * 10).toFixed(2)} -> ${result.toFixed(2)}`
                 break
 
-                case UPGRADE_TYPE.berserkShoots:
-                    title = 'RAGE SHOOTS'
-                    result = gameState.berserkShoots + berserkShootStep
-                    desc = `+${berserkShootStep}`
-                    res = `${gameState.berserkShoots} -> ${result}`
+                case UPGRADE_TYPE.berserkStartRage:
+                    title = 'START RAGE'
+                    result = gameState.berserkStartRage + berserkStartRageStep
+                    desc = `+${berserkStartRageStep}`
+                    res = `${gameState.berserkStartRage} -> ${result}`
                 break
                 case UPGRADE_TYPE.berserkPowerRate:
                     title = 'RAGE POWER RATE'

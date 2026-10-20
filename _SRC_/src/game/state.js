@@ -8,8 +8,8 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 100000,
-        round: 12,
+        gold: 0,
+        round: 1,
         
         towerHp: 100,
         towerHpPrice: 5,
@@ -26,7 +26,7 @@ function initState() {
         arrowShootTimeout: 1000,
         arrowReloadTimeout: 3000,
         berserkPowerRate: 1.2,
-        berserkShoots: 12,
+        berserkStartRage: 0,
 
         mineTimeout: 2.25 * 60 * 1000, // 2 minutes 15 seconds
         mineTimeoutPrice: 100,
@@ -34,10 +34,8 @@ function initState() {
         mineMaxGoldPrice: 50,
 
         iceCount: 0,
-        iceDuration: 5000,
+        iceDuration: 4000,
         iceDurationPrice: 25,
-        icePowerRate: 0.5, // 0.75, 1, 1.25, 1.5, 1.75, 2
-        icePowerRatePrice: 40,
 
         trapsCount: 0,
         trapPower: 75, // 100, 125, 150, 175, 200
@@ -47,7 +45,8 @@ function initState() {
 
         dragonsCount: 0,
         dragonPrice: 50,
-        dragonFuel: 120,
+        dragonFuel: 60,
+        dragonFuelPrice: 25,
         dragonPower: 5,
         dragonPowerPrice: 20,
 
@@ -86,6 +85,8 @@ export const towerHPStep = 20
 export const towerHPMax = 200
 export const towerFogPowerStep = 5
 export const towerFogPowerMax = 50
+export const towerFogReloadStep = 0.06
+export const towerFogReloadDone = 100
 export const towerFogPrice = 120
 export const towerRepairStep = 5
 export const towerRepairMax = 50
@@ -98,10 +99,7 @@ export const mineMaxGoldMax = 300
 
 export const icePrice = 50
 export const iceAdd = 12
-export const iceDurationStep = 1000
-export const iceDurationMax = 10000
-export const icePowerRateStep = 0.25
-export const icePowerRateMax = 2
+export const iceDurationStep = 500
 
 export const trapPrice = 25
 export const trapsAdd = 6
@@ -111,7 +109,8 @@ export const trapRadiusStep = 25
 export const trapRadiusMax = 200
 
 export const dragonPrice = 100
-export const dragonFuelMax = 144
+export const dragonFuelStep = 12
+export const dragonFuelMax = 120
 export const dragonPowerStep = 3
 export const dragonPowerMax = 20
 
@@ -125,8 +124,9 @@ export const arrowReloadTimeoutMax = 1500
 export const arrowFlyRateStep = 0.016
 export const arrowFlyRateMax = 0.10
 
-export const berserkShootStep = 1
 export const berserkPowerRateStep = 0.1
+export const berserkStartRageStep = 12
+export const berserkReadyRage = 144
 
 export const catapultsCountMax = 3
 export const catapultBasePrice = 75

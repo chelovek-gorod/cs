@@ -49,6 +49,7 @@ export const images = {
 export const atlases = {
     buildings: 'buildings.json',
     trees: 'trees.json',
+    ui: 'ui.json',
     chest: 'chest.json',
     archer: 'archer.json',
     wizard: 'wizard.json',
@@ -72,6 +73,7 @@ export const sounds = {
     se_scream_hit: 'se_scream_hit.mp3',
     se_scream_die: 'se_scream_die.mp3',
     se_coins: 'se_coins.mp3',
+    se_click: 'se_click.mp3',
 }
 export const music = {
     bgm_menu: 'bgm_menu.mp3',

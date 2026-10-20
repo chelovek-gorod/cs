@@ -4,9 +4,8 @@ import { images, sounds } from "../../../app/assets";
 import { soundPlay } from "../../../app/sound";
 import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
-import Explosion from "../../effects/Explosion";
 import { gameState } from "../../state";
-import { EventHub, events } from '../../../app/events'
+import { addExplosion } from '../../../app/events'
 
 const STONE_POOL = createObjectPool(100)
 
@@ -64,29 +63,15 @@ class Stone extends Container {
     }
 
     setDamage() {
-        this.parent.addChild( new Explosion(this.x, this.y, 'explosion_stone', gameState.catapultRadius) )
-        
-        const enemies = this.enemies.children
-        const dmgSqRadius = gameState.catapultRadius * gameState.catapultRadius
-
-        for (let i = enemies.length - 1; i >= 0; i--) {
-            const enemy = enemies[i]
-            const dx = enemy.x - this.x
-            const dy = enemy.y - this.y
-            const sqDist = dx * dx + dy * dy
-            const inRadius = dmgSqRadius + enemy.bodySqCollider > sqDist
-            if (inRadius && enemy.hp > 0) {
-                enemy.setDamage(gameState.catapultPower)
-                EventHub.emit(events.enemyHit, {
-                    x: enemy.x,
-                    y: enemy.y,
-                    damage: gameState.catapultPower,
-                    bloodType: enemy.bloodType,
-                    isKill: enemy.hp === 0
-                })
-            }
-        }
-
+        addExplosion({
+            atlasName: 'explosion_stone',
+            x: this.x,
+            y: this.y,
+            radius: gameState.catapultRadius,
+            frameDamage: 4,
+            damage: gameState.catapultPower,
+        })
+    
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
         STONE_POOL.put(this)

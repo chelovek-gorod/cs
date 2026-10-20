@@ -58,6 +58,8 @@ export let styles = {
 
     /* Font keys (init all fonts in function bellow) */
     loading: null,
+    uiIconCounter: null,
+    uiIconProgress: null,
 
     arrowsCount: null,
     damage: null,
@@ -95,6 +97,36 @@ export function initFontStyles() {
         dropShadowBlur: 6,
         dropShadowAngle: 0,
         dropShadowDistance: 0,
+    })
+
+    styles.uiIconCounter = new TextStyle({
+        fontFamily: fonts.P,
+        fontSize: 24,
+        fill: 0xffffff,
+        align: 'center',
+
+        dropShadow: true,
+        dropShadowColor: 0x000000,
+        dropShadowBlur: 6,
+        dropShadowAngle: 0,
+        dropShadowDistance: 0,
+
+        stroke: {
+            color: 0x000000,
+            width: 1
+        },
+    })
+
+    styles.uiIconProgress = new TextStyle({
+        fontFamily: fonts.P,
+        fontSize: 16,
+        fill: 0x000000,
+        align: 'center',
+
+        stroke: {
+            color: 0xffffff,
+            width: 2
+        },
     })
 
     styles.arrowsCount = new TextStyle({

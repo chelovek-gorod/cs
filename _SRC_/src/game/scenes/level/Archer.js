@@ -1,12 +1,11 @@
 import { AnimatedSprite, Container, Graphics, Sprite, Text } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases, images } from "../../../app/assets";
-import { EventHub, events } from "../../../app/events";
+import { EventHub, events, updateArrows, updateArrowsReload, updateRage } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { gameState } from "../../state";
+import { berserkReadyRage, gameState } from "../../state";
 import { createArrow } from "./Arrow";
 
-const RAGE_MAX = 240
 const BERSERK_BG_TINT = 0xff4400
 const BERSERK_SHOOT_RATE = 0.667
 const BERSERK_MAX_DISTANCE = 360
@@ -35,70 +34,53 @@ export default class Archer extends Container {
         this.isPointerDown = false
         this.isReadyToShoot = true
 
-        this.rage = 0
+        this.rage = gameState.berserkStartRage
         this.isBerserk = false
         this.berserkClickPoint = null
+        requestAnimationFrame( () => updateRage(this.rage) )
 
-        this.arrowsLabel = new Container()
-        this.arrowsLabel.position.set(0, 30)
-        this.addChild(this.arrowsLabel)
-
-        this.arrowsLabelBg = new Graphics()
-        this.arrowsLabelBg.roundRect(-25, -10, 50, 20, 6)
-        this.arrowsLabelBg.fill(0xffffff)
-        this.arrowsLabelBg.alpha = 0.5
-        this.arrowsLabel.addChild(this.arrowsLabelBg)
-
-        /*
-        this.arrowsLabelBg = new Sprite(images.icon_bow_bg)
-        this.arrowsLabelBg.anchor.set(0.5)
-        this.arrowsLabel.addChild(this.arrowsLabelBg)
-
-        this.arrowsLabelLine = new Sprite(images.icon_bow_line)
-        this.arrowsLabelLine.anchor.set(0, 0.5)
-        this.arrowsLabelLine.position.set(-25, 0)
-        this.arrowsLabel.addChild(this.arrowsLabelLine)
-        */
-
-        this.arrowsLabelIcon = new Sprite(images.icon_bow)
-        this.arrowsLabelIcon.anchor.set(0.5)
-        this.arrowsLabel.addChild(this.arrowsLabelIcon)
-
-        this.arrowsLabelText = new Text({text: 'x' + this.arrows, style: styles.arrowsCount})
-        this.arrowsLabelText.position.set(-2, -10)
-        this.arrowsLabel.addChild(this.arrowsLabelText)
+        this.isIceActive = false
 
         EventHub.on(events.setShootPoint, this.getShootPoint, this)
         EventHub.on(events.addRage, this.addRage, this)
+        EventHub.on(events.rageClick, this.triggerBerserk, this)
+        EventHub.on(events.iceClick, this.toggleIce, this)
+        EventHub.on(events.reloadClick, this.triggerReload, this)
 
         tickerAdd(this)
     }
 
+    toggleIce() {
+        if (gameState.iceCount <= 0 || this.isBerserk) return
+        this.isIceActive = !this.isIceActive
+    }
+
     addRage(amount) {
         if (this.isBerserk) return
-
+        if (this.rage >= berserkReadyRage) return
+    
         this.rage += amount
-        if (this.rage >= RAGE_MAX) {
-            this.isBerserk = true
-            this.rage = 0
-            this.isPointerDown = false
-            this.archer.tint = BERSERK_BG_TINT
+        updateRage(this.rage)
+    }
 
-            // Счётчик стрел = число выстрелов берсерка
-            this.arrows = gameState.berserkShoots
-            this.arrowsLabelText.text = 'x' + this.arrows
+    triggerBerserk() {
+        if (this.isBerserk) return
+        if (this.rage < berserkReadyRage) return
+    
+        this.isIceActive = false
 
-            // Сбросить все таймеры
-            this.reloadTimeout = 0
-            this.shootTimeout = 0
-            this.isReadyToShoot = true
-
-            // Сбросить визуал полоски перезарядки
-            this.arrowsLabelBg.clear()
-            this.arrowsLabelBg.roundRect(-25, -10, 50, 20, 6)
-            this.arrowsLabelBg.fill(0xffffff)
-            this.arrowsLabelBg.alpha = 0.5
-        }
+        this.rage -= berserkReadyRage
+        updateRage(0)
+        this.isBerserk = true
+        this.berserkClickPoint = null
+        this.archer.tint = BERSERK_BG_TINT
+    
+        // Мгновенная перезарядка в полный колчан
+        this.reloadTimeout = 0
+        this.shootTimeout = 0
+        this.isReadyToShoot = true
+        this.arrows = gameState.arrowsCount
+        updateArrows(this.arrows)
     }
 
     getNearestEnemy() {
@@ -117,21 +99,39 @@ export default class Archer extends Container {
         return nearest
     }
 
+    triggerReload() {
+        if (this.isBerserk || this.reloadTimeout > 0 || this.arrows === 0) return
+    
+        this.arrows = 0
+        this.shootTimeout = 0
+        this.isReadyToShoot = false
+        this.reloadTimeout = gameState.arrowReloadTimeout
+    
+        updateArrows(0)
+    }
+
     shoot() {
+        if (this.arrows <= 0) return
+    
         this.archer.gotoAndPlay(0)
     
-        const arrow = createArrow(this.shootPointX, this.shootPointY, this.isBerserk)
-        this.arrowsContainer.addChild(arrow)
+        let isIceShot = false
+        if (this.isIceActive && gameState.iceCount > 0) {
+            isIceShot = true
+            gameState.iceCount--
+            if (gameState.iceCount === 0) this.isIceActive = false
+        }
     
+        const arrow = createArrow(this.shootPointX, this.shootPointY, this.isBerserk, isIceShot)
+        this.arrowsContainer.addChild(arrow)
         arrow.arrowPoint.position.set(this.shootPointX, this.shootPointY)
         this.arrowPoints.addChild(arrow.arrowPoint)
     
         this.isReadyToShoot = false
+        this.arrows--
+        updateArrows(this.arrows)
     
         if (this.isBerserk) {
-            this.arrows--
-            this.arrowsLabelText.text = 'x' + this.arrows
-        
             if (this.arrows > 0) {
                 this.shootTimeout += gameState.arrowShootTimeout * BERSERK_SHOOT_RATE
             } else {
@@ -139,12 +139,9 @@ export default class Archer extends Container {
                 this.archer.tint = null
                 this.shootTimeout = 0
                 this.reloadTimeout = gameState.arrowReloadTimeout
+                updateRage(this.rage)
             }
         } else {
-            if (this.arrows <= 0) return
-            
-            this.arrows--
-            this.arrowsLabelText.text = 'x' + this.arrows
             if (this.arrows > 0) this.shootTimeout += gameState.arrowShootTimeout
             else this.reloadTimeout += gameState.arrowReloadTimeout
         }
@@ -183,17 +180,13 @@ export default class Archer extends Container {
         
         else if (this.reloadTimeout > 0) {
             this.reloadTimeout -= deltaMs
+            const reloadRate = Math.max(0, this.reloadTimeout / gameState.arrowReloadTimeout)
+            updateArrowsReload(reloadRate)
 
-            const size = 50 * Math.min(1, 1 - this.reloadTimeout / gameState.arrowReloadTimeout)
-            this.arrowsLabelBg.clear()
-            this.arrowsLabelBg.roundRect(-25, -10, size, 20, 6)
-            this.arrowsLabelBg.fill(0xffffff)
-            this.arrowsLabelBg.alpha = 0.5
-    
             if (this.reloadTimeout <= 0) {
                 this.arrows = gameState.arrowsCount
                 this.isReadyToShoot = true
-                this.arrowsLabelText.text = 'x' + this.arrows
+                updateArrows(this.arrows)
                 if (this.isPointerDown) this.shoot()
             }
         }
@@ -226,6 +219,9 @@ export default class Archer extends Container {
     kill() {
         EventHub.off(events.setShootPoint, this.getShootPoint, this)
         EventHub.off(events.addRage, this.addRage, this)
+        EventHub.off(events.rageClick, this.triggerBerserk, this)
+        EventHub.off(events.iceClick, this.toggleIce, this)
+        EventHub.off(events.reloadClick, this.triggerReload, this)
         tickerRemove(this)
     }
 }

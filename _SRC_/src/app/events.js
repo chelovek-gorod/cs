@@ -21,11 +21,23 @@ export const events = createEnum([
 
     'addGoldForKill',
     'setDamage',
+    'updateTowerHp',
+    'updateArrows',
     'setShootPoint',
     'arrowOnTarget',
+    'updateRage',
+    'rageClick',
+    'repairTower',
+    'iceClick',
+    'reloadClick',
 
     'setTrapsOnMap',
+    'addDragon',
+    'updateDragonFuel',
+    'dragonIsEmpty',
     'setEnemyFirstWave',
+
+    'addExplosion',
 
     'goldChanged',
 
@@ -73,6 +85,33 @@ export function addGoldForKill( value ) {
 export function setDamage( data ) {
     EventHub.emit( events.setDamage, data )
 }
+export function updateTowerHp( value ) {
+    EventHub.emit( events.updateTowerHp, value )
+}
+export function repairTower() {
+    EventHub.emit( events.repairTower )
+}
+
+export function updateArrows( value ) {
+    EventHub.emit( events.updateArrows, value )
+}
+export function updateArrowsReload( value ) {
+    EventHub.emit( events.updateArrowsReload, value )
+}
+export function updateRage( value ) {
+    EventHub.emit( events.updateRage, value )
+}
+export function rageClick() {
+    EventHub.emit( events.rageClick )
+}
+
+export function iceClick() {
+    EventHub.emit( events.iceClick )
+}
+
+export function reloadClick() {
+    EventHub.emit( events.reloadClick )
+}
 
 export function setShootPoint( data ) {
     EventHub.emit( events.setShootPoint, data )
@@ -85,8 +124,21 @@ export function arrowOnTarget( data ) {
 export function setTrapsOnMap() {
     EventHub.emit( events.setTrapsOnMap )
 }
+export function addDragon() {
+    EventHub.emit( events.addDragon )
+}
+export function updateDragonFuel( progress ) {
+    EventHub.emit( events.updateDragonFuel, progress )
+}
+export function dragonIsEmpty() {
+    EventHub.emit( events.dragonIsEmpty )
+}
 export function setEnemyFirstWave() {
     EventHub.emit( events.setEnemyFirstWave )
+}
+
+export function addExplosion(data) {
+    EventHub.emit( events.addExplosion, data )
 }
 
 export function goldChanged() {

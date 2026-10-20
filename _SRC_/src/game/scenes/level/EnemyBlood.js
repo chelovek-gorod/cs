@@ -12,11 +12,15 @@ const TAU = Math.PI * 2
 export const BLOOD_GREEN = 0
 export const BLOOD_BLACK = 1
 export const BLOOD_GOLD  = 2
+export const BLOOD_ICE = 3
 
 const GREEN_COLS = [0xaaff77, 0x66ff22, 0x00dd00, 0x0a8822, 0x04440a]
 const BLACK_COLS = [0x666666, 0x444444, 0x222222, 0x111111, 0x050505]
 const GOLD_COLS = [0xffe888, 0xffcc33, 0xffaa00, 0xcc8800, 0x664400]
+const ICE_COLS = [0xffffff, 0xaaffff, 0x66ffff, 0x00ffff, 0x00aaff]
 const GOLD_SCALE_RATE = 2
+
+const BLOOD_SPREAD = Math.PI / 3   // ±60°
 
 // Индекс "тёмного" цвета для пятна (нижние 2 оттенка из палитры)
 const DARK_IDX_MIN = 3
@@ -105,7 +109,7 @@ export default class EnemyBlood {
     }
 
     onEnemyHit(data) {
-        this.emit(data.x, data.y, data.damage, data.bloodType, data.isKill)
+        this.emit(data.x, data.y, data.damage, data.bloodType, data.isKill, data.fromAngle)
     }
 
     warmup() {
@@ -160,23 +164,28 @@ export default class EnemyBlood {
         }
     }
 
-    emit(x, y, damage, bloodType, isKill) {
+    emit(x, y, damage, bloodType, isKill, fromAngle) {
         let count = Math.ceil(damage / BLOOD_DAMAGE_RATE)
         if (isKill) count *= KILL_RATE
         if (count < BLOOD_COUNT_MIN) count = BLOOD_COUNT_MIN
         if (count > BLOOD_COUNT_MAX) count = BLOOD_COUNT_MAX
 
         const cols = bloodType === BLOOD_BLACK ? BLACK_COLS
-           : bloodType === BLOOD_GOLD  ? GOLD_COLS
-           : GREEN_COLS
+            : bloodType === BLOOD_GOLD  ? GOLD_COLS
+            : bloodType === BLOOD_ICE   ? ICE_COLS
+            : GREEN_COLS
         const colsLen = cols.length
 
         for (let i = 0; i < count; i++) {
             const p = this.pool.get()
             if (!p) break
 
-            // ---- рандомы + bias ----
-            const angle = Math.random() * TAU
+            let angle
+            if (isKill || fromAngle === null) {
+                angle = Math.random() * TAU
+            } else {
+                angle = fromAngle + (Math.random() - 0.5) * BLOOD_SPREAD
+            }
 
             const distR = Math.random()
             const dist  = DIST_MIN + (DIST_MAX - DIST_MIN) * distR * Math.sqrt(distR)

@@ -53,9 +53,10 @@ export default class LevelScene extends Container {
 
         this.ui = new LevelUI()
         this.addChild(this.ui)
+        this.ui.start()
 
         this.enemiesSpawner = new EnemySpawner(this.gameContainer, this.ui)
-
+        
         EventHub.on( events.pauseGameplay, this.pauseGameplay, this )
         EventHub.on( events.addGoldForKill, this.addGoldForKill, this )
 

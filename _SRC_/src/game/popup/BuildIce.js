@@ -1,7 +1,7 @@
 import { Container, Text } from "pixi.js"
 import { styles } from "../../app/styles"
 import { closePopup, goldChanged } from "../../app/events"
-import { gameState, iceAdd, iceDurationMax, iceDurationStep, icePowerRateMax, icePowerRateStep, icePrice } from "../state"
+import { gameState, iceAdd, iceDurationStep, icePrice } from "../state"
 import PopupButton from "./PopupButton"
 
 export default class BuildIce extends Container {
@@ -35,35 +35,21 @@ export default class BuildIce extends Container {
 
         sText = `${gameState.iceDuration} -> ${gameState.iceDuration + iceDurationStep}`
         dText = gameState.iceDurationPrice + '$'
+        /*
         if (gameState.iceDuration === iceDurationMax) {
             sText = gameState.iceDuration
             dText = 'Maximum'
         }
+        */
         this.btnUpDuration = new PopupButton(
             "UPGRADE DURATION",
             sText,
             dText,
             this.upDuration.bind(this),
-            () => gameState.gold >= gameState.iceDurationPrice && gameState.iceDuration < iceDurationMax,
-            0, 0
-        )
-        this.addChild(this.btnUpDuration)
-
-        sText = `${gameState.icePowerRate} -> ${gameState.icePowerRate + icePowerRateStep}`
-        dText = gameState.icePowerRatePrice + '$'
-        if (gameState.icePowerRate === icePowerRateMax) {
-            sText = gameState.icePowerRate
-            dText = 'Maximum'
-        }
-        this.btnUpPowerRate = new PopupButton(
-            "UPGRADE POWER RATE",
-            sText,
-            dText,
-            this.upPowerRate.bind(this),
-            () => gameState.gold >= gameState.icePowerRatePrice && gameState.icePowerRate < icePowerRateMax,
+            () => gameState.gold >= gameState.iceDurationPrice,
             240, 0
         )
-        this.addChild(this.btnUpPowerRate)
+        this.addChild(this.btnUpDuration)
 
         this.btnClose = new PopupButton(
             "", "CLOSE", "",
@@ -82,7 +68,6 @@ export default class BuildIce extends Container {
     checkButtons() {
         this.btnAddIce.updateAvailable()
         this.btnUpDuration.updateAvailable()
-        this.btnUpPowerRate.updateAvailable()
     }
 
     addIce() {
@@ -98,37 +83,20 @@ export default class BuildIce extends Container {
 
     upDuration() {
         gameState.gold -= gameState.iceDurationPrice
-        gameState.iceDuration = Math.min(iceDurationMax, gameState.iceDuration + iceDurationStep)
+        gameState.iceDuration = gameState.iceDuration + iceDurationStep
         gameState.iceDurationPrice *= 2
 
         let sText, dText
         sText = `${gameState.iceDuration} -> ${gameState.iceDuration + iceDurationStep}`
         dText = gameState.iceDurationPrice + '$'
+        /*
         if (gameState.iceDuration === iceDurationMax) {
             sText = gameState.iceDuration
             dText = 'Maximum'
         }
+        */
         this.btnUpDuration.setSubtitle(sText)
         this.btnUpDuration.setDescription(dText)
-
-        goldChanged()
-
-        this.checkButtons()
-    }
-
-    upPowerRate() {
-        gameState.gold -= gameState.icePowerRatePrice
-        gameState.icePowerRate = Math.min(icePowerRateMax, gameState.icePowerRate + icePowerRateStep)
-        gameState.icePowerRatePrice *= 2
-        let sText, dText
-        sText = `${gameState.icePowerRate} -> ${gameState.icePowerRate + icePowerRateStep}`
-        dText = gameState.icePowerRatePrice + '$'
-        if (gameState.icePowerRate === icePowerRateMax) {
-            sText = gameState.icePowerRate
-            dText = 'Maximum'
-        }
-        this.btnUpPowerRate.setSubtitle(sText)
-        this.btnUpPowerRate.setDescription(dText)
 
         goldChanged()
 

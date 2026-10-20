@@ -1,6 +1,7 @@
 import { AnimatedSprite, Graphics } from "pixi.js";
 import { tickerAdd, tickerRemove } from "../../../app/application";
 import { atlases } from "../../../app/assets";
+import { updateDragonFuel } from "../../../app/events";
 import { dragonFuelMax, gameState } from "../../state";
 
 const TAU = Math.PI * 2
@@ -8,9 +9,9 @@ const TAU = Math.PI * 2
 const TOWER_OFFSET = 180
 const FLY_SPEED = 0.0004
 const FLY_AWAY_SPEED = 0.08
-const FLY_AWAY_ALPHA_STEP = 0.00009
+const FLY_AWAY_ALPHA_STEP = 0.00012
 
-const FLY_IN_START_DIST = 480    // стартовая дистанция от точки входа вдоль касательной
+const FLY_IN_START_DIST = 600    // стартовая дистанция от точки входа вдоль касательной
 
 const SPARKS_COUNT = 96
 const FIRE_DURATION = 1200
@@ -75,6 +76,7 @@ export default class Dragon extends AnimatedSprite {
         this.updateCircles()
 
         tickerAdd(this)
+        updateDragonFuel(1)
     }
 
     updateCircles(isOnAttack = false) {
@@ -187,10 +189,11 @@ export default class Dragon extends AnimatedSprite {
 
         this.fuel--
         if (this.fuel <= 0) {
+            updateDragonFuel(0)
             this.state = 'fly_away'
-            gameState.dragonsCount -= 1
-            gameState.dragonFuel = dragonFuelMax
             this.onFuelEmpty()
+        } else {
+            updateDragonFuel(this.fuel / gameState.dragonFuel)
         }
     }
 
