@@ -32,10 +32,15 @@ export const events = createEnum([
     'reloadClick',
 
     'setTrapsOnMap',
+    'updateTrapsAvailable',
+    'trapExploded',
+
+    'fogStart',
+    'updateFogAvailable',
+
     'addDragon',
     'updateDragonFuel',
     'dragonIsEmpty',
-    'setEnemyFirstWave',
 
     'addExplosion',
 
@@ -124,6 +129,20 @@ export function arrowOnTarget( data ) {
 export function setTrapsOnMap() {
     EventHub.emit( events.setTrapsOnMap )
 }
+export function updateTrapsAvailable( value ) {
+    EventHub.emit( events.updateTrapsAvailable, value )
+}
+export function trapExploded( slotIndex ) {
+    EventHub.emit( events.trapExploded, slotIndex )
+}
+
+export function fogStart() {
+    EventHub.emit( events.fogStart )
+}
+export function updateFogAvailable( value ) {
+    EventHub.emit( events.updateFogAvailable, value )
+}
+
 export function addDragon() {
     EventHub.emit( events.addDragon )
 }
@@ -132,9 +151,6 @@ export function updateDragonFuel( progress ) {
 }
 export function dragonIsEmpty() {
     EventHub.emit( events.dragonIsEmpty )
-}
-export function setEnemyFirstWave() {
-    EventHub.emit( events.setEnemyFirstWave )
 }
 
 export function addExplosion(data) {

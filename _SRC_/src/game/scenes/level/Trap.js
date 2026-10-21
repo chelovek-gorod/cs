@@ -5,22 +5,23 @@ import { soundPlay } from "../../../app/sound";
 import { createObjectPool } from "../../../utils/pool";
 import Explosion from "../../effects/Explosion";
 import { gameState } from "../../state";
+import { trapExploded } from "../../../app/events"
 
 const TRAP_POOL = createObjectPool(100)
 
-export function createTrap(x, y, particles, enemies) {
+export function createTrap(x, y, particles, enemies, index) {
     let trap = TRAP_POOL.get()
     if (trap) {
-        trap.reset(x, y, particles, enemies)
+        trap.reset(x, y, particles, enemies, index)
     } else {
-        trap = new Trap(x, y, particles, enemies)
+        trap = new Trap(x, y, particles, enemies, index)
         TRAP_POOL.add(trap)
     }
     return trap
 }
 
 class Trap extends AnimatedSprite {
-    constructor(x, y, particles, enemies) {
+    constructor(x, y, particles, enemies, index) {
         super(atlases.trap.animations.burn)
 
         this.anchor.set(0.5)
@@ -31,11 +32,13 @@ class Trap extends AnimatedSprite {
         this.rangeSq = trapRadiusTrigger * trapRadiusTrigger
         this.damageSq = gameState.trapRadius * gameState.trapRadius
 
-        this.reset(x, y, particles, enemies)
+        this.reset(x, y, particles, enemies, index)
     }
   
-    reset(x, y, particles, enemies) {
+    reset(x, y, particles, enemies, index) {
         this.position.set(x, y)
+
+        this.slotIndex = index
 
         this.particles = particles
         this.enemies = enemies
@@ -49,6 +52,8 @@ class Trap extends AnimatedSprite {
     }
 
     setDamage(enemies) {
+        trapExploded(this.slotIndex)
+
         this.parent.addChild(
             new Explosion(this.x, this.y, 'explosion_stone', gameState.trapRadius)
         )

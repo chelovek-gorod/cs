@@ -4,7 +4,6 @@ import { POPUP_TYPE } from "./popupTypes"
 import Popup from "./Popup"
 import Settings from "./Settings"
 import Upgrade from "./Upgrade"
-import Trapping from "./Trapping"
 import BuildMine from "./BuildMine"
 import BuildDragon from "./BuildDragon"
 import BuildMagic from "./BuildMagic"
@@ -20,7 +19,6 @@ function createContent(type, popup) {
     switch (type) {
         case POPUP_TYPE.SETTINGS: return new Settings(popup)
         case POPUP_TYPE.UPGRADE: return new Upgrade(popup)
-        case POPUP_TYPE.TRAPPING: return new Trapping(popup)
 
         case POPUP_TYPE.BUILD_MINE: return new BuildMine(popup)
         case POPUP_TYPE.BUILD_DRAGON: return new BuildDragon(popup)

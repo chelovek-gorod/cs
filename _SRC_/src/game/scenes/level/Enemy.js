@@ -9,6 +9,7 @@ import { createEnemyArrow } from "./EnemyArrow"
 import { createEnemyStone } from "./EnemyStone"
 import { BLOOD_GREEN, BLOOD_BLACK, BLOOD_ICE } from './EnemyBlood'
 import { soundPlay } from "../../../app/sound"
+import { gameState } from "../../state"
 
 const ENEMY_POOL = createObjectPool(100)
 
@@ -304,18 +305,19 @@ class Enemy extends Container {
 
     setDamage(power, isRadial = false) {
         if (this.hp === 0) return
-    
-        const wasIce = this.isIce
 
-        this.hp = Math.max(0, this.hp - power)
+        const wasIce = this.isIce
+        const finalPower = wasIce ? Math.round(power * gameState.iceFreezeDepth) : power
+
+        this.hp = Math.max(0, this.hp - finalPower)
         this.hpBar.setLineScale(this.hp / this.maxHp)
-    
+
         const bloodType = (wasIce && this.hp > 0) ? BLOOD_ICE : this.bloodType
 
         enemyHit({
             x: this.x,
             y: this.y,
-            damage: power,
+            damage: finalPower,
             bloodType,
             isKill: this.hp === 0,
             fromAngle: isRadial ? null : Math.atan2(this.y, this.x),

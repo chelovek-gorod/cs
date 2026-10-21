@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js'
 import { images, music } from '../../../app/assets'
-import { EventHub, events, setEnemyFirstWave, setShootPoint, showPopup } from '../../../app/events'
+import { EventHub, events, setShootPoint } from '../../../app/events'
 import { getLanguage } from '../../localization'
 import { gameplayRunSDK, gameplayStopSDK } from '../../storage'
 import BackgroundTiling from '../../BG/BackgroundTiling'
@@ -31,8 +31,6 @@ export default class LevelScene extends Container {
 
         this.currentLanguage = getLanguage()
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
-
-        this.isArcherReadyToShoot = false
 
         this.bg = new BackgroundTiling(
             gameState.round % 10 === 0 ? images.lava_bg :
@@ -77,13 +75,6 @@ export default class LevelScene extends Container {
         */
         
         setMusicList( getMusic() )
-
-        requestAnimationFrame( () => {
-            if (gameState.trapsCount > 0) showPopup(POPUP_TYPE.TRAPPING)
-            else setEnemyFirstWave()
-        })
-
-        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
     }
 
     screenResize(screenData) {
@@ -114,31 +105,21 @@ export default class LevelScene extends Container {
     }
 
     getPointerDown(data) {
-        if (!this.isArcherReadyToShoot) return
-
         const localPos = this.bg.toLocal(data.global)
         setShootPoint({x: localPos.x, y: localPos.y, type: 'down'})
     }
     getPointerMove(data) {
-        if (!this.isArcherReadyToShoot) return
-
         const localPos = this.bg.toLocal(data.global)
         setShootPoint({x: localPos.x, y: localPos.y, type: 'move'})
     }
     getPointerUp(data) {
         const localPos = this.bg.toLocal(data.global)
-
-        if (!this.isArcherReadyToShoot) this.gameContainer.addTrap(localPos.x, localPos.y)
-        else setShootPoint({x: localPos.x, y: localPos.y, type: 'up'})
+        setShootPoint({x: localPos.x, y: localPos.y, type: 'up'})
     }
 
     addGoldForKill(value) {
         gameState.gold += value
         this.ui.setGoldText()
-    }
-
-    setEnemyFirstWave() {
-        this.isArcherReadyToShoot = true
     }
 
     updateLanguage(lang) {
@@ -167,7 +148,5 @@ export default class LevelScene extends Container {
         EventHub.off( events.updateLanguage, this.updateLanguage, this )
         EventHub.off( events.pauseGameplay, this.pauseGameplay, this )
         EventHub.off( events.addGoldForKill, this.addGoldForKill, this )
-
-        EventHub.off( events.setEnemyFirstWave, this.setEnemyFirstWave, this )
     }
 }

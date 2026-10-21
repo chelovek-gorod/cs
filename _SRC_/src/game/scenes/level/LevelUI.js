@@ -1,8 +1,9 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { atlases } from "../../../app/assets";
-import { addDragon, EventHub, events, iceClick, rageClick, reloadClick, repairTower } from "../../../app/events";
+import { addDragon, EventHub, events, iceClick, rageClick, reloadClick, repairTower,
+    setTrapsOnMap, fogStart } from "../../../app/events";
 import { styles } from "../../../app/styles";
-import { berserkReadyRage, dragonFuelMax, gameState } from "../../state";
+import { berserkReadyRage, gameState } from "../../state";
 import ActionIcon from "./LevelUIIcon";
 
 export default class LevelUI extends Container {
@@ -150,6 +151,8 @@ export default class LevelUI extends Container {
         EventHub.on( events.updateArrows, this.updateArrows, this )
         EventHub.on( events.updateArrowsReload, this.updateArrowsReload, this )
         EventHub.on( events.updateRage, this.updateRage, this )
+        EventHub.on( events.updateTrapsAvailable, this.updateTrapsAvailable, this )
+        EventHub.on( events.updateFogAvailable, this.updateFogAvailable, this )
     }
 
     screenResize(screenData, safeAreaOffsets) {
@@ -259,6 +262,17 @@ export default class LevelUI extends Container {
         }
     }
 
+    updateTrapsAvailable(canPlace) {
+        this.trapsBtn.setActive(canPlace)
+        this.trapsBtn.setText(gameState.trapsCount, true)
+    }
+
+    updateFogAvailable(canStart) {
+        this.fogBtn.setActive(canStart)
+        this.fogBtn.setText(gameState.towerFogCount, true)
+        this.fogBtn.setShine(canStart, 0x00ff00)
+    }
+
     updateArrows(value) {
         this.archerText.text = `${value}/${gameState.arrowsCount}`
     
@@ -314,11 +328,14 @@ export default class LevelUI extends Container {
     }
 
     fogClick() {
-
+        if (gameState.towerFogCount < 1) return
+        fogStart()
     }
 
     trapsClick() {
+        if (gameState.trapsCount < 1) return
 
+        setTrapsOnMap()
     }
 
     rageClick() {
@@ -349,5 +366,7 @@ export default class LevelUI extends Container {
         EventHub.off( events.updateArrows, this.updateArrows, this )
         EventHub.off( events.updateArrowsReload, this.updateArrowsReload, this )
         EventHub.off( events.updateRage, this.updateRage, this )
+        EventHub.off( events.updateTrapsAvailable, this.updateTrapsAvailable, this )
+        EventHub.off( events.updateFogAvailable, this.updateFogAvailable, this )
     }
 }

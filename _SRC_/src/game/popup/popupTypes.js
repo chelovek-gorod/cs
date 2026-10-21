@@ -9,7 +9,6 @@ export const POPUP_TYPE = createEnum([
     'WIN',
     'LOSE',
     'UPGRADE',
-    'TRAPPING',
 
     'BUILD_MINE',
     'BUILD_DRAGON',

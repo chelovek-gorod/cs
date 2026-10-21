@@ -225,8 +225,8 @@ export default class Upgrade extends Container {
                 gameState.arrowFlyRate += arrowFlyRateStep;
             break
 
-            case UPGRADE_TYPE.berserkShoots:
-                gameState.berserkShoots += berserkShootStep;
+            case UPGRADE_TYPE.berserkStartRage:
+                gameState.berserkStartRage += berserkStartRageStep;
             break
             case UPGRADE_TYPE.berserkPowerRate:
                 gameState.berserkPowerRate += berserkPowerRateStep;

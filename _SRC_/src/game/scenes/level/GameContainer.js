@@ -1,10 +1,9 @@
 import { Container, Graphics, Text } from "pixi.js"
 import { kill, tickerAdd, tickerRemove } from "../../../app/application"
 import { sounds } from "../../../app/assets"
-import { addGoldForKill, EventHub, events, setEnemyFirstWave, showPopup, startScene, dragonIsEmpty } from "../../../app/events"
+import { addGoldForKill, EventHub, events, showPopup, startScene, dragonIsEmpty,
+    updateTrapsAvailable, updateFogAvailable } from "../../../app/events"
 import { soundPlay } from "../../../app/sound"
-import { styles } from "../../../app/styles"
-import { removeCursorPointer, setCursorPointer } from "../../../utils/functions"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
 import { gameState, goldForSavingHp } from "../../state"
@@ -20,10 +19,27 @@ import Tower from "./Tower"
 import TowerStones from "./TowerStones"
 import { createTrap } from "./Trap"
 import Trees from "./Trees"
+import TowerFog from "./TowerFog"
 
 const SIZE = 720
 const MAX_SCALE = 1.3
 const RESULT_POPUP_TIMEOUT = 1800
+
+const TRAP_SLOTS_SMALL = 12
+const TRAP_SLOTS_BIG = 18
+const TRAP_SLOTS_TOTAL = TRAP_SLOTS_SMALL + TRAP_SLOTS_BIG
+const TRAP_RADIUS_SMALL = 150
+const TRAP_RADIUS_BIG = 230
+
+function getTrapSlotPosition(index) {
+    if (index < TRAP_SLOTS_SMALL) {
+        const angle = (Math.PI * 2 * index) / TRAP_SLOTS_SMALL
+        return { x: Math.cos(angle) * TRAP_RADIUS_SMALL, y: Math.sin(angle) * TRAP_RADIUS_SMALL }
+    }
+    const i = index - TRAP_SLOTS_SMALL
+    const angle = (Math.PI * 2 * i) / TRAP_SLOTS_BIG
+    return { x: Math.cos(angle) * TRAP_RADIUS_BIG, y: Math.sin(angle) * TRAP_RADIUS_BIG }
+}
 
 export default class GameContainer extends Container {
     constructor() {
@@ -37,7 +53,7 @@ export default class GameContainer extends Container {
 
         this.traps = new Container()
         this.addChild(this.traps)
-        this.trapsButton = null
+        this.trapSlots = new Array(TRAP_SLOTS_TOTAL).fill(null)
 
         this.chests = new ChestsContainer()
         this.addChild(this.chests)
@@ -58,6 +74,10 @@ export default class GameContainer extends Container {
         requestAnimationFrame(() => this.towerStones.warmup())
 
         this.enemies = new Container()
+
+        this.fog = new TowerFog(this.enemies, this.onFogFinished.bind(this))
+        this.addChild(this.fog)
+
         this.addChild(this.enemies)
 
         this.addChild(this.blood.flyContainer)
@@ -111,8 +131,9 @@ export default class GameContainer extends Container {
         EventHub.on(events.arrowOnTarget, this.arrowOnTarget, this)
         EventHub.on(events.setTrapsOnMap, this.setTrapsOnMap, this)
         EventHub.on(events.addDragon, this.addDragon, this)
-        EventHub.on(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
         EventHub.on(events.addExplosion, this.addExplosion, this)
+        EventHub.on(events.trapExploded, this.onTrapExploded, this)
+        EventHub.on(events.fogStart, this.startFog, this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
@@ -138,51 +159,74 @@ export default class GameContainer extends Container {
     }
 
     setTrapsOnMap() {
-        this.trapsButton = new Container()
-        this.addChild(this.trapsButton)
-
-        const circle = new Graphics()
-        circle.circle(0, 0, 100)
-        circle.fill(0xff6600)
-        circle.stroke({width: 2, color: 0x000000})
-        this.trapsButton.addChild(circle)
-
-        this.trapsButton.text = new Text({text: `traps: ${gameState.trapsCount}`, style: styles.loading})
-        this.trapsButton.text.anchor.set(0.5)
-        this.trapsButton.text.scale.set(0.5)
-        this.trapsButton.text.position.set(0.5, 20)
-        this.trapsButton.addChild(this.trapsButton.text)
-
-        const exitText = new Text({text: `START ROUND`, style: styles.loading})
-        exitText.anchor.set(0.5)
-        exitText.scale.set(0.5)
-        exitText.position.set(0.5, -20)
-        this.trapsButton.addChild(exitText)
-
-        setCursorPointer(this.trapsButton)
-        this.trapsButton.on('pointerup', this.getTrapButtonClick, this)
+        if (gameState.trapsCount <= 0) return
+    
+        const freeSmall = []
+        const freeBig = []
+        for (let i = 0; i < TRAP_SLOTS_TOTAL; i++) {
+            if (this.trapSlots[i] !== null) continue
+            if (i < TRAP_SLOTS_SMALL) freeSmall.push(i)
+            else freeBig.push(i)
+        }
+    
+        let freeSlots
+        let baseIndex
+        let N
+        if (freeSmall.length > 0) {
+            freeSlots = freeSmall
+            baseIndex = 0
+            N = TRAP_SLOTS_SMALL
+        } else if (freeBig.length > 0) {
+            freeSlots = freeBig
+            baseIndex = TRAP_SLOTS_SMALL
+            N = TRAP_SLOTS_BIG
+        } else {
+            return
+        }
+    
+        const count = Math.min(6, freeSlots.length, gameState.trapsCount)
+        if (count <= 0) return
+    
+        let placed = 0
+    
+        if (freeSlots.length <= count) {
+            for (const index of freeSlots) {
+                this.placeTrapAtSlot(index)
+                placed++
+            }
+        } else {
+            const step = N / 6
+            const seed = freeSlots[Math.floor(Math.random() * freeSlots.length)] - baseIndex
+    
+            outer: for (let offset = 0; offset < step; offset++) {
+                for (let i = 0; i < 6; i++) {
+                    if (placed >= count) break outer
+                    const localPos = (seed + offset + i * step) % N
+                    const index = baseIndex + localPos
+                    if (this.trapSlots[index] !== null) continue
+                    this.placeTrapAtSlot(index)
+                    placed++
+                }
+            }
+        }
+    
+        gameState.trapsCount -= placed
+        this.emitTrapsAvailable()
     }
-    getTrapButtonClick() {
-        setEnemyFirstWave()
+    
+    placeTrapAtSlot(index) {
+        const pos = getTrapSlotPosition(index)
+        const trap = createTrap(pos.x, pos.y, null, this.enemies, index)
+        this.traps.addChild(trap)
+        this.trapSlots[index] = trap
     }
-    removeTrapsButton() {
-        if (this.trapsButton === null) return
-
-        removeCursorPointer(this.trapsButton)
-        this.trapsButton.off('pointerup', this.getTrapButtonClick, this)
-        this.removeChild(this.trapsButton)
-        this.trapsButton.destroy({children: true})
-        this.trapsButton = null
+    emitTrapsAvailable() {
+        const hasFreeSlot = this.trapSlots.some(slot => slot === null)
+        updateTrapsAvailable(gameState.trapsCount > 0 && hasFreeSlot)
     }
-    setEnemyFirstWave() {
-        if (this.trapsButton) this.removeTrapsButton()
-    }
-    addTrap(x, y) {
-        this.traps.addChild( createTrap(x, y, null, this.enemies) )
-        gameState.trapsCount -= 1
-        this.trapsButton.text.text = `traps: ${gameState.trapsCount}`
-        if (gameState.trapsCount > 0) return
-        else setEnemyFirstWave()
+    onTrapExploded(slotIndex) {
+        this.trapSlots[slotIndex] = null
+        this.emitTrapsAvailable()
     }
 
     addDragon() {
@@ -201,6 +245,17 @@ export default class GameContainer extends Container {
     onDragonFuelEmpty() {
         this.dragon = null
         dragonIsEmpty()
+    }
+
+    startFog() {
+        if (gameState.towerFogCount <= 0) return
+        gameState.towerFogCount--
+        this.fog.start()
+        updateFogAvailable(false)
+    }
+    
+    onFogFinished() {
+        updateFogAvailable(gameState.towerFogCount > 0)
     }
 
     addExplosion(data) {
@@ -308,6 +363,8 @@ export default class GameContainer extends Container {
     }
 
     handleRoundLose() {
+        gameState.trapsCount += this.traps.children.length
+
         if (this.dragon) gameState.dragonsCount += 1
         this.parent.enemiesSpawner.kill()
         startScene(SCENE_NAME.Menu)
@@ -343,14 +400,13 @@ export default class GameContainer extends Container {
             this.dragonFire.kill()
             this.dragonFire = null
         }
-        
-        if (this.trapsButton) this.removeTrapsButton()
 
         EventHub.off(events.arrowOnTarget, this.arrowOnTarget, this)
         EventHub.off(events.setTrapsOnMap, this.setTrapsOnMap, this)
         EventHub.off(events.addDragon, this.addDragon, this)
-        EventHub.off(events.setEnemyFirstWave, this.setEnemyFirstWave, this)
         EventHub.off(events.addExplosion, this.addExplosion, this)
+        EventHub.off(events.trapExploded, this.onTrapExploded, this)
+        EventHub.off(events.fogStart, this.startFog, this)
 
         if (this.blood) {
             this.blood.kill()
@@ -360,6 +416,11 @@ export default class GameContainer extends Container {
         if (this.smoke) {
             this.smoke.kill()
             this.smoke = null
+        }
+
+        if (this.fog) {
+            this.fog.kill()
+            this.fog = null
         }
 
         if (this.towerStones) {

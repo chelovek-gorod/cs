@@ -66,9 +66,8 @@ export default class EnemySpawner {
 
         this.isActive = true
 
-        EventHub.on( events.setEnemyFirstWave, this.startEnemyFirstWave, this )
+        tickerAdd(this)
     }
-    startEnemyFirstWave() { tickerAdd(this) }
 
     screenResize(screenData, scale) {
         this.isLandscape = screenData.isLandscape
@@ -252,9 +251,6 @@ export default class EnemySpawner {
     }
 
     kill() {
-        console.log('EnemySpawner.kill()')
-        EventHub.on( events.setEnemyFirstWave, this.startEnemyFirstWave, this )
-
         this.isActive = false
         tickerRemove(this)
         if (this.spawnQueue) this.spawnQueue.length = 0

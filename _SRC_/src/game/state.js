@@ -8,8 +8,8 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 0,
-        round: 1,
+        gold: 10000,
+        round: 24,
         
         towerHp: 100,
         towerHpPrice: 5,
@@ -36,6 +36,8 @@ function initState() {
         iceCount: 0,
         iceDuration: 4000,
         iceDurationPrice: 25,
+        iceFreezeDepth: 1.0,
+        iceFreezeDepthPrice: 25,
 
         trapsCount: 0,
         trapPower: 75, // 100, 125, 150, 175, 200
@@ -100,6 +102,8 @@ export const mineMaxGoldMax = 300
 export const icePrice = 50
 export const iceAdd = 12
 export const iceDurationStep = 500
+export const iceFreezeDepthStep = 0.2
+export const iceFreezeDepthMax = 2.0
 
 export const trapPrice = 25
 export const trapsAdd = 6
