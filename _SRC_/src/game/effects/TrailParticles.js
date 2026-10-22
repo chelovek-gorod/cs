@@ -65,7 +65,7 @@ export default class TrailParticles {
                 alpha: true,
                 color: true,
             },
-            blendMode: 'add',
+            //blendMode: 'add',
         })
 
         // Слой ядер (верхний, обычный blend)

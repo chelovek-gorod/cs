@@ -49,7 +49,7 @@ export default class BuildMine extends Container {
         sText = `${gameState.mineMaxGold} -> ${gameState.mineMaxGold + mineMaxGoldStep}`
         dText = gameState.mineMaxGoldPrice + '$'
         if (gameState.mineMaxGold === mineMaxGoldMax) {
-            sText = 'v'
+            sText = gameState.mineMaxGold
             dText = 'Maximum'
         }
         this.btnUpMaxGold = new PopupButton(
@@ -123,7 +123,7 @@ export default class BuildMine extends Container {
         sText = `${restMinutesNow}min. ${restSecondsNow}sec. -> ${restMinutesThen}min. ${restSecondsThen}sec.`
         dText = gameState.mineTimeoutPrice + '$'
         if (gameState.mineTimeout === mineTimeoutMax) {
-            sText = 'v'
+            sText = `${restMinutesNow}min. ${restSecondsNow}sec.`
             dText = 'Maximum'
         }
         this.btnUpTimeout.setSubtitle(sText)
@@ -142,7 +142,7 @@ export default class BuildMine extends Container {
         sText = `${gameState.mineMaxGold} -> ${gameState.mineMaxGold + mineMaxGoldStep}`
         dText = gameState.mineMaxGoldPrice + '$'
         if (gameState.mineMaxGold === mineMaxGoldMax) {
-            sText = 'v'
+            sText = gameState.mineMaxGold
             dText = 'Maximum'
         }
         this.btnUpMaxGold.setSubtitle(sText)

@@ -268,6 +268,7 @@ function loadBgMusic() {
     if (musicHowl) {
         musicHowl.off('load')
         musicHowl.off('loaderror')
+        musicHowl.off('end')
         musicHowl.stop()
         musicHowl.unload()
         musicHowl = null
@@ -282,6 +283,8 @@ function loadBgMusic() {
         html5: false,
         volume: 0 // Начальный volume 0 для fade in
     })
+
+    if (!isSingleTrack) musicHowl.once('end', nextBgMusic)
 
     musicHowl.on('load', () => {
         if (token !== musicToken) {

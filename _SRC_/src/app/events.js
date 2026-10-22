@@ -48,6 +48,8 @@ export const events = createEnum([
 
     'enemyHit',
     'addRage',
+
+    'trailEmit',
 ])
 
 export function screenResize( data ) {
@@ -166,5 +168,9 @@ export function enemyHit( data ) {
 }
 
 export function addRage( value ) {
-    EventHub.emit( events.enemyHit, value )
+    EventHub.emit( events.addRage, value )
+}
+
+export function trailEmit( data ) {
+    EventHub.emit( events.trailEmit, data )
 }

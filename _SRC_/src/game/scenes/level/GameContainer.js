@@ -20,6 +20,7 @@ import TowerStones from "./TowerStones"
 import { createTrap } from "./Trap"
 import Trees from "./Trees"
 import TowerFog from "./TowerFog"
+import TrailEmitter from "./TrailEmitter"
 
 const SIZE = 720
 const MAX_SCALE = 1.3
@@ -116,6 +117,9 @@ export default class GameContainer extends Container {
         this.addChild(this.arrows)
         this.addChild(this.stones)
 
+        this.trail = new TrailEmitter()
+        this.addChild(this.trail)
+
         this.dragon = null
         this.dragonFire = new DragonFire()
         this.addChild(this.dragonFire)
@@ -134,6 +138,7 @@ export default class GameContainer extends Container {
         EventHub.on(events.addExplosion, this.addExplosion, this)
         EventHub.on(events.trapExploded, this.onTrapExploded, this)
         EventHub.on(events.fogStart, this.startFog, this)
+        EventHub.on(events.trailEmit, this.onTrailEmit, this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
@@ -150,6 +155,8 @@ export default class GameContainer extends Container {
         }
 
         this.scale.set(scale)
+
+        this.chests.screenResize(screenData, scale)
 
         this.trees.screenResize(screenData)
 
@@ -271,6 +278,13 @@ export default class GameContainer extends Container {
         this.explosions.addChild(explosion)
     }
 
+    onTrailEmit(data) {
+        this.trail.spawn(
+            data.x, data.y, data.vx, data.vy,
+            data.tint, data.scale, data.alphaStart, data.alphaDecay
+        )
+    }
+
     arrowOnTarget(data) {
         let nearestIndex = -1
         let nearestSqDist = Infinity
@@ -350,6 +364,8 @@ export default class GameContainer extends Container {
     }
 
     handleRoundWin() {
+        this.chests.stopSpawning()
+
         if (this.tower.hp > 9) {
             const extraGold = Math.floor(this.tower.hp * goldForSavingHp)
             this.parent.flyTexts.addChild(new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0))
@@ -371,6 +387,8 @@ export default class GameContainer extends Container {
     }
 
     tick(deltaMs) {
+        if (this.chests.children.length > 0) return
+        
         this.resultPopupTimer -= deltaMs
         if (this.resultPopupTimer > 0) return
 
@@ -407,6 +425,7 @@ export default class GameContainer extends Container {
         EventHub.off(events.addExplosion, this.addExplosion, this)
         EventHub.off(events.trapExploded, this.onTrapExploded, this)
         EventHub.off(events.fogStart, this.startFog, this)
+        EventHub.off(events.trailEmit, this.onTrailEmit, this)
 
         if (this.blood) {
             this.blood.kill()
@@ -426,6 +445,11 @@ export default class GameContainer extends Container {
         if (this.towerStones) {
             this.towerStones.kill()
             this.towerStones = null
+        }
+
+        if (this.trail) {
+            this.trail.kill()
+            this.trail = null
         }
 
         kill(this.deadEnemies)

@@ -31,15 +31,29 @@ class Chest extends AnimatedSprite {
         this.state = STATE.SHOW
     }
 
-    set(minOffset, maxOffset) {
+    set(minOffset, maxOffset, boundHalfW, boundHalfH) {
         const point = getRandomPointInRing(minOffset, maxOffset)
-        this.position.set(point.x, point.y)
+        let px = point.x
+        let py = point.y
+        let isInside = Math.abs(px) <= boundHalfW && Math.abs(py) <= boundHalfH
+
+        if (!isInside) {
+            const angle = Math.atan2(py, px)
+            px = Math.cos(angle) * minOffset
+            py = Math.sin(angle) * minOffset
+            isInside = Math.abs(px) <= boundHalfW && Math.abs(py) <= boundHalfH
+        }
+
+        if (!isInside) return false
+
+        this.position.set(px, py)
         this.openDelay = OPEN_DELAY
         this.state = STATE.SHOW
         this.textures = atlases.chest.animations.open
         this.gotoAndStop(0)
         this.alpha = 0
         tickerAdd(this)
+        return true
     }
 
     release() {
@@ -93,10 +107,34 @@ export default class ChestsContainer extends Container {
         this.time = CHECK_CHEST_TIMEOUT * 0.5 + Math.floor(Math.random() * CHECK_CHEST_TIMEOUT * 0.5)
         this.chest = new Chest()
 
+        // макс. половинные габариты спрайта по всем кадрам open-анимации
+        let maxW = 0
+        let maxH = 0
+        const frames = atlases.chest.animations.open
+        for (let i = 0; i < frames.length; i++) {
+            if (frames[i].width > maxW) maxW = frames[i].width
+            if (frames[i].height > maxH) maxH = frames[i].height
+        }
+        this.chestHalfW = maxW * 0.5
+        this.chestHalfH = maxH * 0.5
+
         this.minOffset = MIN_OFFSET
         this.maxOffset = MAX_OFFSET
+        this.boundHalfW = 0
+        this.boundHalfH = 0
+        this.canSpawn = false   // до первого screenResize
 
         tickerAdd(this)
+    }
+
+    screenResize(screenData, scale) {
+        this.boundHalfW = screenData.width / (2 * scale) - this.chestHalfW
+        this.boundHalfH = screenData.height / (2 * scale) - this.chestHalfH
+        this.canSpawn = this.boundHalfW > 0 && this.boundHalfH > 0
+    }
+
+    stopSpawning() {
+        this.canSpawn = false
     }
 
     checkShut(x, y) {
@@ -107,8 +145,12 @@ export default class ChestsContainer extends Container {
         const sqDist = dx * dx + dy * dy
         const isOnTarget = sqDist < CHEST_HIT_SQ
 
-        if (isOnTarget) this.chest.release()
-        return getChestReward()
+        let reward = 0
+        if (isOnTarget) {
+            this.chest.release()
+            reward = getChestReward()
+        }
+        return reward
     }
 
     tick(deltaMs) {
@@ -116,9 +158,10 @@ export default class ChestsContainer extends Container {
         if (this.time > 0) return
 
         this.time += CHECK_CHEST_TIMEOUT
-        if (this.children.length === 0) {
-            this.chest.set(this.minOffset, this.maxOffset)
-            this.addChild(this.chest)
+        if (this.children.length === 0 && this.canSpawn) {
+            if (this.chest.set(this.minOffset, this.maxOffset, this.boundHalfW, this.boundHalfH)) {
+                this.addChild(this.chest)
+            }
         }
     }
 

@@ -124,7 +124,7 @@ export default class Upgrade extends Container {
             const btn = buttons[i]
 
             if (!type) {
-                this.removeChild(bth)
+                this.removeChild(btn)
                 btn.destroy({children: true})
                 continue
             }

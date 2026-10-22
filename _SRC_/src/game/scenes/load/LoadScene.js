@@ -72,6 +72,8 @@ export default class LoadScene extends Container {
 
         this.isLoadingDone = false
 
+        this.screenFreeSide = 0
+
         if (isFirstLoading) preloadFonts(this.setText.bind(this))
         else this.setText()
     }
