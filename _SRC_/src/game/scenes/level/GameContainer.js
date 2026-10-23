@@ -29,8 +29,8 @@ const RESULT_POPUP_TIMEOUT = 1800
 const TRAP_SLOTS_SMALL = 12
 const TRAP_SLOTS_BIG = 18
 const TRAP_SLOTS_TOTAL = TRAP_SLOTS_SMALL + TRAP_SLOTS_BIG
-const TRAP_RADIUS_SMALL = 150
-const TRAP_RADIUS_BIG = 230
+const TRAP_RADIUS_SMALL = 130
+const TRAP_RADIUS_BIG = 190
 
 function getTrapSlotPosition(index) {
     if (index < TRAP_SLOTS_SMALL) {

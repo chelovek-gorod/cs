@@ -64,6 +64,7 @@ export const atlases = {
     enemy_bomber: 'enemy_bomber.json',
     enemy_rider: 'enemy_rider.json',
     enemy_tank: 'enemy_tank.json',
+    enemy_voodoo: 'enemy_voodoo.json',
     enemy_boss: 'enemy_boss.json',
     trap: 'trap.json',
 }

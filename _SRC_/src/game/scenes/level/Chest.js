@@ -13,7 +13,7 @@ const ALPHA_STEP = 0.003
 const OPEN_DELAY = 900
 const STATE = createEnum(['SHOW','OPEN','HIDE'])
 
-const chestRewards = [5, 7, 10, 7, 5, 5]
+const chestRewards = [5, 7, 10, 5, 7, 10, 12, 5, 7, 10, 12, 15, 5, 7, 10, 12, 15, 20, 5, 7, 10, 12, 15, 20, 25]
 let chestRewardIndex = Math.floor( Math.random() * chestRewards.length )
 function getChestReward() {
     return chestRewards[ ++chestRewardIndex % chestRewards.length ]

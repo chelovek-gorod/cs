@@ -8,17 +8,17 @@ export let isLeaderboardAvailable = false
 
 function initState() {
     return {
-        gold: 1,
-        round: 0,
+        gold: 0,
+        round: 1,
         
         towerHp: 100,
-        towerHpPrice: 5,
+        towerHpPrice: 25,
         towerFogCount: 0,
-        towerFogPower: 25,
-        towerFogUpgradePrice: 10,
+        towerFogPower: 15,
+        towerFogUpgradePrice: 30,
         towerRepairsCount: 0,
         towerRepairHp: 25,
-        towerRepairUpgradePrice: 5,
+        towerRepairUpgradePrice: 15,
 
         arrowsCount: 10,
         arrowPower: 10,
@@ -29,50 +29,50 @@ function initState() {
         berserkStartRage: 0,
 
         mineTimeout: 2.25 * 60 * 1000, // 2 minutes 15 seconds
-        mineTimeoutPrice: 100,
+        mineTimeoutPrice: 25,
         mineMaxGold: 100,
         mineMaxGoldPrice: 50,
 
         iceCount: 0,
         iceDuration: 4000,
-        iceDurationPrice: 25,
+        iceDurationPrice: 35,
         iceFreezeDepth: 1.0,
         iceFreezeDepthPrice: 25,
 
         trapsCount: 0,
         trapPower: 75, // 100, 125, 150, 175, 200
-        trapPowerPrice: 10,
-        trapRadius: 100, // activateRadius = trapRadius * 0.5
-        trapRadiusPrice: 20,
+        trapPowerPrice: 25,
+        trapRadius: 60, // activateRadius = trapRadius * 0.5
+        trapRadiusPrice: 35,
 
         dragonsCount: 0,
         dragonPrice: 50,
         dragonFuel: 60,
-        dragonFuelPrice: 25,
+        dragonFuelPrice: 20,
         dragonPower: 5,
-        dragonPowerPrice: 20,
+        dragonPowerPrice: 25,
 
         wizardsCount: 0,
         wizardPrice: 50,
         wizardPower: 20,
         wizardPowerPrice: 10,
         wizardTimeout: 4000,
-        wizardTimeoutPrice: 10,
-        wizardDistance: 240,
-        wizardDistancePrice: 15,
+        wizardTimeoutPrice: 15,
+        wizardDistance: 200,
+        wizardDistancePrice: 20,
         wizardTargets: 1,
-        wizardTargetPrice: 15,
+        wizardTargetPrice: 25,
 
         catapultsCount: 0,
         catapultPrice: 80,
         catapultPower: 30,
         catapultPowerPrice: 20,
         catapultTimeout: 6000,
-        catapultTimeoutPrice: 25,
-        catapultDistance: 300,
+        catapultTimeoutPrice: 40,
+        catapultDistance: 250,
         catapultDistancePrice: 30,
         catapultRadius: 60,
-        catapultRadiusPrice: 40,
+        catapultRadiusPrice: 50,
     }
 }
 
@@ -85,11 +85,11 @@ export const adGoldBonus = 12
 
 export const towerHPStep = 20
 export const towerHPMax = 200
-export const towerFogPowerStep = 5
-export const towerFogPowerMax = 50
+export const towerFogPowerStep = 3
+export const towerFogPowerMax = 30
 export const towerFogReloadStep = 0.06
 export const towerFogReloadDone = 100
-export const towerFogPrice = 120
+export const towerFogPrice = 40
 export const towerRepairStep = 5
 export const towerRepairMax = 50
 export const towerRepairPrice = 75
@@ -99,18 +99,18 @@ export const mineTimeoutMax = 1 * 60 * 1000 // 1 minutes
 export const mineMaxGoldStep = 50
 export const mineMaxGoldMax = 300
 
-export const icePrice = 50
+export const icePrice = 40
 export const iceAdd = 12
 export const iceDurationStep = 500
 export const iceFreezeDepthStep = 0.2
 export const iceFreezeDepthMax = 2.0
 
-export const trapPrice = 25
+export const trapPrice = 30
 export const trapsAdd = 6
 export const trapPowerStep = 25
 export const trapPowerMax = 200
-export const trapRadiusStep = 25
-export const trapRadiusMax = 200
+export const trapRadiusStep = 12
+export const trapRadiusMax = 120
 
 export const dragonPrice = 100
 export const dragonFuelStep = 12
@@ -139,8 +139,8 @@ export const catapultDamageRadiusStep = 14
 export const catapultDamageRadiusMax = 120
 export const catapultShootTimeoutStep = 600
 export const catapultShootTimeoutMax = 3000
-export const catapultShootDistanceStep = 60
-export const catapultShootDistanceMax = 600
+export const catapultShootDistanceStep = 10
+export const catapultShootDistanceMax = 300
 
 export const wizardsCountMax = 3
 export const wizardBasePrice = 50
@@ -149,8 +149,8 @@ export const wizardTargetsCountMax = 6 // main + 5 additional targets
 export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
 export const wizardShootTimeoutStep = 400
 export const wizardShootTimeoutMax = 2000
-export const wizardShootDistanceStep = 48
-export const wizardShootDistanceMax = 480
+export const wizardShootDistanceStep = 10
+export const wizardShootDistanceMax = 250
 
 export function getHelperPrice(currentPrice) {
     return currentPrice * 2 ** (wizardsCount + catapultsCount)
