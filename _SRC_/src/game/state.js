@@ -14,7 +14,7 @@ function initState() {
         towerHp: 100,
         towerHpPrice: 25,
         towerFogCount: 0,
-        towerFogPower: 15,
+        towerFogPower: 5,
         towerFogUpgradePrice: 30,
         towerRepairsCount: 0,
         towerRepairHp: 25,
@@ -58,7 +58,7 @@ function initState() {
         wizardPowerPrice: 10,
         wizardTimeout: 4000,
         wizardTimeoutPrice: 15,
-        wizardDistance: 200,
+        wizardDistance: 240,
         wizardDistancePrice: 20,
         wizardTargets: 1,
         wizardTargetPrice: 25,
@@ -66,13 +66,13 @@ function initState() {
         catapultsCount: 0,
         catapultPrice: 80,
         catapultPower: 30,
-        catapultPowerPrice: 20,
+        catapultPowerPrice: 30,
         catapultTimeout: 6000,
-        catapultTimeoutPrice: 40,
-        catapultDistance: 250,
-        catapultDistancePrice: 30,
+        catapultTimeoutPrice: 20,
+        catapultDistance: 300,
+        catapultDistancePrice: 10,
         catapultRadius: 60,
-        catapultRadiusPrice: 50,
+        catapultRadiusPrice: 40,
     }
 }
 
@@ -85,8 +85,8 @@ export const adGoldBonus = 12
 
 export const towerHPStep = 20
 export const towerHPMax = 200
-export const towerFogPowerStep = 3
-export const towerFogPowerMax = 30
+export const towerFogPowerStep = 1
+export const towerFogPowerMax = 10
 export const towerFogReloadStep = 0.06
 export const towerFogReloadDone = 100
 export const towerFogPrice = 40
@@ -121,10 +121,10 @@ export const dragonPowerMax = 20
 export const arrowsStep = 2
 export const arrowsMax = 20
 export const arrowPowerStep = 1
-export const arrowShootTimeoutStep = 150
-export const arrowShootTimeoutMax = 250
-export const arrowReloadTimeoutStep = 300
-export const arrowReloadTimeoutMax = 1500
+export const arrowShootTimeoutStep = 120
+export const arrowShootTimeoutMax = 400
+export const arrowReloadTimeoutStep = 360
+export const arrowReloadTimeoutMax = 1200
 export const arrowFlyRateStep = 0.016
 export const arrowFlyRateMax = 0.10
 
@@ -139,8 +139,8 @@ export const catapultDamageRadiusStep = 14
 export const catapultDamageRadiusMax = 120
 export const catapultShootTimeoutStep = 600
 export const catapultShootTimeoutMax = 3000
-export const catapultShootDistanceStep = 10
-export const catapultShootDistanceMax = 300
+export const catapultShootDistanceStep = 12
+export const catapultShootDistanceMax = 360
 
 export const wizardsCountMax = 3
 export const wizardBasePrice = 50
@@ -149,8 +149,8 @@ export const wizardTargetsCountMax = 6 // main + 5 additional targets
 export const wizardTargetRadiusRate = 0.25 // цепь бьет не больше чем на 25% расстояния от wizardShootDistance
 export const wizardShootTimeoutStep = 400
 export const wizardShootTimeoutMax = 2000
-export const wizardShootDistanceStep = 10
-export const wizardShootDistanceMax = 250
+export const wizardShootDistanceStep = 16
+export const wizardShootDistanceMax = 320
 
 export function getHelperPrice(currentPrice) {
     return currentPrice * 2 ** (wizardsCount + catapultsCount)

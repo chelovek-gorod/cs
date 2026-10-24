@@ -15,7 +15,7 @@ export default class LevelUI extends Container {
 
         // tower HP
         this.tower = new Container()
-        this.tower.position.set(0, -108)
+        this.tower.position.set(0, -50)
         this.addChild(this.tower)
 
         this.towerHp = new ActionIcon(
@@ -37,7 +37,7 @@ export default class LevelUI extends Container {
 
         // archer info
         this.archer = new Container()
-        this.archer.position.set(0, 44)
+        this.archer.position.set(0, 40)
         this.addChild(this.archer)
 
         this.archerInfo = new ActionIcon(

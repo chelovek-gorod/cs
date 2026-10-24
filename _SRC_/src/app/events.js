@@ -43,6 +43,7 @@ export const events = createEnum([
     'dragonIsEmpty',
 
     'addExplosion',
+    'addEnemySmoke',
 
     'goldChanged',
 
@@ -50,6 +51,7 @@ export const events = createEnum([
     'addRage',
 
     'trailEmit',
+    'addVoodooFX',
 ])
 
 export function screenResize( data ) {
@@ -158,6 +160,9 @@ export function dragonIsEmpty() {
 export function addExplosion(data) {
     EventHub.emit( events.addExplosion, data )
 }
+export function addEnemySmoke( data ) {
+    EventHub.emit( events.addEnemySmoke, data )
+}
 
 export function goldChanged() {
     EventHub.emit( events.goldChanged )
@@ -173,4 +178,8 @@ export function addRage( value ) {
 
 export function trailEmit( data ) {
     EventHub.emit( events.trailEmit, data )
+}
+
+export function addVoodooFX( data ) {
+    EventHub.emit( events.addVoodooFX, data )
 }

@@ -3,19 +3,26 @@ import { tickerAdd, tickerRemove } from "../../../app/application"
 import { atlases } from "../../../app/assets"
 import { gameState } from "../../state"
 
-const POOL_SIZE = 48
-const SPAWN_INTERVAL = 50
-const FOG_DURATION = 5000
-const RING_RADIUS = 128
-const ANIMATION_SPEED = 0.3
+const POOL_SIZE = 128
 const TINT = 0x66ff44
 const TAU = Math.PI * 2
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
+const ANIMATION_SPEED = 0.5
 
-const INNER_RADIUS = 96
-const DAMAGE_RADIUS = 160
-const DAMAGE_RADIUS_SQ = DAMAGE_RADIUS * DAMAGE_RADIUS
-const DAMAGE_INTERVAL = 500
+// кольцо
+const RING_WIDTH = 64
+const START_RADIUS_MIN = 12
+const MAX_RING_RADIUS = 256
+const RING_SPEED = 0.06   // px/ms
+
+// плотность тумана
+const SPAWN_INTERVAL = 12  // мс, базовый интервал при минимальном кольце
+
+// урон
+const DAMAGE_INTERVAL = 120
+
+// площадь кольца при минимальном радиусе (π сокращается в ratio)
+const AREA_MIN = (START_RADIUS_MIN + RING_WIDTH) ** 2 - START_RADIUS_MIN ** 2
 
 export default class TowerFog extends Container {
     constructor(enemiesContainer, onFinished) {
@@ -25,21 +32,19 @@ export default class TowerFog extends Container {
         this.enemiesContainer = enemiesContainer
         this.isNotified = false
 
+        this.innerRingRadius = START_RADIUS_MIN
+
         this.rings = new Graphics()
-        this.rings.circle(0, 0, INNER_RADIUS)
-        this.rings.stroke({ width: 2, color: 0x66ff44, alpha: 0.4 })
-        this.rings.circle(0, 0, DAMAGE_RADIUS)
-        this.rings.stroke({ width: 2, color: 0x66ff44, alpha: 0.4 })
         this.rings.visible = false
         this.addChild(this.rings)
+        this.drawRings()
 
         this.pool = []
         this.active = []
-        this.isSpawning = false
+        this.isGrowing = false
         this.spawnTimer = 0
-        this.durationTimer = 0
-        this.spawnAngle = 0
         this.damageTimer = 0
+        this.spawnAngle = 0
 
         for (let i = 0; i < POOL_SIZE; i++) {
             const sprite = new AnimatedSprite(atlases.smoke.animations.effect)
@@ -54,26 +59,41 @@ export default class TowerFog extends Container {
     }
 
     start() {
-        this.isSpawning = true
+        this.innerRingRadius = START_RADIUS_MIN
+        this.isGrowing = true
         this.spawnTimer = 0
-        this.durationTimer = FOG_DURATION
+        this.damageTimer = DAMAGE_INTERVAL
         this.spawnAngle = Math.random() * TAU
-        this.damageTimer = 0
         this.isNotified = false
         this.rings.visible = true
+        this.drawRings()
     }
 
     stop() {
-        this.isSpawning = false
+        this.isGrowing = false
     }
 
-    spawnAt(angle) {
+    drawRings() {
+        const inner = this.innerRingRadius
+        const outer = this.innerRingRadius + RING_WIDTH
+
+        this.rings.clear()
+        this.rings.circle(0, 0, inner)
+        this.rings.stroke({ width: 2, color: TINT, alpha: 0.4 })
+        this.rings.circle(0, 0, outer)
+        this.rings.stroke({ width: 2, color: TINT, alpha: 0.4 })
+    }
+
+    spawnAt() {
         if (this.pool.length === 0) return
+
+        const radius = this.innerRingRadius + Math.random() * RING_WIDTH
+        const angle = this.spawnAngle
 
         const sprite = this.pool.pop()
         sprite.position.set(
-            Math.cos(angle) * RING_RADIUS,
-            Math.sin(angle) * RING_RADIUS
+            Math.cos(angle) * radius,
+            Math.sin(angle) * radius
         )
         sprite.rotation = Math.random() * TAU
         sprite.gotoAndPlay(0)
@@ -87,35 +107,50 @@ export default class TowerFog extends Container {
 
         this.addChild(sprite)
         this.active.push(sprite)
+
+        this.spawnAngle = (this.spawnAngle + GOLDEN_ANGLE) % TAU
     }
 
     dealDamage() {
         if (!this.enemiesContainer) return
 
+        const innerR = this.innerRingRadius
+        const outerR = this.innerRingRadius + RING_WIDTH
+        const innerSq = innerR * innerR
+        const outerSq = outerR * outerR
+
         const enemies = this.enemiesContainer.children
         for (let i = 0; i < enemies.length; i++) {
             const enemy = enemies[i]
             if (enemy.hp <= 0) continue
+            if (enemy.alpha <= 0) continue
 
             const distSq = enemy.x * enemy.x + enemy.y * enemy.y
-            if (distSq <= DAMAGE_RADIUS_SQ) {
+            if (distSq >= innerSq && distSq <= outerSq) {
                 enemy.setDamage(gameState.towerFogPower, true)
             }
         }
     }
 
     tick(deltaMs) {
-        if (this.isSpawning) {
-            this.durationTimer -= deltaMs
-            if (this.durationTimer <= 0) {
-                this.isSpawning = false
-            } else {
-                this.spawnTimer -= deltaMs
-                if (this.spawnTimer <= 0) {
-                    this.spawnTimer += SPAWN_INTERVAL
-                    this.spawnAt(this.spawnAngle)
-                    this.spawnAngle = (this.spawnAngle + GOLDEN_ANGLE) % TAU
-                }
+        if (this.isGrowing) {
+            this.innerRingRadius += RING_SPEED * deltaMs
+            if (this.innerRingRadius >= MAX_RING_RADIUS) {
+                this.innerRingRadius = MAX_RING_RADIUS
+                this.isGrowing = false
+            }
+            this.drawRings()
+        }
+
+        if (this.isGrowing) {
+            const innerR = this.innerRingRadius
+            const areaCur = (innerR + RING_WIDTH) ** 2 - innerR ** 2
+            const rateMul = areaCur / AREA_MIN
+
+            this.spawnTimer -= deltaMs * rateMul
+            while (this.spawnTimer <= 0) {
+                this.spawnTimer += SPAWN_INTERVAL
+                this.spawnAt()
             }
         }
 
@@ -127,7 +162,7 @@ export default class TowerFog extends Container {
             }
         }
 
-        if (!this.isSpawning && this.active.length === 0 && !this.isNotified) {
+        if (!this.isGrowing && this.active.length === 0 && !this.isNotified) {
             this.isNotified = true
             this.rings.visible = false
             if (this.onFinished) this.onFinished()

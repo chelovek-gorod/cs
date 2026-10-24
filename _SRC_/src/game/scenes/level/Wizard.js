@@ -1,15 +1,16 @@
-import { AnimatedSprite } from "pixi.js";
-import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, sounds } from "../../../app/assets";
-import { soundPlay } from "../../../app/sound";
-import { drawLightning } from "../../../utils/lightning";
-import { gameState, wizardTargetRadiusRate } from "../../state";
+import { AnimatedSprite } from "pixi.js"
+import { tickerAdd, tickerRemove } from "../../../app/application"
+import { atlases, sounds } from "../../../app/assets"
+import { soundPlay } from "../../../app/sound"
+import { drawLightning } from "../../../utils/lightning"
+import { gameState, wizardTargetRadiusRate } from "../../state"
+import { addEnemySmoke } from "../../../app/events"
 
 const LIGHTNING_FORWARD_OFFSET = 40
 const LIGHTNING_SIDE_OFFSET = 8
 
 export default class Wizard extends AnimatedSprite {
-    constructor(x, y, lightnings, smoke, enemies, startShootTimeoutRate) {
+    constructor(x, y, lightnings, enemies, startShootTimeoutRate) {
         super(atlases.wizard.animations.shoot)
         
         this.anchor.set(0.5)
@@ -18,7 +19,6 @@ export default class Wizard extends AnimatedSprite {
         this.position.set(x, y)
 
         this.lightnings = lightnings
-        this.smoke = smoke
         this.enemies = enemies
 
         this.shootTimeout = gameState.wizardTimeout * startShootTimeoutRate
@@ -47,7 +47,7 @@ export default class Wizard extends AnimatedSprite {
             const dx = this.x - enemies[i].x
             const dy = this.y - enemies[i].y
             const dist = dx * dx + dy * dy
-            if (dist < nearestDist) {
+            if (dist < nearestDist && enemies[i].alpha > 0 && enemies[i].hp > 0) {
                 nearestDist = dist
                 nearestEnemy = enemies[i]
             }
@@ -81,7 +81,7 @@ export default class Wizard extends AnimatedSprite {
             // Перебираем всех врагов, кроме уже использованных
             for (let j = 0; j < enemiesCount; j++) {
                 const enemy = enemies[j]
-                if (usedSet.has(enemy)) continue
+                if (usedSet.has(enemy) || enemies[i].alpha <= 0 || enemies[i].hp <= 0) continue
     
                 const dx = currentTarget.x - enemy.x
                 const dy = currentTarget.y - enemy.y
@@ -110,12 +110,16 @@ export default class Wizard extends AnimatedSprite {
             this.chainDamages.push(damage)
             target.onLightning(damage)
 
-            this.smoke.spawn(target.x, target.y, {
-                tint: 0x222222,
-                count: 16,
-                spread: 24,
-                lifeMin: 800,
-                lifeMax: 1600,
+            addEnemySmoke({
+                x: target.x,
+                y: target.y,
+                options: {
+                    tint: 0x222222,
+                    count: 16,
+                    spread: 24,
+                    lifeMin: 800,
+                    lifeMax: 1600,
+                }
             })
         }
     

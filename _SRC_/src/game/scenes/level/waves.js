@@ -9,6 +9,7 @@ const ALL_TYPES_ORDER = [
     TYPES.NORMAL,
     TYPES.BOSS,
     TYPES.TANK,
+    TYPES.VOODOO,
     TYPES.BOMB,
     TYPES.RIDER,
     TYPES.SHOOTER,
@@ -21,6 +22,7 @@ const ALL_TYPES_ORDER = [
 const PRIORITY_ORDER = [
     TYPES.BOSS,
     TYPES.TANK,
+    TYPES.VOODOO,
     TYPES.BOMB,
     TYPES.RIDER,
     TYPES.SHOOTER,
@@ -69,25 +71,29 @@ const UNIT_DATA = {
         replacementLimit: 0.1,
     },
     [TYPES.SHOOTER]: {
-        unlockRound: 5,
-        replacementLimit: 0.3,
+        unlockRound: 6,
+        replacementLimit: 0.2,
     },
     [TYPES.RIDER]: {
-        unlockRound: 8,
+        unlockRound: 12,
         replacementLimit: 0.2,
     },
     [TYPES.BOMB]: {
-        unlockRound: 12,
+        unlockRound: 15,
         replacementLimit: 0.1,
     },
     [TYPES.TANK]: {
-        unlockRound: 16,
-        replacementLimit: 0.2,
+        unlockRound: 25,
+        replacementLimit: 0.1,
+    },
+    [TYPES.VOODOO]: {
+        unlockRound: 35,
+        replacementLimit: 0.1,
     },
     [TYPES.BOSS]: {
         unlockRound: 10,
         countDivisor: 10,
-        bossLineRatio: 0.75,
+        bossLineRatio: 0.7,
     },
 }
 
@@ -117,6 +123,7 @@ const THEME_RULES = [
     { type: TYPES.FAST,    divisor: 4 },
     { type: TYPES.BOMB,    divisor: 7 },
     { type: TYPES.SHOOTER, divisor: 9 },
+    { type: TYPES.TANK,    divisor: 13},
 ]
 
 // Приоритет тем при конфликте (раунд кратен нескольким divisor'ам).

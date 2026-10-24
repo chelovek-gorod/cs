@@ -6,7 +6,7 @@ import { createStone } from "./Stone";
 
 
 export default class Catapult extends AnimatedSprite {
-    constructor(x, y, smoke, catapultStones, enemies, startShootTimeoutRate) {
+    constructor(x, y, catapultStones, enemies, startShootTimeoutRate) {
         super(atlases.catapult.animations.shoot)
 
         this.anchor.set(0.5)
@@ -14,7 +14,6 @@ export default class Catapult extends AnimatedSprite {
         this.loop = false
         this.position.set(x, y)
 
-        this.smoke = smoke
         this.stones = catapultStones
         this.enemies = enemies
 
@@ -32,6 +31,8 @@ export default class Catapult extends AnimatedSprite {
         const enemies = this.enemies.children
         const enemiesCount = enemies.length
         for (let i = 0; i < enemiesCount; i++) {
+            if (enemies[i].alpha <= 0) continue
+            
             const dx = this.x - enemies[i].x
             const dy = this.y - enemies[i].y
             const distance = dx * dx + dy * dy
@@ -45,7 +46,7 @@ export default class Catapult extends AnimatedSprite {
         this.rotation = Math.atan2(strongestEnemy.y, strongestEnemy.x)
 
         this.stones.addChild(
-            createStone(this.x, this.y, strongestEnemy.x, strongestEnemy.y, this.enemies, this.smoke)
+            createStone(this.x, this.y, strongestEnemy.x, strongestEnemy.y, this.enemies)
         )
         this.gotoAndPlay(0)
     }

@@ -90,7 +90,7 @@ export default class Archer extends Container {
         for (let i = 0; i < enemies.length; i++) {
             const e = enemies[i]
             const sq = e.x * e.x + e.y * e.y  // расстояние от башни (0,0)
-            if (sq > BERSERK_MAX_DIST_SQ) continue
+            if (sq > BERSERK_MAX_DIST_SQ || e.alpha <= 0) continue
             if (sq < nearestSqDist) {
                 nearestSqDist = sq
                 nearest = e

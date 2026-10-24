@@ -2,7 +2,7 @@ import { Container, Graphics, Text } from "pixi.js"
 import { kill, tickerAdd, tickerRemove } from "../../../app/application"
 import { sounds } from "../../../app/assets"
 import { addGoldForKill, EventHub, events, showPopup, startScene, dragonIsEmpty,
-    updateTrapsAvailable, updateFogAvailable } from "../../../app/events"
+    updateTrapsAvailable, updateFogAvailable, enemyHit } from "../../../app/events"
 import { soundPlay } from "../../../app/sound"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
@@ -21,6 +21,8 @@ import { createTrap } from "./Trap"
 import Trees from "./Trees"
 import TowerFog from "./TowerFog"
 import TrailEmitter from "./TrailEmitter"
+import { BLOOD_GOLD } from "./EnemyBlood"
+import { createVoodooFX } from "./VoodooFX"
 
 const SIZE = 720
 const MAX_SCALE = 1.3
@@ -93,8 +95,11 @@ export default class GameContainer extends Container {
         requestAnimationFrame( () => this.smoke.warmup() )
 
         this.tower = new Tower(
-            this.arrowPoints, this.arrows, this.smoke,
-            this.stones, this.lightnings, this.enemies,
+            this.arrowPoints,
+            this.arrows,
+            this.stones,
+            this.lightnings,
+            this.enemies,
             this.towerStones
         )
 
@@ -139,6 +144,8 @@ export default class GameContainer extends Container {
         EventHub.on(events.trapExploded, this.onTrapExploded, this)
         EventHub.on(events.fogStart, this.startFog, this)
         EventHub.on(events.trailEmit, this.onTrailEmit, this)
+        EventHub.on(events.addEnemySmoke, this.onEnemySmoke, this)
+        EventHub.on(events.addVoodooFX, this.onVoodooFX, this)
 
         this.testGraphics = new Graphics()
         this.addChild(this.testGraphics)
@@ -265,6 +272,10 @@ export default class GameContainer extends Container {
         updateFogAvailable(gameState.towerFogCount > 0)
     }
 
+    onEnemySmoke(data) {
+        this.smoke.spawn(data.x, data.y, data.options)
+    }
+
     addExplosion(data) {
         const explosion = new Explosion(
             data.atlasName,
@@ -285,6 +296,10 @@ export default class GameContainer extends Container {
         )
     }
 
+    onVoodooFX(data) {
+        this.explosions.addChild(createVoodooFX(data.x, data.y))
+    }
+
     arrowOnTarget(data) {
         let nearestIndex = -1
         let nearestSqDist = Infinity
@@ -293,13 +308,15 @@ export default class GameContainer extends Container {
         const enemiesSize = enemies.length
         for(let i = 0; i < enemiesSize; i++) {
             const enemy = enemies[i]
-            const dx = data.x - enemy.x
-            const dy = data.y - enemy.y
-            const distSq = dx * dx + dy * dy
-
-            if (distSq < enemy.bodySqCollider && distSq < nearestSqDist) {
-                nearestSqDist = distSq
-                nearestIndex = i
+            if (enemy.alpha > 0 && enemy.hp > 0) {
+                const dx = data.x - enemy.x
+                const dy = data.y - enemy.y
+                const distSq = dx * dx + dy * dy
+    
+                if (distSq < enemy.bodySqCollider && distSq < nearestSqDist) {
+                    nearestSqDist = distSq
+                    nearestIndex = i
+                }
             }
         }
 
@@ -355,6 +372,16 @@ export default class GameContainer extends Container {
                 this.parent.flyTexts.addChild(
                     new FlyText(`+${chestReward} Gold`, textPoint.x, textPoint.y)
                 )
+
+                enemyHit({
+                    x: data.x,
+                    y: data.y,
+                    damage: chestReward,
+                    bloodType: BLOOD_GOLD,
+                    isKill: true,
+                    fromAngle: null,
+                })
+
                 addGoldForKill(chestReward)
                 soundPlay(sounds.se_coins)
             } else {
@@ -426,6 +453,8 @@ export default class GameContainer extends Container {
         EventHub.off(events.trapExploded, this.onTrapExploded, this)
         EventHub.off(events.fogStart, this.startFog, this)
         EventHub.off(events.trailEmit, this.onTrailEmit, this)
+        EventHub.off(events.addEnemySmoke, this.onEnemySmoke, this)
+        EventHub.off(events.addVoodooFX, this.onVoodooFX, this)
 
         if (this.blood) {
             this.blood.kill()

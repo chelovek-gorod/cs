@@ -69,6 +69,10 @@ function appReady() {
         app.stage.on('pointermove', (event) => appPointer = event.data)
     }
 
+    // rerender text fix
+    app.canvas.addEventListener( 'webglcontextlost', (e) => e.preventDefault() )
+    app.canvas.addEventListener( 'webglcontextrestored', () => refreshAllText(app.stage) )
+
     appReadyCallback()
 }
 
@@ -142,7 +146,11 @@ function updateVisibilityState( ) {
     changeFocus(isVisible) // event for others entities
 
     // one render step to create first visible frame
-    if (isVisible && app.renderer) app.renderer.render(app.stage)
+    if (isVisible && app.renderer) {
+        refreshAllText(app.stage) // Text
+        
+        app.renderer.render(app.stage)
+    }
 
     if (isVisible) tickerStart()
     else tickerStop()
@@ -231,6 +239,25 @@ function startFullScreen() {
     
     // Подписываемся на клик
     app.canvas.addEventListener('click', onCanvasClick)
+}
+
+// rerender text fix
+function refreshAllText(root) {
+    if (!root) return
+
+    const stack = [root]
+    while (stack.length > 0) {
+        const node = stack.pop()
+
+        if (typeof node.updateText === 'function') node.updateText()
+
+        const children = node.children
+        if (children) {
+            for (let i = 0; i < children.length; i++) {
+                stack.push(children[i])
+            }
+        }
+    }
 }
 
 // ticker

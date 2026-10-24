@@ -6,15 +6,16 @@ import { moveToTarget, turnSpriteToTarget } from "../../../utils/functions";
 import { createObjectPool } from "../../../utils/pool";
 import { gameState } from "../../state";
 import { addExplosion } from '../../../app/events'
+import { addEnemySmoke } from "../../../app/events"
 
 const STONE_POOL = createObjectPool(100)
 
-export function createStone(x, y, targetX, targetY, enemies, smoke) {
+export function createStone(x, y, targetX, targetY, enemies) {
     let stone = STONE_POOL.get()
     if (stone) {
-        stone.reset(x, y, targetX, targetY, enemies, smoke)
+        stone.reset(x, y, targetX, targetY, enemies)
     } else {
-        stone = new Stone(x, y, targetX, targetY, enemies, smoke)
+        stone = new Stone(x, y, targetX, targetY, enemies)
         STONE_POOL.add(stone)
     }
     return stone
@@ -28,7 +29,7 @@ const MID_SCALE = MAX_SCALE - MIN_SCALE
 const START_OFFSET = -24
 
 class Stone extends Container {
-    constructor(x, y, targetX, targetY, enemies, smoke) {
+    constructor(x, y, targetX, targetY, enemies) {
         super()
 
         this.image = new Sprite(images.stone)
@@ -38,15 +39,14 @@ class Stone extends Container {
         this.speed = 0.24
         this.turnSpeed = 0.006
 
-        this.reset(x, y, targetX, targetY, enemies, smoke)
+        this.reset(x, y, targetX, targetY, enemies)
     }
   
-    reset(x, y, targetX, targetY, enemies, smoke) {
+    reset(x, y, targetX, targetY, enemies) {
         this.position.set(x, y)
         this.target = {x: targetX, y: targetY}
 
         this.enemies = enemies
-        this.smoke = smoke
         this.isSmokeFrame = false
 
         this.path = 0
@@ -94,12 +94,16 @@ class Stone extends Container {
 
         this.isSmokeFrame = !this.isSmokeFrame
         if (this.isSmokeFrame) {
-            this.smoke.spawn(this.x, this.y, {
-                tint: 0x888888,
-                count: 8,
-                spread: 18,
-                lifeMin: 800,
-                lifeMax: 1600,
+            addEnemySmoke({
+                x: this.x,
+                y: this.y,
+                options: {
+                    tint: 0x888888,
+                    count: 8,
+                    spread: 18,
+                    lifeMin: 800,
+                    lifeMax: 1600,
+                }
             })
         }
     }

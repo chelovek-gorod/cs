@@ -45,7 +45,6 @@ export default class Explosion extends AnimatedSprite {
         const targets = []
         for (let i = 0; i < children.length; i++) {
             const enemy = children[i]
-            if (enemy.hp <= 0) continue
 
             const dx = enemy.x - ex
             const dy = enemy.y - ey
