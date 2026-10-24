@@ -80,7 +80,7 @@ let mineLastCollectedAt = Date.now()
 
 export let gameState = initState()
 
-export const goldForSavingHp = 0.05
+export const goldForSavingHp = 0.2
 export const adGoldBonus = 12
 
 export const towerHPStep = 20

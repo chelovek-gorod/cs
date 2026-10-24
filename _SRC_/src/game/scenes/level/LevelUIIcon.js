@@ -8,11 +8,11 @@ import { soundPlay } from "../../../app/sound"
 const ALPHA_DISABLED = 0.7
 
 // Максимальное смещение от центра иконки
-const SHINE_COUNT = 3
-const SHINE_RADIUS_MAX = 32
+const SHINE_COUNT = 5
+const SHINE_RADIUS_MAX = 36
 const SHINE_SCALE_MIN = 0
-const SHINE_SCALE_MAX = 0.7
-const SHINE_TIME = 600
+const SHINE_SCALE_MAX = 0.9
+const SHINE_TIME = 900
 const SHINE_SCALE_STEP = (SHINE_SCALE_MAX - SHINE_SCALE_MIN) / SHINE_TIME
 const SHINE_ALPHA_STEP = 1 / SHINE_TIME
 

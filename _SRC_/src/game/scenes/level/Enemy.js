@@ -147,7 +147,7 @@ const ENEMY = {
         damage: 0,
         attackTimeout: Infinity,
         attackStartFrameIndex: 0,
-        reward: 2,
+        reward: 3,
         towerOffset: TOWER_OFFSET + 120,
         bodyCollider: 40,
         headCollider: 20,
@@ -161,7 +161,7 @@ const ENEMY = {
         damage: 5,
         attackTimeout: 1000,
         attackStartFrameIndex: 0,
-        reward: 7,
+        reward: 10,
         towerOffset: TOWER_OFFSET + 64,
         bodyCollider: 50,
         headCollider: 15,
@@ -222,6 +222,7 @@ class Enemy extends Container {
         this.damage = ENEMY[type].damage
         this.lightningCount = 0
         this.lightningDamage = 0
+        this.bodyCollider = ENEMY[type].bodyCollider
         this.bodySqCollider = ENEMY[type].bodyCollider * ENEMY[type].bodyCollider
         this.headSqCollider = ENEMY[type].headCollider * ENEMY[type].headCollider
         this.towerOffset = ENEMY[type].towerOffset

@@ -38,13 +38,10 @@ class Chest extends AnimatedSprite {
         let isInside = Math.abs(px) <= boundHalfW && Math.abs(py) <= boundHalfH
 
         if (!isInside) {
-            const angle = Math.atan2(py, px)
+            const angle = Math.atan2(py, px) * (Math.PI * 0.25)
             px = Math.cos(angle) * minOffset
             py = Math.sin(angle) * minOffset
-            isInside = Math.abs(px) <= boundHalfW && Math.abs(py) <= boundHalfH
         }
-
-        if (!isInside) return false
 
         this.position.set(px, py)
         this.openDelay = OPEN_DELAY

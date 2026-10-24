@@ -1,11 +1,10 @@
-import { AnimatedSprite } from "pixi.js";
-import { tickerAdd, tickerRemove } from "../../../app/application";
-import { atlases, sounds } from "../../../app/assets";
-import { soundPlay } from "../../../app/sound";
-import { createObjectPool } from "../../../utils/pool";
-import Explosion from "../../effects/Explosion";
-import { gameState } from "../../state";
-import { trapExploded } from "../../../app/events"
+import { AnimatedSprite, Graphics } from "pixi.js"
+import { tickerAdd, tickerRemove } from "../../../app/application"
+import { atlases, sounds } from "../../../app/assets"
+import { soundPlay } from "../../../app/sound"
+import { createObjectPool } from "../../../utils/pool"
+import { gameState } from "../../state"
+import { trapExploded, addExplosion } from "../../../app/events"
 
 const TRAP_POOL = createObjectPool(100)
 
@@ -28,9 +27,8 @@ class Trap extends AnimatedSprite {
         this.animationSpeed = 0.25
         this.play()
 
-        const trapRadiusTrigger = gameState.trapRadius * 0.5
-        this.rangeSq = trapRadiusTrigger * trapRadiusTrigger
-        this.damageSq = gameState.trapRadius * gameState.trapRadius
+        this.rangeCircle = new Graphics()
+        this.addChild(this.rangeCircle)
 
         this.reset(x, y, particles, enemies, index)
     }
@@ -47,20 +45,26 @@ class Trap extends AnimatedSprite {
 
         this.isCheckFrame = Math.random() < 0.5 ? false : true
 
+        // test
+        this.rangeCircle.clear()
+        this.rangeCircle.circle(0, 0, gameState.trapRadius * 0.5)
+        this.rangeCircle.stroke({ width: 2, color: 0xffff00 })
+
         tickerAdd(this)
         soundPlay(sounds.se_catapult_shoot.rate(0.8))
     }
 
-    setDamage(enemies) {
+    setDamage() {
         trapExploded(this.slotIndex)
 
-        this.parent.addChild(
-            new Explosion(this.x, this.y, 'explosion_stone', gameState.trapRadius)
-        )
-
-        for (let i = enemies.length - 1; i >= 0; i--) {
-            enemies[i].setDamage(gameState.trapPower)
-        }
+        addExplosion({
+            atlasName: 'explosion_stone',
+            x: this.x,
+            y: this.y,
+            radius: gameState.trapRadius,
+            frameDamage: 4,
+            damage: gameState.trapPower, 
+        })
 
         tickerRemove(this)
         if (this.parent) this.parent.removeChild(this)
@@ -72,21 +76,27 @@ class Trap extends AnimatedSprite {
         if (!this.isCheckFrame) return
 
         const enemies = this.enemies.children
-        const enemiesCount = enemies.length
-        const damagedEnemies = []
+        const triggerR = gameState.trapRadius * 0.5
         let isActive = false
     
-        for (let i = 0; i < enemiesCount; i++) {
-            const dx = this.x - enemies[i].x
-            const dy = this.y - enemies[i].y
-            const dist = dx * dx + dy * dy
-            if (dist < this.damageSq) {
-                damagedEnemies.push(enemies[i])
-                if (!isActive && dist < this.rangeSq) isActive = true
+        for (let i = 0; i < enemies.length; i++) {
+            const enemy = enemies[i]
+            if (enemy.hp <= 0) continue
+            if (enemy.alpha <= 0) continue
+
+            const dx = this.x - enemy.x
+            const dy = this.y - enemy.y
+            const distSq = dx * dx + dy * dy
+
+            const touchR = triggerR + enemy.bodyCollider
+
+            if (distSq < touchR * touchR) {
+                isActive = true
+                break
             }
         }
     
-        if (isActive) this.setDamage(damagedEnemies)
+        if (isActive) this.setDamage()
     }
 
     kill() {
