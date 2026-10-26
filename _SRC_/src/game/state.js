@@ -62,8 +62,8 @@ export function setLevelType(type) {
 
 function initState() {
     return {
-        gold: 0,
-        round: 1,
+        gold: 100,
+        round: 10,
         levelRewardEasy: START_REWARD.EASY,
         levelRewardNorm: START_REWARD.NORM,
         levelRewardHard: START_REWARD.HARD,

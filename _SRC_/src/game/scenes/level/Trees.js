@@ -27,17 +27,13 @@ const DENSITY_RATE = 1.8
 const JITTER_RATE = 0.5
 
 const prefixes = ['marsh_', 'winter_', 'lava_']
-const prefixLastIndex = -1
-
+let prefixIndex = Math.floor( Math.random() * prefixes.length )
 function getTexturePrefix() {
     if (levelType === ROUND_TYPE.EASY) return 'marsh_'
     if (levelType === ROUND_TYPE.NORM) return 'winter_'
     if (levelType === ROUND_TYPE.HARD) return 'lava_'
     if (gameState.round % 3 === 0) return 'marsh_'
-
-    prefixLastIndex++
-    if (prefixLastIndex === prefixes.length) prefixLastIndex = 0
-    return prefixes[ prefixLastIndex ]
+    return prefixes[ prefixIndex ]
 }
 
 export default class Trees extends Container {

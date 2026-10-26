@@ -74,8 +74,8 @@ export default class BuildFog extends Container {
         let sText, dText
         sText = `${gameState.fogCount} -> ${gameState.fogCount + 1}`
         dText = dText = fogPrice + '$'
-        this.btnAddWizard.setSubtitle(sText)
-        this.btnAddWizard.setDescription(dText)
+        this.btnAddFog.setSubtitle(sText)
+        this.btnAddFog.setDescription(dText)
 
         goldChanged()
 
