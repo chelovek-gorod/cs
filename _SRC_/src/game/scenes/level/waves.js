@@ -1,3 +1,4 @@
+import { levelType, ROUND_TYPE } from "../../state"
 import { TYPES } from "./Enemy"
 
 // ============================================================
@@ -33,11 +34,14 @@ const PRIORITY_ORDER = [
 //  ОБЩЕЕ ЧИСЛО NORMAL В РАУНДЕ
 // ============================================================
 
-const MIN_ENEMIES_PER_ROUND = 5                // жёсткий минимум врагов в раунде
+const MIN_ENEMIES_PER_ROUND = 6                // жёсткий минимум врагов в раунде
 const ENEMIES_PER_ROUND_FORMULA_BASE = 4       // база формулы: (base + round)
 const DIFFICULTY_MULTIPLIER = 1.3              // множитель сложности: (base + round) * mult
-const EASY_ROUND_MODULO = 3                    // каждый N-й раунд считается "лёгким"
+// const EASY_ROUND_MODULO = 3                    // каждый N-й раунд считается "лёгким"
 const EASY_NORMAL_MULTIPLIER = 0.7             // в лёгких раундах врагов × 0.7
+const NORMAL_NORMAL_MULTIPLIER = 1.0           
+const HARD_NORMAL_MULTIPLIER = 1.2    
+const BOSS_NORMAL_MULTIPLIER = 1.3         
 
 // ============================================================
 //  РАЗМЕР ВОЛНЫ
@@ -68,27 +72,27 @@ const QUARTER_STRING = '123231132'
 const UNIT_DATA = {
     [TYPES.FAST]: {
         unlockRound: 3,
-        replacementLimit: 0.1,
+        replacementLimit: 0.12,
     },
     [TYPES.SHOOTER]: {
         unlockRound: 6,
-        replacementLimit: 0.2,
+        replacementLimit: 0.18,
     },
     [TYPES.RIDER]: {
         unlockRound: 12,
-        replacementLimit: 0.2,
+        replacementLimit: 0.15,
     },
     [TYPES.BOMB]: {
         unlockRound: 15,
-        replacementLimit: 0.1,
+        replacementLimit: 0.15,
     },
     [TYPES.TANK]: {
         unlockRound: 25,
-        replacementLimit: 0.1,
+        replacementLimit: 0.15,
     },
     [TYPES.VOODOO]: {
         unlockRound: 35,
-        replacementLimit: 0.1,
+        replacementLimit: 0.05,
     },
     [TYPES.BOSS]: {
         unlockRound: 10,
@@ -120,10 +124,10 @@ const BOSS_DIVISOR = 10           // босс-раунды (кратные эт�
 // Темы раундов: массив { type, divisor } — раунд кратен divisor → тема = type
 // Если раунд кратен нескольким — сработает приоритет из THEME_PRIORITY.
 const THEME_RULES = [
-    { type: TYPES.FAST,    divisor: 4 },
-    { type: TYPES.BOMB,    divisor: 7 },
-    { type: TYPES.SHOOTER, divisor: 9 },
-    { type: TYPES.TANK,    divisor: 13},
+    { type: TYPES.FAST,    divisor: 5 },
+    { type: TYPES.BOMB,    divisor: 6 },
+    { type: TYPES.SHOOTER, divisor: 7 },
+    { type: TYPES.TANK,    divisor: 8 },
 ]
 
 // Приоритет тем при конфликте (раунд кратен нескольким divisor'ам).
@@ -148,11 +152,17 @@ const THEME_ALIEN_RATE = 0.25
 // Формула: (base + round) * difficulty, для лёгких (÷3, кроме ÷10) умножается на 0.7.
 function getTotalNormal(round) {
     let total = Math.floor((ENEMIES_PER_ROUND_FORMULA_BASE + round) * DIFFICULTY_MULTIPLIER)
-
-    if (round % EASY_ROUND_MODULO === 0 && round % BOSS_DIVISOR !== 0) {
+    console.log('TOTAL ENEMIES before', total)
+    if (levelType === ROUND_TYPE.EASY) {
         total = Math.ceil(total * EASY_NORMAL_MULTIPLIER)
+    } else if (levelType === ROUND_TYPE.NORM) {
+        total = Math.ceil(total * NORMAL_NORMAL_MULTIPLIER)
+    } else if (levelType === ROUND_TYPE.HARD) {
+        total = Math.ceil(total * HARD_NORMAL_MULTIPLIER)
+    } else {
+        total = Math.ceil(total * BOSS_NORMAL_MULTIPLIER)
     }
-
+    console.log('TOTAL ENEMIES after', total)
     return Math.max(MIN_ENEMIES_PER_ROUND, total)
 }
 
@@ -204,8 +214,6 @@ function getNextQuarterDigit(quarterIndex) {
 function getThemeTypeForRound(round) {
     // 1. Босс-раунды — без темы
     if (round % BOSS_DIVISOR === 0) return null
-    // 2. Лёгкие раунды — без темы
-    if (round % EASY_ROUND_MODULO === 0) return null
 
     // 3. Собираем кандидатов
     const candidates = []

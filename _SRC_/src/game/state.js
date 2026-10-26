@@ -6,19 +6,78 @@ import { createEnum } from "../utils/functions"
 export let isAdAvailable = true
 export let isLeaderboardAvailable = false
 
+export const ROUND_TYPE = createEnum(['EASY', 'NORM', 'HARD', 'BOSS'])
+const START_REWARD = {
+    [ROUND_TYPE.EASY]: 20,
+    [ROUND_TYPE.NORM]: 30,
+    [ROUND_TYPE.HARD]: 50,
+    [ROUND_TYPE.BOSS]: 100,
+}
+export let levelReward = START_REWARD.EASY
+export let levelType = ROUND_TYPE.EASY
+export function setLevelType(type) {
+    levelType = type
+    switch (type) {
+        case ROUND_TYPE.BOSS:
+            gameState.levelRewardEasy = START_REWARD.EASY
+            gameState.levelRewardNorm = START_REWARD.NORM
+            gameState.levelRewardHard = START_REWARD.HARD
+            
+            levelReward = gameState.levelRewardBoss
+
+            gameState.levelRewardBoss = Math.max(10, gameState.levelRewardBoss - 10)
+        break
+
+        case ROUND_TYPE.EASY:
+            gameState.levelRewardNorm = START_REWARD.NORM
+            gameState.levelRewardHard = START_REWARD.HARD
+            gameState.levelRewardBoss = START_REWARD.BOSS
+
+            levelReward = gameState.levelRewardEasy
+
+            gameState.levelRewardEasy = Math.max(10, gameState.levelRewardEasy - 10)
+        break
+
+        case ROUND_TYPE.NORM:
+            gameState.levelRewardEasy = START_REWARD.EASY
+            gameState.levelRewardHard = START_REWARD.HARD
+            gameState.levelRewardBoss = START_REWARD.BOSS
+
+            levelReward = gameState.levelRewardNorm
+
+            gameState.levelRewardNorm = Math.max(10, gameState.levelRewardNorm - 10)
+        break
+
+        case ROUND_TYPE.HARD:
+            gameState.levelRewardEasy = START_REWARD.EASY
+            gameState.levelRewardNorm = START_REWARD.NORM
+            gameState.levelRewardBoss = START_REWARD.BOSS
+
+            levelReward = gameState.levelRewardHard
+
+            gameState.levelRewardHard = Math.max(10, gameState.levelRewardHard - 10)
+        break
+    }
+}
+
 function initState() {
     return {
         gold: 0,
         round: 1,
+        levelRewardEasy: START_REWARD.EASY,
+        levelRewardNorm: START_REWARD.NORM,
+        levelRewardHard: START_REWARD.HARD,
+        levelRewardBoss: START_REWARD.BOSS,
         
         towerHp: 100,
         towerHpPrice: 25,
-        towerFogCount: 0,
-        towerFogPower: 5,
-        towerFogUpgradePrice: 30,
         towerRepairsCount: 0,
         towerRepairHp: 25,
         towerRepairUpgradePrice: 15,
+
+        fogCount: 0,
+        fogPower: 5,
+        fogPowerPrice: 30,
 
         arrowsCount: 10,
         arrowPower: 10,
@@ -80,16 +139,10 @@ let mineLastCollectedAt = Date.now()
 
 export let gameState = initState()
 
-export const goldForSavingHp = 0.2
 export const adGoldBonus = 12
 
 export const towerHPStep = 20
 export const towerHPMax = 200
-export const towerFogPowerStep = 1
-export const towerFogPowerMax = 10
-export const towerFogReloadStep = 0.06
-export const towerFogReloadDone = 100
-export const towerFogPrice = 40
 export const towerRepairStep = 5
 export const towerRepairMax = 50
 export const towerRepairPrice = 75
@@ -98,6 +151,12 @@ export const mineTimeoutStep = 15 * 1000 // 15 seconds
 export const mineTimeoutMax = 1 * 60 * 1000 // 1 minutes
 export const mineMaxGoldStep = 50
 export const mineMaxGoldMax = 300
+
+export const fogPowerStep = 1
+export const fogPowerMax = 10
+export const fogReloadStep = 0.06
+export const fogReloadDone = 100
+export const fogPrice = 40
 
 export const icePrice = 40
 export const iceAdd = 12

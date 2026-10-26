@@ -8,7 +8,7 @@ import { removeCursorPointer, setCursorPointer } from '../../../utils/functions'
 import GameContainer from './GameContainer'
 import LevelUI from './LevelUI'
 import { getSafeAreaOffsets, setAfterTickerCallbacks } from '../../../app/application'
-import { gameState } from '../../state'
+import { gameState, levelType, ROUND_TYPE } from '../../state'
 import { setMusicList } from '../../../app/sound'
 import EnemySpawner from './EnemySpawner'
 import { POPUP_TYPE } from '../../popup/popupTypes'
@@ -33,9 +33,10 @@ export default class LevelScene extends Container {
         EventHub.on( events.updateLanguage, this.updateLanguage, this )
 
         this.bg = new BackgroundTiling(
-            gameState.round % 10 === 0 ? images.lava_bg :
-            gameState.round % 3 === 0 ? images.swamp_bg :
-            images.winter_bg
+            levelType === ROUND_TYPE.EASY ? images.swamp_bg :
+            levelType === ROUND_TYPE.NORM ? images.winter_bg :
+            levelType === ROUND_TYPE.HARD ? images.lava_bg :
+            images.voodoo_bg
         )
         setCursorPointer(this.bg)
         this.bg.on('pointerdown', this.getPointerDown, this)

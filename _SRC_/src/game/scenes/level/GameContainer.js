@@ -1,4 +1,4 @@
-import { Container, Graphics, Text } from "pixi.js"
+import { Container, Graphics } from "pixi.js"
 import { kill, tickerAdd, tickerRemove } from "../../../app/application"
 import { sounds } from "../../../app/assets"
 import { addGoldForKill, EventHub, events, showPopup, startScene, dragonIsEmpty,
@@ -6,7 +6,7 @@ import { addGoldForKill, EventHub, events, showPopup, startScene, dragonIsEmpty,
 import { soundPlay } from "../../../app/sound"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
-import { gameState, goldForSavingHp } from "../../state"
+import { gameState, levelReward } from "../../state"
 import { SCENE_NAME } from "../SceneManager"
 import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
@@ -262,14 +262,14 @@ export default class GameContainer extends Container {
     }
 
     startFog() {
-        if (gameState.towerFogCount <= 0) return
-        gameState.towerFogCount--
+        if (gameState.fogCount <= 0) return
+        gameState.fogCount--
         this.fog.start()
         updateFogAvailable(false)
     }
     
     onFogFinished() {
-        updateFogAvailable(gameState.towerFogCount > 0)
+        updateFogAvailable(gameState.fogCount > 0)
     }
 
     onEnemySmoke(data) {
@@ -393,10 +393,13 @@ export default class GameContainer extends Container {
     handleRoundWin() {
         this.chests.stopSpawning()
 
-        if (this.tower.hp > 9) {
-            const extraGold = Math.floor(this.tower.hp * goldForSavingHp)
-            this.parent.flyTexts.addChild(new FlyText(`+${extraGold} EXTRA GOLD`, 0, 0))
-            gameState.gold += extraGold
+        this.parent.flyTexts.addChild(new FlyText(`+${levelReward} REWARD GOLD`, 0, -18))
+        gameState.gold += levelReward
+
+        const hpReward = Math.floor((this.tower.hp / gameState.towerHp) * 10)
+        if (hpReward > 0) {
+            this.parent.flyTexts.addChild(new FlyText(`+${hpReward} EXTRA GOLD`, 0, 0))
+            gameState.gold += hpReward
         }
 
         if (this.dragon) gameState.dragonsCount += 1

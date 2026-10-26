@@ -66,7 +66,7 @@ export default class BuildIce extends Container {
             "", "CLOSE", "",
             this.close.bind(this),
             () => true,
-            240, 240
+            0, 240
         )
         this.btnClose.subtitle.scale.set(1.5)
         this.addChild(this.btnClose)

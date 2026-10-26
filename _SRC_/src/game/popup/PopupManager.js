@@ -11,6 +11,7 @@ import BuildTower from "./BuildTower"
 import BuildCatapult from "./BuildCatapult"
 import BuildTraps from "./BuildTraps"
 import BuildIce from "./BuildIce"
+import BuildFog from "./BuildFog"
 
 export let popupManager = null
 
@@ -22,11 +23,12 @@ function createContent(type, popup) {
 
         case POPUP_TYPE.BUILD_MINE: return new BuildMine(popup)
         case POPUP_TYPE.BUILD_DRAGON: return new BuildDragon(popup)
-        case POPUP_TYPE.BUILD_MAGIC: return new BuildMagic(popup)
+        case POPUP_TYPE.BUILD_WIZARD: return new BuildMagic(popup)
         case POPUP_TYPE.BUILD_TOWER: return new BuildTower(popup)
         case POPUP_TYPE.BUILD_CATAPULT: return new BuildCatapult(popup)
         case POPUP_TYPE.BUILD_ICE: return new BuildIce(popup)
-        case POPUP_TYPE.BUILD_FIRE: return new BuildTraps(popup)
+        case POPUP_TYPE.BUILD_TRAP: return new BuildTraps(popup)
+        case POPUP_TYPE.BUILD_FOG: return new BuildFog(popup)
     }
 }
 

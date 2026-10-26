@@ -45,7 +45,7 @@ export default class BuildMagic extends Container {
             dText,
             this.upPower.bind(this),
             () => gameState.gold >= gameState.wizardPowerPrice,
-            240, 0
+            0, 0
         )
         this.addChild(this.btnUpPower)
 
@@ -67,7 +67,7 @@ export default class BuildMagic extends Container {
             dText,
             this.upTimeout.bind(this),
             () => gameState.gold >= gameState.wizardTimeoutPrice && gameState.wizardTimeout > wizardShootTimeoutMax,
-            -240, 120
+            -120, 120
         )
         this.addChild(this.btnUpTimeout)
 
@@ -83,7 +83,7 @@ export default class BuildMagic extends Container {
             dText,
             this.upDistance.bind(this),
             () => gameState.gold >= gameState.wizardDistancePrice && gameState.wizardDistance < wizardShootDistanceMax,
-            240, 120
+            120, 120
         )
         this.addChild(this.btnUpDistance)
 
@@ -99,7 +99,7 @@ export default class BuildMagic extends Container {
             dText,
             this.addTargets.bind(this),
             () => gameState.gold >= gameState.wizardTargetPrice && gameState.wizardTargets < wizardTargetsCountMax,
-            -240, 240
+            240, 0
         )
         this.addChild(this.btnAddTargets)
 
@@ -107,7 +107,7 @@ export default class BuildMagic extends Container {
             "", "CLOSE", "",
             this.close.bind(this),
             () => true,
-            240, 240
+            0, 240
         )
         this.btnClose.subtitle.scale.set(1.5)
         this.addChild(this.btnClose)

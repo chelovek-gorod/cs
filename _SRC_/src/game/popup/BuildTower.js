@@ -1,7 +1,7 @@
 import { Container, Text } from "pixi.js"
 import { styles } from "../../app/styles"
 import { closePopup, goldChanged } from "../../app/events"
-import { gameState, towerFogPowerMax, towerFogPowerStep, towerFogPrice, towerHPMax, towerHPStep, towerRepairMax, towerRepairPrice, towerRepairStep } from "../state"
+import { gameState, towerHPMax, towerHPStep, towerRepairMax, towerRepairPrice, towerRepairStep } from "../state"
 import PopupButton from "./PopupButton"
 
 export default class BuildTower extends Container {
@@ -45,7 +45,7 @@ export default class BuildTower extends Container {
             dText,
             this.upRepair.bind(this),
             () => gameState.gold >= gameState.towerRepairUpgradePrice && gameState.towerRepairHp < towerRepairMax,
-            -240, 120
+            0, 0
         )
         this.addChild(this.btnUpRepair)
 
@@ -61,43 +61,15 @@ export default class BuildTower extends Container {
             dText,
             this.upHp.bind(this),
             () => gameState.gold >= gameState.towerHpPrice && gameState.towerHp < towerHPMax,
-            -240, 240
-        )
-        this.addChild(this.btnUpHp)
-
-        sText = `${gameState.towerFogCount} -> ${gameState.towerFogCount + 1}`
-        dText = towerFogPrice + '$'
-        this.btnAddFog = new PopupButton(
-            "ADD TOXIC FOG",
-            sText,
-            dText,
-            this.addFog.bind(this),
-            () => gameState.gold >= towerFogPrice,
             240, 0
         )
-        this.addChild(this.btnAddFog)
-
-        sText = `${gameState.towerFogPower} -> ${gameState.towerFogPower + towerFogPowerStep}`
-        dText = gameState.towerFogUpgradePrice + '$'
-        if (gameState.towerFogPower === towerFogPowerMax) {
-            sText = gameState.towerFogPower
-            dText = 'Maximum'
-        }
-        this.btnUpFog = new PopupButton(
-            "UPGRADE FOG POWER",
-            sText,
-            dText,
-            this.upFog.bind(this),
-            () => gameState.gold >= gameState.towerFogUpgradePrice && gameState.towerFogPower < towerFogPowerMax,
-            240, 120
-        )
-        this.addChild(this.btnUpFog)
+        this.addChild(this.btnUpHp)
 
         this.btnClose = new PopupButton(
             "", "CLOSE", "",
             this.close.bind(this),
             () => true,
-            240, 240
+            0, 240
         )
         this.btnClose.subtitle.scale.set(1.5)
         this.addChild(this.btnClose)
@@ -111,8 +83,6 @@ export default class BuildTower extends Container {
         this.btnAddRepair.updateAvailable()
         this.btnUpRepair.updateAvailable()
         this.btnUpHp.updateAvailable()
-        this.btnAddFog.updateAvailable()
-        this.btnUpFog.updateAvailable()
     }
 
     addRepair() {
@@ -159,37 +129,6 @@ export default class BuildTower extends Container {
         }
         this.btnUpHp.setSubtitle(sText)
         this.btnUpHp.setDescription(dText)
-
-        goldChanged()
-
-        this.checkButtons()
-    }
-
-    addFog() {
-        gameState.gold -= towerFogPrice
-        gameState.towerFogCount += 1
-        let sText = `${gameState.towerFogCount} -> ${gameState.towerFogCount + 1}`
-        this.btnAddFog.setSubtitle(sText)
-
-        goldChanged()
-
-        this.checkButtons()
-    }
-
-    upFog() {
-        gameState.gold -= gameState.towerFogUpgradePrice
-        gameState.towerFogPower = Math.min(towerFogPowerMax, gameState.towerFogPower + towerFogPowerStep)
-        gameState.towerFogUpgradePrice *= 2
-
-        let sText, dText
-        sText = `${gameState.towerFogPower} -> ${gameState.towerFogPower + towerFogPowerStep}`
-        dText = gameState.towerFogUpgradePrice + '$'
-        if (gameState.towerFogPower === towerFogPowerMax) {
-            sText = gameState.towerFogPower
-            dText = 'Maximum'
-        }
-        this.btnUpFog.setSubtitle(sText)
-        this.btnUpFog.setDescription(dText)
 
         goldChanged()
 

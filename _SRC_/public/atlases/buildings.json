@@ -1,6 +1,6 @@
 {
   "frames": {
-    "magic": {
+    "build_wizard": {
       "frame": {
         "x": 4,
         "y": 4,
@@ -24,20 +24,20 @@
         "y": 0.5
       }
     },
-    "mine": {
+    "build_catapult": {
       "frame": {
         "x": 4,
         "y": 267,
-        "w": 223,
-        "h": 216
+        "w": 204,
+        "h": 220
       },
       "rotated": false,
       "trimmed": true,
       "spriteSourceSize": {
-        "x": 10,
-        "y": 56,
-        "w": 223,
-        "h": 216
+        "x": 15,
+        "y": 50,
+        "w": 204,
+        "h": 220
       },
       "sourceSize": {
         "w": 240,
@@ -48,7 +48,7 @@
         "y": 0.5
       }
     },
-    "tower": {
+    "build_tower": {
       "frame": {
         "x": 187,
         "y": 4,
@@ -72,9 +72,9 @@
         "y": 0.5
       }
     },
-    "ice": {
+    "build_ice": {
       "frame": {
-        "x": 235,
+        "x": 216,
         "y": 260,
         "w": 189,
         "h": 233
@@ -96,10 +96,58 @@
         "y": 0.5
       }
     },
-    "dragon": {
+    "build_trap": {
       "frame": {
-        "x": 432,
+        "x": 413,
         "y": 260,
+        "w": 196,
+        "h": 231
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 22,
+        "y": 48,
+        "w": 196,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "build_mine": {
+      "frame": {
+        "x": 617,
+        "y": 260,
+        "w": 223,
+        "h": 216
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 10,
+        "y": 56,
+        "w": 223,
+        "h": 216
+      },
+      "sourceSize": {
+        "w": 240,
+        "h": 280
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "build_dragon": {
+      "frame": {
+        "x": 387,
+        "y": 4,
         "w": 233,
         "h": 204
       },
@@ -120,9 +168,9 @@
         "y": 0.5
       }
     },
-    "fire": {
+    "build_fog": {
       "frame": {
-        "x": 387,
+        "x": 628,
         "y": 4,
         "w": 168,
         "h": 204
@@ -143,37 +191,15 @@
         "x": 0.5,
         "y": 0.5
       }
-    },
-    "catapult": {
-      "frame": {
-        "x": 563,
-        "y": 4,
-        "w": 204,
-        "h": 187
-      },
-      "rotated": false,
-      "trimmed": true,
-      "spriteSourceSize": {
-        "x": 18,
-        "y": 86,
-        "w": 204,
-        "h": 187
-      },
-      "sourceSize": {
-        "w": 240,
-        "h": 280
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
     }
   },
   "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
     "image": "buildings.png",
     "format": "RGBA8888",
     "size": {
-      "w": 771,
+      "w": 844,
       "h": 497
     },
     "scale": 1

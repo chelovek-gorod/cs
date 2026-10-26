@@ -1,6 +1,6 @@
 import { Container, Sprite } from "pixi.js";
 import { atlases } from "../../../app/assets";
-import { gameState } from "../../state";
+import { gameState, levelType, ROUND_TYPE } from "../../state";
 
 const _2Pi = Math.PI * 2
 const TEXTURE_INDEXES = [1, 3, 1, 2, 3, 1, 3, 2, 3, 1, 2, 3]
@@ -26,10 +26,18 @@ const DENSITY_RATE = 1.8
 // Разброс внутри ячейки. 0 = строгая сетка, 1 = полный хаос.
 const JITTER_RATE = 0.5
 
+const prefixes = ['marsh_', 'winter_', 'lava_']
+const prefixLastIndex = -1
+
 function getTexturePrefix() {
-    if (gameState.round % 10 === 0) return 'lava_'
+    if (levelType === ROUND_TYPE.EASY) return 'marsh_'
+    if (levelType === ROUND_TYPE.NORM) return 'winter_'
+    if (levelType === ROUND_TYPE.HARD) return 'lava_'
     if (gameState.round % 3 === 0) return 'marsh_'
-    return 'winter_'
+
+    prefixLastIndex++
+    if (prefixLastIndex === prefixes.length) prefixLastIndex = 0
+    return prefixes[ prefixLastIndex ]
 }
 
 export default class Trees extends Container {

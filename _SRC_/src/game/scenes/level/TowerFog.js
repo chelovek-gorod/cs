@@ -127,7 +127,7 @@ export default class TowerFog extends Container {
 
             const distSq = enemy.x * enemy.x + enemy.y * enemy.y
             if (distSq >= innerSq && distSq <= outerSq) {
-                enemy.setDamage(gameState.towerFogPower, true)
+                enemy.setDamage(gameState.fogPower, true)
             }
         }
     }

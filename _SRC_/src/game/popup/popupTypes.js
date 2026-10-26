@@ -11,12 +11,13 @@ export const POPUP_TYPE = createEnum([
     'UPGRADE',
 
     'BUILD_MINE',
+    'BUILD_TRAP',
     'BUILD_DRAGON',
-    'BUILD_MAGIC',
+    'BUILD_WIZARD',
     'BUILD_TOWER',
     'BUILD_CATAPULT',
     'BUILD_ICE',
-    'BUILD_FIRE',
+    'BUILD_FOG',
 
     'ERROR'
 ])

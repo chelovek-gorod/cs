@@ -45,7 +45,7 @@ export default class BuildCatapult extends Container {
             dText,
             this.upPower.bind(this),
             () => gameState.gold >= gameState.catapultPowerPrice,
-            240, 0
+            0, 0
         )
         this.addChild(this.btnUpPower)
 
@@ -67,7 +67,7 @@ export default class BuildCatapult extends Container {
             dText,
             this.upTimeout.bind(this),
             () => gameState.gold >= gameState.catapultTimeoutPrice && gameState.catapultTimeout > catapultShootTimeoutMax,
-            -240, 120
+            -120, 120
         )
         this.addChild(this.btnUpTimeout)
 
@@ -83,7 +83,7 @@ export default class BuildCatapult extends Container {
             dText,
             this.upDistance.bind(this),
             () => gameState.gold >= gameState.catapultDistancePrice && gameState.catapultDistance < catapultShootDistanceMax,
-            240, 120
+            120, 120
         )
         this.addChild(this.btnUpDistance)
 
@@ -99,7 +99,7 @@ export default class BuildCatapult extends Container {
             dText,
             this.upRadius.bind(this),
             () => gameState.gold >= gameState.catapultRadiusPrice && gameState.catapultRadius < catapultDamageRadiusMax,
-            -240, 240
+            240, 0
         )
         this.addChild(this.btnUpRadius)
 
@@ -107,7 +107,7 @@ export default class BuildCatapult extends Container {
             "", "CLOSE", "",
             this.close.bind(this),
             () => true,
-            240, 240
+            0, 240
         )
         this.btnClose.subtitle.scale.set(1.5)
         this.addChild(this.btnClose)

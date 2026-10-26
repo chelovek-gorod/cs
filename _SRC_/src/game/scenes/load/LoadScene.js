@@ -265,8 +265,8 @@ export default class LoadScene extends Container {
         getFirstUserAction()
         if ('se_click' in sounds) soundPlay(sounds.se_click)
 
-        // startScene(gameState.round > 1 ? SCENE_NAME.Menu : SCENE_NAME.Level)
-        startScene(SCENE_NAME.Menu)
+        startScene(gameState.round > 1 ? SCENE_NAME.Menu : SCENE_NAME.Level)
+        //startScene(SCENE_NAME.Menu)
     }
 
     tick(delta) {

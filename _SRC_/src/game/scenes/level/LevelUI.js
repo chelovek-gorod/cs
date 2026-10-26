@@ -108,7 +108,7 @@ export default class LevelUI extends Container {
         this.fogBtn = new ActionIcon(
             atlases.ui.textures.ui_btn_fog,
             this.fogClick.bind(this),
-            gameState.towerFogCount > 0,
+            gameState.fogCount > 0,
             true, true, true
         )
         this.addChild(this.fogBtn)
@@ -208,9 +208,9 @@ export default class LevelUI extends Container {
         
         this.fogBtn.setProgressBg(0x000000, 1)
         this.fogBtn.setProgress(1, true, 0x00ff00)
-        this.fogBtn.setText(gameState.towerFogCount, true)
+        this.fogBtn.setText(gameState.fogCount, true)
         this.fogBtn.setProgressBorder(true, 0xffffff)
-        this.fogBtn.setShine(gameState.towerFogCount > 0, 0x00ff00)  
+        this.fogBtn.setShine(gameState.fogCount > 0, 0x00ff00)  
         
         this.trapsBtn.setProgressBg(0xffff00, 0.5)
         this.trapsBtn.setText(gameState.trapsCount, true)
@@ -269,7 +269,7 @@ export default class LevelUI extends Container {
 
     updateFogAvailable(canStart) {
         this.fogBtn.setActive(canStart)
-        this.fogBtn.setText(gameState.towerFogCount, true)
+        this.fogBtn.setText(gameState.fogCount, true)
         this.fogBtn.setShine(canStart, 0x00ff00)
     }
 
@@ -328,7 +328,7 @@ export default class LevelUI extends Container {
     }
 
     fogClick() {
-        if (gameState.towerFogCount < 1) return
+        if (gameState.fogCount < 1) return
         fogStart()
     }
 

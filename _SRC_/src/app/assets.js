@@ -33,6 +33,7 @@ export const images = {
     grass_bg: 'grass_bg.png',
     winter_bg: 'winter_bg.png',
     swamp_bg: 'swamp_bg.png',
+    voodoo_bg: 'voodoo_bg.png',
     lava_bg: 'lava_bg.png',
     tower: 'tower.png',
     archer_arrow: 'archer_arrow.png',
