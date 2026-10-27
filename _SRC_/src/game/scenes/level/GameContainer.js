@@ -6,7 +6,7 @@ import { addGoldForKill, EventHub, events, showPopup, startScene, dragonIsEmpty,
 import { soundPlay } from "../../../app/sound"
 import FlyText from "../../effects/FlyText"
 import { POPUP_TYPE } from "../../popup/popupTypes"
-import { gameState, levelReward } from "../../state"
+import { gameState, levelReward, setLevelResult } from "../../state"
 import { SCENE_NAME } from "../SceneManager"
 import { createArrowOnGround } from "./ArrowOnGround"
 import ChestsContainer from "./Chest"
@@ -391,6 +391,8 @@ export default class GameContainer extends Container {
     }
 
     handleRoundWin() {
+        setLevelResult(true)
+
         this.chests.stopSpawning()
 
         this.parent.flyTexts.addChild(new FlyText(`+${levelReward} REWARD GOLD`, 0, -18))
@@ -409,6 +411,8 @@ export default class GameContainer extends Container {
     }
 
     handleRoundLose() {
+        setLevelResult(false)
+
         gameState.trapsCount += this.traps.children.length
 
         if (this.dragon) gameState.dragonsCount += 1

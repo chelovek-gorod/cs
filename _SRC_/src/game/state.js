@@ -19,45 +19,42 @@ export function setLevelType(type) {
     levelType = type
     switch (type) {
         case ROUND_TYPE.BOSS:
-            gameState.levelRewardEasy = START_REWARD.EASY
-            gameState.levelRewardNorm = START_REWARD.NORM
-            gameState.levelRewardHard = START_REWARD.HARD
-            
             levelReward = gameState.levelRewardBoss
-
             gameState.levelRewardBoss = Math.max(10, gameState.levelRewardBoss - 10)
         break
 
         case ROUND_TYPE.EASY:
-            gameState.levelRewardNorm = START_REWARD.NORM
-            gameState.levelRewardHard = START_REWARD.HARD
-            gameState.levelRewardBoss = START_REWARD.BOSS
-
             levelReward = gameState.levelRewardEasy
-
             gameState.levelRewardEasy = Math.max(10, gameState.levelRewardEasy - 10)
         break
 
         case ROUND_TYPE.NORM:
-            gameState.levelRewardEasy = START_REWARD.EASY
-            gameState.levelRewardHard = START_REWARD.HARD
-            gameState.levelRewardBoss = START_REWARD.BOSS
-
             levelReward = gameState.levelRewardNorm
-
             gameState.levelRewardNorm = Math.max(10, gameState.levelRewardNorm - 10)
         break
 
         case ROUND_TYPE.HARD:
-            gameState.levelRewardEasy = START_REWARD.EASY
-            gameState.levelRewardNorm = START_REWARD.NORM
-            gameState.levelRewardBoss = START_REWARD.BOSS
-
             levelReward = gameState.levelRewardHard
-
             gameState.levelRewardHard = Math.max(10, gameState.levelRewardHard - 10)
         break
     }
+}
+export function setLevelResult(isWin) {
+    if (levelType === ROUND_TYPE.BOSS) {
+        if (isWin) {
+            gameState.levelRewardEasy = START_REWARD.EASY
+            gameState.levelRewardNorm = START_REWARD.NORM
+            gameState.levelRewardHard = START_REWARD.HARD
+            gameState.levelRewardBoss = START_REWARD.BOSS
+        }
+        return
+    }
+
+    if (!isWin) return
+
+    gameState.levelRewardEasy = Math.min(START_REWARD.EASY, gameState.levelRewardEasy + 10)
+    gameState.levelRewardNorm = Math.min(START_REWARD.NORM, gameState.levelRewardNorm + 10)
+    gameState.levelRewardHard = Math.min(START_REWARD.HARD, gameState.levelRewardHard + 10)
 }
 
 function initState() {
@@ -210,13 +207,6 @@ export const wizardShootTimeoutStep = 400
 export const wizardShootTimeoutMax = 2000
 export const wizardShootDistanceStep = 16
 export const wizardShootDistanceMax = 320
-
-export function getHelperPrice(currentPrice) {
-    return currentPrice * 2 ** (wizardsCount + catapultsCount)
-}
-export function getWizardTargetMaxDistance() {
-    return Math.ceil(wizardShootDistance * wizardTargetRadiusRate)
-}
 
 export function getMineAccumulated() {
     const elapsed = Date.now() - mineLastCollectedAt
